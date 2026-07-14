@@ -40,11 +40,13 @@ explicaciones, ejemplos, guías y matices de comportamiento.
 
 ## Guías
 
+- [API Pública de FacturaDirecta](./guides/overview.md)
 - [Autenticación](./guides/authentication.md)
 - [Errores y validaciones](./guides/errors.md)
 - [Facturas rectificativas](./guides/invoices-rectificativas.md)
 - [Facturas sustitutivas (F3)](./guides/invoices-sustitutivas.md)
 - [Impuestos](./guides/taxes.md)
+- [Inicio rápido con la API](./guides/quickstart.md)
 - [Paginación y filtros estándar](./guides/pagination.md)
 - [TicketBAI](./guides/ticketbai.md)
 - [VeriFactu](./guides/verifactu.md)

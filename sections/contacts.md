@@ -36,6 +36,12 @@ Para listar contactos por faceta, usa los filtros `isClient`, `isProvider` o
 `isEmployee` en `GET /contacts`. Devuelven los contactos que tienen la cuenta
 correspondiente asignada.
 
+Cuando el contacto actúa como cliente, `content.main.owner` identifica al
+usuario responsable de esa cartera. Se usa con roles personalizados para
+limitar la visibilidad a clientes asignados. Si creas el contacto con
+OAuth y no envías `owner`, la API asigna como responsable al usuario
+autenticado; con apiKey se deja vacío salvo que lo envíes en el body.
+
 ## Operaciones
 
 - [Lista de contactos](#lista-de-contactos)

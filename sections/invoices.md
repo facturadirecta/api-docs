@@ -62,6 +62,10 @@ deriva de los flags del documento y del importe pagado vs total:
 | `overpaid` | Cobros totales > importe. |
 | `voided` | `main.voided === true`. Anulada. |
 
+Cada factura tiene un único estado en cada momento: los valores son
+excluyentes entre sí. En el filtro `state` se pueden indicar varios y se
+devuelven las facturas cuyo estado sea cualquiera de ellos.
+
 Las transiciones no se imponen como máquina de estados: se calculan
 en cada lectura desde los pagos y fechas actuales.
 
@@ -97,6 +101,11 @@ Los campos de `main` más importantes para crear una factura:
 | `verifactu` | No | Parámetros específicos VeriFactu (`TipoFactura`, `DescripcionOperacion`, etc.). Ver [VeriFactu](../guides/verifactu.md). |
 | `ticketbai` | No | Parámetros específicos TicketBAI (`causaExencion`, `claveTipoFacturaRectificativa`, etc.). Ver [TicketBAI](../guides/ticketbai.md). |
 | `customFields` | No | Map de strings: `{ "miCampo": "valor" }`. |
+| `owner` | No | Usuario responsable de la factura. Se usa con roles personalizados para limitar la visibilidad a documentos asignados. |
+
+Si creas la factura con OAuth y no envías `owner`, la API asigna como
+responsable al usuario autenticado. Si usas una apiKey, la factura queda
+sin responsable salvo que envíes `owner` en el body.
 
 Cada elemento de `lines` (`InvoiceMainLine`):
 
@@ -142,12 +151,19 @@ completa en el Swagger UI):
 - **`series`** — filtrar por serie de numeración.
 - **`contact`** — filtrar por ID de cliente.
 - **`state`** — filtrar por estado (`draft`, `pending`, `overdue`,
-  `paid`, `overpaid`, `voided`).
+  `paid`, `overpaid`, `voided`). Cada factura solo tiene uno; si se
+  indican varios, el filtro incluye cualquiera de ellos.
+- **`draft`** — por defecto solo se incluyen facturas definitivas;
+  `only` devuelve solo borradores y `all` mezcla definitivas y borradores.
+  Los borradores no generan asientos contables, por lo que al incluirlos
+  el recuento puede no coincidir con el diario.
 - **`simplified`** — `true` para solo simplificadas.
 - **`external`** — `true` para solo externas.
 - **`voided`** — `true` para solo anuladas.
-- **`sortBy`** — orden (`date`, `docNumber`, `total`,
-  `creationDate`, etc.).
+- **`sortBy`** — admite `date`, `series`, `formattedSeries`, `number`,
+  `total`, `currency`, `country`, `creationDate` y `modificationDate`.
+  Repite el parámetro para combinar criterios y antepone `-` para orden
+  descendente (por ejemplo, `sortBy=-date&sortBy=number`).
 - **Tags**: `allTheseTags`, `anyOfTheseTags`, `hasTags`.
 
 **Parámetros globales aceptados:**

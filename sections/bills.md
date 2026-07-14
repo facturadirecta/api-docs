@@ -100,14 +100,33 @@ documento:
 `taxIncludedPrices: true` indica que `unitPrice` ya incluye IVA. Por
 defecto es `false`.
 
-### Estados: borrador y anuladas
+## Estados
 
-- **`draft: true`** — la factura se guarda como **provisional**. Útil
-  para entradas en revisión. Si no envías `draft`, se aplica la
-  configuración por defecto de la empresa.
-- **`voided: true`** — la factura está **anulada**. Solo se puede anular
-  en empresas que soportan registro de facturas de compra en sistemas
-  externos (TicketBAI, VeriFactu...). En otros casos, usa el borrado.
+`state` es un campo calculado a partir de los flags del documento, sus
+pagos y sus vencimientos:
+
+| Estado | Cuándo |
+|---|---|
+| `draft` | `main.draft === true`. Provisional; no genera asientos contables. |
+| `pending` | Definitiva, con saldo pendiente que aún no ha vencido. |
+| `overdue` | Definitiva, con saldo pendiente vencido según sus vencimientos. |
+| `paid` | Saldo pendiente cero. |
+| `overpaid` | Los pagos superan el importe esperado. |
+| `voided` | `main.voided === true`. Anulada. |
+
+Cada factura de compra o ticket tiene un único estado en cada momento:
+los valores son excluyentes entre sí. En el filtro `state` se pueden
+indicar varios y se devuelven los documentos cuyo estado sea cualquiera
+de ellos.
+
+Al crear o actualizar, `draft: true` guarda el documento como provisional.
+Si se omite, se aplica la configuración por defecto de la empresa. Los
+borradores no aparecen en el diario, por lo que un listado que los incluya
+puede tener un recuento distinto al de los movimientos contables.
+
+Con `voided: true` la factura queda anulada. Solo se puede anular en
+empresas que soportan el registro de facturas de compra en sistemas
+externos (TicketBAI, VeriFactu...). En otros casos, usa el borrado.
 
 ### Fiscalidad y casos especiales
 
@@ -154,11 +173,17 @@ empresa, paginados.
 - `minTotal`, `maxTotal` — rango de importe.
 - `currency` — código ISO 4217.
 - `country` — código país ISO 3166-1 Alpha-2.
-- `state` — estado de cobro (`pending`, `partial`, `paid`...). Los
-  valores admitidos se documentan en la referencia OpenAPI.
-- `draft` — `true`/`false` para filtrar borradores.
+- `state` — estado del documento (`draft`, `pending`, `overdue`, `paid`,
+  `overpaid`, `voided`). Cada documento solo tiene uno; si se indican
+  varios, el filtro incluye cualquiera de ellos.
+- `draft` — por defecto solo se incluyen documentos definitivos; `only`
+  devuelve solo borradores y `all` mezcla definitivos y borradores. Los
+  borradores no generan asientos contables, por lo que al incluirlos el
+  recuento puede no coincidir con el diario.
 - `allTheseTags`, `anyOfTheseTags`, `hasTags`.
-- `sortBy` — campo de orden.
+- `sortBy` — admite `date`, `total`, `currency`, `country`,
+  `creationDate` y `modificationDate`. Repite el parámetro para combinar
+  criterios y antepone `-` para orden descendente.
 - `related` — recursos a expandir.
 
 Ver [Paginación](../guides/pagination.md) para los parámetros comunes.

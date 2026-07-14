@@ -102,6 +102,10 @@ cambios fiscales:
 | `IRPF` | ✓ | ✓ | Retención de IRPF. |
 | `VATEU` | ✓ | — | IVA de otros países de la UE (régimen OSS). Solo aplica en ventas. |
 
+En `VATEU`, algunos países de la UE tienen tipos legítimos del `0%` para
+operaciones concretas. Si el catálogo devuelve un impuesto con `value: 0`,
+trátalo como un impuesto aplicable, no como ausencia de impuesto.
+
 ### Categorías funcionales (`category`)
 
 La categoría es lo que controla el tratamiento real del impuesto. Misma

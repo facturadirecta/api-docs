@@ -73,12 +73,17 @@ Forma común a los documentos de venta de FacturaDirecta:
 - `content.type` — siempre `"estimate"`.
 - `content.uuid` — identificador inmutable.
 - `content.main` — datos del documento (contacto, fechas, divisa, líneas,
-  totales, condiciones, plantilla).
+  totales, condiciones, plantilla). Puede incluir `owner`, el usuario
+  responsable del presupuesto cuando trabajas con roles personalizados.
 - `content.attachments` — adjuntos vinculados (ver [Adjuntos](#adjuntos)).
 - `content.meta` — metadatos internos.
 
 En respuestas, además, en el nivel raíz: `tags`, `creationDate`,
 `modificationDate`, `related`.
+
+Si creas el presupuesto con OAuth y no envías `owner`, la API asigna
+como responsable al usuario autenticado. Si usas una apiKey, queda sin
+responsable salvo que envíes `owner` en el body.
 
 ### Líneas de detalle
 

@@ -82,10 +82,10 @@ paginada por la línea individual (no por asiento).
 - **`minDate`**, **`maxDate`** — rango por fecha del apunte
   (`YYYY-MM-DD`, inclusivos).
 - **`account`** — cuenta contable. Acepta entre 1 y 6 dígitos:
-  - 6 dígitos: cuenta exacta (`572000` → solo apuntes de la cuenta
-    bancaria 572000).
-  - menos de 6 dígitos: prefijo (`5720` → todos los apuntes con
-    cuenta que empiece por 5720, equivalente a `like '5720%'`).
+  - entre 1 y 5 dígitos: prefijo (`6` → todos los gastos; `64` →
+    todas las cuentas de personal).
+  - 6 dígitos: cuenta completa (`700000` → solo apuntes de la cuenta
+    de ventas 700000).
 - **`document`** — ID del documento que actúa como subcuenta. Filtra
   los apuntes que afectan al saldo de ese contacto/banco/producto.
 - **`journalPriority`** — entero. Aísla un tipo concreto de asiento

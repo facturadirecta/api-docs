@@ -14,7 +14,8 @@ no necesita actuar en nombre de un usuario humano. Ver
 [Autenticación](../guides/authentication.md) para el contexto general.
 
 Este recurso permite gestionar las API keys vía la propia API: crear,
-listar, consultar y borrar.
+listar, consultar y borrar. También permite consultar los scopes de la
+clave que autentica la llamada actual.
 
 > En los ejemplos de esta página, los IDs y prefijos son ilustrativos.
 > Los reales se devuelven al crear cada API key.
@@ -83,10 +84,39 @@ el campo `apiKey` con la clave completa.
 
 ## Operaciones
 
+- [Información de la API key actual](#información-de-la-api-key-actual)
 - [Lista de API keys](#lista-de-api-keys)
 - [Crear API key](#crear-api-key)
 - [Obtener una API key](#obtener-una-api-key)
 - [Borrar una API key](#borrar-una-api-key)
+
+## Información de la API key actual
+
+`GET /{companyId}/apiKeyInfo` devuelve los scopes asociados a la
+API key que autentica la petición actual. Úsalo cuando tu integración
+necesita adaptar su comportamiento a los permisos reales de la clave
+instalada en una empresa.
+
+Este endpoint solo acepta autenticación mediante API key. Si llamas con
+OAuth2, devuelve `401 Unauthorized` porque no hay una API key actual que
+inspeccionar.
+
+**Respuesta:**
+
+```json
+{
+  "scopes": ["contacts:read", "contacts:write"]
+}
+```
+
+**Parámetros globales aceptados:** `accept-version`.
+
+###### Copy as cURL
+
+```shell
+curl -s -H "facturadirecta-api-key: $API_KEY" \
+  "https://app.facturadirecta.com/api/$COMPANY_ID/apiKeyInfo"
+```
 
 ## Lista de API keys
 
@@ -234,6 +264,8 @@ rotación se hace siempre creando nueva y borrando antigua.
 - `400 ValidationError` — `scopes` vacío o `name` ausente.
 - `403 Forbidden` — el `id` no existe, o `managedViaApi: false`, o
   intento de auto-eliminación.
+- `401 Unauthorized` — llamada a `GET /apiKeyInfo` autenticada con
+  OAuth2 en lugar de API key.
 - `403 Forbidden` — scope solicitado fuera del subconjunto del caller
   (cuando el caller autentica con API key).
 
@@ -251,6 +283,7 @@ consulta el [Swagger UI](https://www.facturadirecta.com/api) o el
 
 | Método | Path | operationId | Scopes | Descripción |
 |---|---|---|---|---|
+| GET | `/{companyId}/apiKeyInfo` | `getPublicApiKeyInfo` | — | Información de la API key actual |
 | GET | `/{companyId}/apiKeys` | `listPublicApiKeys` | `apiKeys:read` | Lista de API keys |
 | GET | `/{companyId}/apiKeys/{id}` | `getPublicApiKey` | `apiKeys:read` | Obtener API key |
 | POST | `/{companyId}/apiKeys` | `createPublicApiKey` | `apiKeys:write` | Crear API key |
