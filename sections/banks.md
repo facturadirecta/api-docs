@@ -34,6 +34,7 @@ modificationDate }`. El contenido principal está en `content.main`:
 |---|---|---|
 | `name` | string | Nombre de la cuenta. |
 | `title` | string | Título descriptivo (opcional). |
+| `notes` | string | Notas internas de la cuenta, si están informadas en la interfaz. |
 | `subtype` | enum | `iban`, `card` u `other`. Determina qué otros campos aplican. |
 | `currency` | string | Moneda (ISO 4217). |
 | `account` | string | Cuenta contable del banco en el plan contable. |
@@ -117,6 +118,7 @@ Respuesta típica (sin scope `banks:readIban`):
           "name": "Cuenta principal",
           "subtype": "iban",
           "currency": "EUR",
+          "notes": "Cuenta para cobros principales",
           "account": "572000",
           "iban4": "****1234",
           "bic": "BSCHESMMXXX"

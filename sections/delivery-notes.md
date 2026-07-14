@@ -47,6 +47,9 @@ Campos que se rellenan típicamente al cambiar `baseState`:
 
 - `deliveredDate`, `deliveredTo` — fecha de entrega y persona del
   cliente que la ha recibido (firmante o responsable de recepción).
+- `deliveryReceipt` — recibí firmado. Contiene `signatureImage` (imagen
+  de la firma manuscrita en formato data URL) y `signedAt` (fecha y hora
+  de la firma).
 - `rejectedDate`, `rejectedBy` — fecha y responsable del rechazo, si
   aplica.
 
@@ -60,12 +63,17 @@ Forma común a los documentos de venta de FacturaDirecta:
 - `content.type` — siempre `"deliveryNote"`.
 - `content.uuid` — identificador inmutable.
 - `content.main` — datos del documento (contacto, fechas, divisa,
-  líneas, totales, condiciones, plantilla).
+  líneas, totales, condiciones, plantilla). Puede incluir `owner`, el
+  usuario responsable del albarán cuando trabajas con roles personalizados.
 - `content.attachments` — adjuntos vinculados (ver [Adjuntos](#adjuntos)).
 - `content.meta` — metadatos internos.
 
 En respuestas, además, en el nivel raíz: `tags`, `creationDate`,
 `modificationDate`, `related`.
+
+Si creas el albarán con OAuth y no envías `owner`, la API asigna como
+responsable al usuario autenticado. Si usas una apiKey, queda sin
+responsable salvo que envíes `owner` en el body.
 
 ### Líneas de detalle
 
@@ -205,7 +213,8 @@ del albarán. No es un PATCH: lo que no envíes, se borra.
 
 Para cambiar el estado del documento, envía el contacto y las líneas
 inalterados junto con el nuevo `baseState` (y, si aplica,
-`deliveredDate`/`deliveredTo` o `rejectedDate`/`rejectedBy`).
+`deliveredDate`/`deliveredTo`, `deliveryReceipt` o
+`rejectedDate`/`rejectedBy`).
 
 **Restricciones:**
 

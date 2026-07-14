@@ -12,6 +12,20 @@ recursos de tu empresa. En vez de hacer polling, configuras una URL
 HTTPS y FacturaDirecta envía una petición `POST` con el detalle del
 cambio cada vez que se produce un evento al que estás suscrito.
 
+Esta página es la **referencia técnica** para desarrolladores: payloads, firma,
+eventos, endpoints de API y reintentos. Si lo que necesitas es crear o gestionar
+un endpoint desde la interfaz de FacturaDirecta, consulta
+[Configurar webhooks](https://help.facturadirecta.com/es/articles/15097369-configurar-webhooks).
+
+<!-- source: legacy-13905258 -->
+
+Son útiles para integraciones con ERPs, CRMs, plataformas de e-commerce,
+asesorías y cualquier automatización que necesite reaccionar a cambios en la
+cuenta de facturación sin hacer polling. Antes de configurarlos en producción,
+pruébalos en un [entorno sandbox](https://help.facturadirecta.com/es/articles/15157082-entorno-de-pruebas-sandbox).
+
+Los webhooks están disponibles en los planes **Avanzado** y **Total**.
+
 > En los ejemplos de esta página, los UUIDs (`whe_…`, `con_…`, `inv_…`)
 > y los `signing_secret` son **ilustrativos**. Cada endpoint tiene los
 > suyos; sustitúyelos por los valores reales que devuelve la API.
@@ -52,6 +66,20 @@ actualizar un endpoint:
 El catálogo puede ampliarse ante cambios; no asumas un conjunto cerrado.
 Para suscribirte a todos los eventos de una categoría, declara cada tipo
 explícitamente.
+
+## Entornos sandbox y producción
+
+<!-- source: webhookDispatcher -->
+
+Los endpoints mantienen una separación total entre entornos:
+
+- Un endpoint creado en una empresa sandbox recibe eventos del sandbox y sus
+  payloads llevan `livemode: false`.
+- Un endpoint creado en una empresa real recibe eventos de producción y sus
+  payloads llevan `livemode: true`.
+
+Un endpoint de sandbox no recibe eventos de producción, y un endpoint de
+producción no recibe eventos de sandbox.
 
 ## Forma del payload entregado
 
