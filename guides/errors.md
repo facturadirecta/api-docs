@@ -93,6 +93,35 @@ bloqueante, valor duplicado), se devuelven en campos adicionales del JSON.
 Para detalles del flujo de auth y rotación de tokens, ver
 [Autenticación](./authentication.md).
 
+## Límites del plan
+
+Cuando una operación no puede completarse porque la empresa supera una
+capacidad del plan contratado, la respuesta incluye el código estable
+`plan_limit_exceeded` dentro de `errors`:
+
+```json
+{
+  "statusCode": 403,
+  "message": "La empresa está en modo solo lectura por exceder el límite de clientes contratados (10). Por favor, amplia tu suscripción o reduce el número de clientes de tu empresa.",
+  "errors": [
+    {
+      "message": "La empresa está en modo solo lectura por exceder el límite de clientes contratados (10). Por favor, amplia tu suscripción o reduce el número de clientes de tu empresa.",
+      "code": "plan_limit_exceeded"
+    }
+  ]
+}
+```
+
+El estado HTTP es siempre `403`. Usa `errors[].code`, no el texto por separado,
+para identificar este caso. No reintentes la misma operación hasta ampliar el
+plan o reducir el uso que supera la capacidad.
+
+FacturaDirecta también envía un e-mail de aviso al propietario de la empresa,
+al usuario que hizo la solicitud —o al creador de la API key— y a los usuarios
+con permiso completo de configuración de empresa. El aviso identifica la
+petición y el motivo. Se envía como máximo una vez por empresa cada 7 días,
+aunque el error se repita.
+
 ## Recursos no encontrados (`404`)
 
 `404` significa siempre **una de estas dos cosas**:
@@ -114,7 +143,8 @@ Trata ambos casos como "no existe para mí" en tu integración.
   `fiscalId` da `409 Conflict`, no duplicado. Aprovecha esto para
   reintentos seguros en sincronizaciones.
 - **No deduzcas estado a partir del código HTTP solo.** Combina código y
-  contenido (`type`, `message`) para clasificar el error en tu lógica.
+  contenido (`type`, `message`, `errors[].code`) para clasificar el error en tu
+  lógica.
 
 ## Ejemplo completo
 

@@ -15,7 +15,7 @@ gestión laboral completa.
 
 > En los ejemplos de esta página:
 >
-> - Los **UUIDs** (`par_…`, `con_…`, `ban_…`, `tas_…`) son ilustrativos.
+> - Los **UUIDs** (`par_…`, `con_…`, `ban_…`) son ilustrativos.
 >   Cada empresa tiene los suyos; sustitúyelos por los identificadores
 >   reales que devuelve la API.
 > - El `contact` de una nómina es un contacto **con faceta `employee`**.
@@ -24,17 +24,9 @@ gestión laboral completa.
 
 ## Flujos para crear nóminas
 
-Existen dos caminos:
-
-- **Construir el body manualmente** y enviarlo a
-  [`POST /payrolls`](#crear-nómina). Es el flujo descrito en esta
-  página.
-- **Desde la bandeja de entrada**: subes el PDF de la nómina a la
-  bandeja, el sistema lo escanea y extrae los conceptos. Llamas a
-  [`POST /inbox/{id}/proposePayroll`](./inbox.md#proponer-nómina)
-  para obtener un prototipo prerellenado, lo revisas y lo envías a
-  `POST /payrolls` con `fromInbox: { taskId }`. Este flujo vincula
-  la nómina con su origen y reutiliza el PDF sin re-upload.
+Puedes **construir el body manualmente** y enviarlo a
+[`POST /payrolls`](#crear-nómina). Es el flujo descrito en esta
+página.
 
 ## Estructura
 
@@ -163,16 +155,6 @@ sus pagos en una sola llamada (patrón "atómico").
   crear nómina + pagos atómicamente y evitar dos llamadas. **No
   disponible en `POST /bills`** (donde los pagos requieren llamada
   separada).
-- **`fromInbox`** (opcional) — vincula la nómina con un item de la
-  [bandeja de entrada](./inbox.md). Estructura:
-  - `taskId` (obligatorio dentro de `fromInbox`) — el `tas_*` del item.
-  - `archive` (opcional, default `true`) — si archivar el inbox tras
-    crear la nómina.
-
-  Es el flujo recomendado tras
-  [`POST /inbox/{id}/proposePayroll`](./inbox.md#proponer-nómina): el
-  `propose*` devuelve el `content` prerellenado y aquí lo envías con
-  `fromInbox: { taskId }`.
 
 **Notas:**
 
@@ -244,15 +226,6 @@ Crear nómina + pago en la misma llamada (atómico):
   "payments": [
     { "bank": "ban_5e7d8a31-9c4b-4f6e-a1d3-2b5c7e9f1a4d", "date": "2026-06-05" }
   ]
-}
-```
-
-Crear desde un item de la bandeja de entrada:
-
-```json
-{
-  "content": "<prototipo devuelto por proposePayroll>",
-  "fromInbox": { "taskId": "tas_3a7f9c12-2d4e-4b8a-9c1f-5d6e8f0a3b2c" }
 }
 ```
 
@@ -430,19 +403,14 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -X DELETE \
 
 ## Recomendaciones
 
-- **Para escanear nóminas en PDF**, usa el flujo desde la
-  [bandeja de entrada](./inbox.md): el extractor de nóminas
-  identifica automáticamente los conceptos y rellena las 4-7 líneas
-  típicas (salario + SS empleado + IRPF + SS empresa, y casos
-  especiales como dietas, bajas por IT, etc.).
 - **Crear nómina + pago en una sola llamada**: usa el campo
   `payments` en el body de `POST /payrolls` cuando ya conoces el
   pago. Evita una segunda petición y deja la nómina marcada como
   `paid` desde el inicio.
 - **`modelo190.clavePercepcion: "A"`** cubre el caso más habitual
   (relación laboral común). Para autónomos, becarios, miembros de
-  consejos de administración, etc., consulta el catálogo del modelo
-  190.
+  consejos de administración, etc., consulta el catálogo del
+  modelo 190 de la AEAT.
 - **No olvides la línea `ss_company`**: aunque no sale del salario
   del empleado, sí es un gasto contable de la empresa y debe quedar
   reflejado en la nómina.
