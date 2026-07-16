@@ -59,7 +59,15 @@ La fuente autoritativa es el `openapi.json` público en
 `https://app.facturadirecta.com/openapi.json`, sección
 `components.securitySchemes.oAuth.flows.authorizationCode`.
 
-**`client_id`** es `facturadirecta-api` y **no requiere `client_secret`**.
+**`client_id`** para integraciones externas es `facturadirecta-api` y
+**no requiere `client_secret`**.
+
+La API pública solo acepta tokens emitidos para clientes OAuth autorizados
+por FacturaDirecta. Los clientes gestionados por FacturaDirecta para
+integraciones propias, como conectores MCP autorizados, pueden usar su
+propio `client_id`, pero siguen sujetos a los scopes del token. Un token
+válido del realm no basta si el cliente OAuth que lo emitió no está
+autorizado para la API pública.
 
 **`offline_access`** como scope te permite obtener un `refresh_token` para
 operar sin nueva intervención del usuario.
@@ -116,9 +124,10 @@ mínimos necesarios para la integración.
 
 ## Errores de autenticación
 
-- **`401 Unauthorized`** — token expirado, ausente, mal formado o API key
-  inválida. Refresca el token (si tienes `refresh_token`) o regenera la
-  API key.
+- **`401 Unauthorized`** — token expirado, ausente, mal formado, emitido
+  por un cliente OAuth no autorizado para la API pública, o API key inválida.
+  Refresca el token (si tienes `refresh_token`), revisa el `client_id` o
+  regenera la API key.
 - **`403 Forbidden`** — el token o la API key son válidos, pero les falta
   algún scope para la operación. Revisa los scopes asignados.
 - **`403 Forbidden` con `companyId` ajeno** — el token no tiene acceso a
