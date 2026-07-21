@@ -100,6 +100,35 @@ documento:
 `taxIncludedPrices: true` indica que `unitPrice` ya incluye IVA. Por
 defecto es `false`.
 
+### Vencimientos múltiples
+
+Para dividir el pago de una factura de compra, envía `main.installments` al
+crearla o actualizarla. Cada elemento requiere:
+
+- `date` — fecha del vencimiento en formato `YYYY-MM-DD`.
+- `amount` — importe previsto para ese vencimiento.
+- `currency` — moneda del importe en formato ISO 4217.
+
+Por ejemplo, una factura de compra de 121 EUR puede dividirse así:
+
+```json
+{
+  "dueDate": "2026-08-15",
+  "installments": [
+    { "date": "2026-07-15", "amount": 60.5, "currency": "EUR" },
+    { "date": "2026-08-15", "amount": 60.5, "currency": "EUR" }
+  ]
+}
+```
+
+Incluye estos campos dentro de `content.main` en `POST /{companyId}/bills` o
+`PUT /{companyId}/bills/{billId}`. El servidor ajusta el importe del último
+elemento para que la suma coincida con el total calculado de la factura y
+establece `dueDate` en la fecha más tardía. Con un método de pago por
+transferencia SEPA, cada vencimiento pendiente se puede seleccionar como un
+pago separado al preparar una remesa. Si no necesitas dividir el pago,
+`dueDate` basta para representar un único vencimiento.
+
 ## Estados
 
 `state` es un campo calculado a partir de los flags del documento, sus
@@ -143,7 +172,8 @@ guía menciona pero no desarrolla, porque cada uno merece su propia guía:
   fecha del documento.
 - **`depreciable`** y **`depreciationSettings`** — amortización contable
   para bienes inventariables.
-- **`installments`** — calendario de pagos a plazos.
+- **`installments`** — calendario de pagos a plazos. Ver
+  [Vencimientos múltiples](#vencimientos-múltiples).
 - **`manualAccounting`** y **`manualTotals`** — overrides contables
   manuales para casos donde la lógica automática no aplica.
 - **`nonDeductibleInIRPF`** — gasto no deducible en IRPF.

@@ -83,7 +83,8 @@ Los campos de `main` más importantes para crear una factura:
 |---|---|---|
 | `contact` | Sí salvo simplificada | ID del cliente (`con_*`). En simplificadas: `null`. |
 | `date` | Sí | Fecha de emisión (`YYYY-MM-DD`). |
-| `dueDate` | Sí | Fecha de vencimiento. |
+| `dueDate` | Sí | Fecha de vencimiento. Si hay `installments`, se ajusta a la fecha más tardía del calendario. |
+| `installments` | No | Calendario de vencimientos múltiples; cada elemento contiene `date`, `amount` y `currency`. |
 | `currency` | Sí | ISO 4217. |
 | `exchangeRate` | Sí | Tipo de cambio a la moneda de la empresa. 1 si coincide. |
 | `docNumber` | Sí | `{ series: "...", number?: N }`. Si omites `number`, se asigna automáticamente. |
@@ -106,6 +107,35 @@ Los campos de `main` más importantes para crear una factura:
 Si creas la factura con OAuth y no envías `owner`, la API asigna como
 responsable al usuario autenticado. Si usas una apiKey, la factura queda
 sin responsable salvo que envíes `owner` en el body.
+
+### Vencimientos múltiples
+
+Para dividir el cobro de una factura, envía `main.installments` al crearla
+o actualizarla. Cada elemento requiere:
+
+- `date` — fecha del vencimiento en formato `YYYY-MM-DD`.
+- `amount` — importe previsto para ese vencimiento.
+- `currency` — moneda del importe en formato ISO 4217.
+
+Por ejemplo, una factura de 121 EUR puede dividirse en dos vencimientos:
+
+```json
+{
+  "dueDate": "2026-08-15",
+  "installments": [
+    { "date": "2026-07-15", "amount": 60.5, "currency": "EUR" },
+    { "date": "2026-08-15", "amount": 60.5, "currency": "EUR" }
+  ]
+}
+```
+
+Incluye estos campos dentro de `content.main` en `POST /{companyId}/invoices`
+o `PUT /{companyId}/invoices/{invoiceId}`. El servidor ajusta el importe del
+último elemento para que la suma coincida con el total calculado de la factura
+y establece `dueDate` en la fecha más tardía. Con un método de cobro por
+domiciliación SEPA, cada vencimiento pendiente se puede seleccionar como un
+cobro separado al preparar una remesa. Si no necesitas dividir el cobro,
+`dueDate` basta para representar un único vencimiento.
 
 Cada elemento de `lines` (`InvoiceMainLine`):
 
