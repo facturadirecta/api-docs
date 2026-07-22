@@ -63,7 +63,9 @@ paginados.
 - `vatEU` — identificador IVA intracomunitario.
 - `externalId` — referencia externa asignada al importar.
 - `phone` — teléfono exacto.
-- `country` — código país ISO 3166-1 Alpha-2 (`ES`, `FR`...).
+- `country` — código de país de dos letras (`ES`, `FR`...). El catálogo
+  incluye los códigos ISO 3166-1 vigentes, como `BQ`, `SS` y `SX`, y el
+  código de usuario `XK` para Kosovo.
 - `isClient`, `isProvider`, `isEmployee` — facetas (ver sección superior).
 - `allTheseTags`, `anyOfTheseTags`, `hasTags` — filtros por etiquetas.
 - `sortBy` — campo de orden.

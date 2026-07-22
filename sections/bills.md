@@ -329,6 +329,11 @@ factura de compra. No es un PATCH: lo que no envíes, se borra.
 - Una factura de compra anulada (`voided: true`) no se puede modificar.
 - Cambios en facturas de empresas con TicketBAI/VeriFactu activo pueden
   desencadenar la emisión de eventos de cumplimiento.
+- Si Batuz rechazó el alta y nunca aceptó el documento, puedes corregir
+  `contact`, `referenceNumber`, `date` o `transactionDate` y volver a
+  guardarlo. El servidor genera otro alta. Si Batuz lo aceptó alguna vez,
+  los datos identificativos quedan protegidos; anula el documento y crea
+  otro para cambiarlos.
 
 ###### Copy as cURL
 
