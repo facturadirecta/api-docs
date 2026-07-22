@@ -200,6 +200,17 @@ la factura como definitiva**:
 > TicketBAI no genera eventos propios; tu integración debe leer
 > `meta.ticketbai` cuando le interese conocer el estado.
 
+### Corregir un gasto rechazado por Batuz
+
+Si Batuz rechaza el alta de una factura de compra o un ticket y nunca lo
+acepta, puedes corregir los datos identificativos mediante
+`PUT /bills/{id}`. Esto incluye el proveedor, su identificación fiscal, el
+número de factura y sus fechas. Al guardar, el servidor genera otro alta.
+
+Si Batuz aceptó el documento alguna vez, esos datos quedan protegidos. Para
+cambiarlos, anula el documento y crea otro. Esta protección también se aplica
+si el último intento fue rechazado pero existe una aceptación anterior.
+
 ## Anulación
 
 Cuando una factura se anula con `PUT /invoices/{id}` enviando
