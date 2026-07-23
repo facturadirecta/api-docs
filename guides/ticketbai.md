@@ -294,6 +294,11 @@ en unas y `meta.verifactu` en otras.
 
 ## Errores comunes
 
+- Enviar una factura cuyo cliente tiene un país que no pertenece al catálogo
+  admitido por el esquema de TicketBAI. El servidor rechaza la operación antes
+  de generar el XML e indica el país y su código. Actualiza el contacto con un
+  código válido. En Bizkaia, la misma validación se aplica al contacto de los
+  gastos enviados al Libro de Registro de Operaciones Económicas (LROE).
 - Enviar `claveTipoFacturaRectificativa` sin que la factura sea
   realmente rectificativa (no enlazada con `main.correctedInvoice` o
   no usando una serie de rectificativas). El XML se generará pero la
