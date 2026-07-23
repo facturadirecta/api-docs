@@ -210,9 +210,13 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 
 **Notas:**
 
-- La primera ejecución no se produce inmediatamente al crear: se produce
-  cuando llega la primera fecha calculada según `trigger.rrule` a partir
-  de `dtstart`.
+- La primera ejecución no recupera fechas anteriores al día de creación. Si
+  `dtstart` está en el pasado, el calendario conserva esa referencia, pero el
+  servidor espera a la primera ocurrencia del mismo día o posterior. Así evita
+  generar una factura histórica que no solicitaste.
+- Si la primera ocurrencia vence por un error técnico, sigue pendiente durante
+  el resto de su periodo. Una recurrente mensual, por ejemplo, puede recuperar
+  esa primera factura hasta que llegue la siguiente ocurrencia mensual.
 - Si `enabled: false`, la recurrente se guarda pero las ejecuciones
   programadas se omiten hasta que se reactive.
 - La respuesta es la recurrente creada completa, en el mismo formato que
@@ -305,10 +309,12 @@ Casos típicos:
   importe de la suscripción mensual. Los documentos ya emitidos no se
   ven afectados; solo las próximas ejecuciones generan facturas con el
   nuevo importe.
-- Cambiar la frecuencia (`trigger.rrule`): el calendario se recalcula
-  desde `dtstart`.
-- Activar o desactivar (`enabled`): equivale a pausar/reanudar sin
-  perder la configuración.
+- Cambiar la frecuencia (`trigger.rrule`): el calendario conserva `dtstart`
+  como referencia y descarta las ocurrencias anteriores al día de la
+  actualización si todavía no hubo una ejecución correcta.
+- Activar o desactivar (`enabled`): conserva la configuración. Al reactivar una
+  recurrente sin ejecuciones correctas, no se recuperan ocurrencias anteriores
+  al día de la actualización.
 
 **Parámetros globales aceptados:** `accept-version`.
 
