@@ -106,6 +106,12 @@ En `VATEU`, algunos países de la UE tienen tipos legítimos del `0%` para
 operaciones concretas. Si el catálogo devuelve un impuesto con `value: 0`,
 trátalo como un impuesto aplicable, no como ausencia de impuesto.
 
+En el grupo `IRPF`, un impuesto con `value: 0` —como `S_IRPF_0` o
+`P_IRPF_0`, cuyo título es **Sin IRPF**— no se considera una retención
+efectiva. Puedes guardar el documento sin contacto. Cualquier retención de IRPF
+con un valor distinto de cero requiere un contacto asignado y válido para la
+operación.
+
 ### Categorías funcionales (`category`)
 
 La categoría es lo que controla el tratamiento real del impuesto. Misma

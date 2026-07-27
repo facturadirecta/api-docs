@@ -24,7 +24,7 @@ asesorías y cualquier automatización que necesite reaccionar a cambios en la
 cuenta de facturación sin hacer polling. Antes de configurarlos en producción,
 pruébalos en un [entorno sandbox](https://help.facturadirecta.com/es/articles/15157082-entorno-de-pruebas-sandbox).
 
-Los webhooks están disponibles en los planes **Avanzado** y **Total**.
+Los webhooks están disponibles en todos los planes, incluido **Gratis**.
 
 > En los ejemplos de esta página, los UUIDs (`whe_…`, `con_…`, `inv_…`)
 > y los `signing_secret` son **ilustrativos**. Cada endpoint tiene los

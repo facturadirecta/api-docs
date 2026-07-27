@@ -23,7 +23,7 @@ FacturaDirecta:
 - El subsistema **Batuz** (exclusivo de Bizkaia) y el servicio
   **Zuzendu** para subsanaciones.
 - Anulación y rectificativas.
-- Cómo monitorizar el estado del envío.
+- Qué información de estado no expone la API pública.
 
 Para el contrato general del recurso de facturas, ver
 [Facturas](../sections/invoices.md). Para una visión rápida del régimen
@@ -120,8 +120,8 @@ con la información operativa. Es **read-only**: tu integración
 | `identificador` | Identificador TicketBAI de la factura. Se genera siguiendo el formato de la diputación correspondiente. |
 | `ordenEncadenamiento` | Entero ≥ 0. Posición de la factura en la cadena de TicketBAI de la empresa (ver [Encadenamiento](#encadenamiento)). |
 | `diputacionForal` | `Araba` / `Bizkaia` / `Gipuzkoa` (ver tabla más arriba). |
-| `mustBeSent` | El servidor lo pone a `true` cuando la factura debe enviarse a Hacienda. |
-| `sent` | `true` cuando el envío a TicketBAI ha sido confirmado. |
+| `mustBeSent` | Campo obsoleto conservado por compatibilidad. Siempre vale `false`; no indica si existe un envío pendiente. |
+| `sent` | Campo de compatibilidad. En los documentos procesados por el flujo actual permanece en `false`; no indica el resultado del envío. |
 | `qrUrl`, `qr` | URL y datos del código QR que debe aparecer en la representación impresa. |
 | `xml` | XML de **alta** firmado y enviado a TicketBAI. |
 | `encadenamientoFactura` | Referencia a la factura inmediatamente anterior en la cadena (ver siguiente sección). |
@@ -130,9 +130,9 @@ con la información operativa. Es **read-only**: tu integración
 
 | Campo | Significado |
 |---|---|
-| `batuzAccepted` | `true` si Batuz ha aceptado el envío de alta normal. |
-| `batuzAcceptedWithErrors` | `true` si Batuz aceptó la factura **con avisos** (la dio por válida pero señaló observaciones). |
-| `batuzAcceptedZuzendu` | `true` si Batuz aceptó la factura como un envío **Zuzendu** (sin Software Garante). Ver [Zuzendu](#zuzendu-bizkaia). |
+| `batuzAccepted` | Campo de compatibilidad que no refleja el estado de los envíos procesados por el flujo actual. |
+| `batuzAcceptedWithErrors` | Campo de compatibilidad que no refleja si el envío actual se aceptó con avisos. |
+| `batuzAcceptedZuzendu` | Campo de compatibilidad que no refleja el resultado actual de Zuzendu. Ver [Zuzendu](#zuzendu-bizkaia). |
 | `batuzModel` | Modelo interno del XML Batuz de alta. No procesar como contrato estable. |
 | `xmlNoSG` | XML de Batuz cuando la factura se emitió originalmente sin Software Garante. |
 
@@ -140,7 +140,7 @@ con la información operativa. Es **read-only**: tu integración
 
 | Campo | Cuándo aparece |
 |---|---|
-| `voided` | La factura ha sido anulada. Contiene su propio `mustBeSent`/`sent`/`xml` para el envío de anulación. |
+| `voided` | La factura ha sido anulada. Contiene el XML de anulación y campos de compatibilidad `mustBeSent`/`sent`, ambos inertes para consultar el estado. |
 | `zuzenduAlta` | La factura ha sido **subsanada** vía Zuzendu (correcciones a una factura previa sin emitir una rectificativa). |
 
 > Los campos `xmlModel`, `batuzModel`, `batuzModelZuzendu` contienen
@@ -184,16 +184,15 @@ la factura como definitiva**:
 1. Se genera el XML.
 2. Se firma con el certificado de la empresa.
 3. Se envía a la diputación correspondiente.
-4. Si la respuesta es OK, `meta.ticketbai.sent` pasa a `true`. En
-   Bizkaia se actualiza también `batuzAccepted` o
-   `batuzAcceptedWithErrors`.
-5. Si la respuesta es error técnico (timeout, indisponibilidad del
-   servicio), la factura queda con `sent: false` y entra en cola de
-   reintentos con **backoff exponencial**.
-6. Pasadas **24 horas** desde el primer error sin éxito, los
-   reintentos automáticos cesan y la factura queda marcada como no
-   enviada. Tu integración puede detectarlo monitorizando
-   `mustBeSent: true` + `sent: false` durante un periodo prolongado.
+4. Si la respuesta indica un error técnico, como un timeout o una
+   indisponibilidad temporal, FacturaDirecta reintenta el envío con
+   **backoff exponencial**.
+5. Pasadas **24 horas** desde el primer error sin éxito, los reintentos
+   automáticos cesan.
+
+Los campos `mustBeSent`, `sent` y `batuzAccepted*` de `meta.ticketbai` no
+se actualizan con el resultado. Se conservan por compatibilidad y no debes
+usarlos para monitorizar el envío.
 
 > **No hay webhooks específicos de TicketBAI.** A diferencia de
 > VeriFactu, que emite [`invoice.verifactu_sent`](../sections/webhooks.md),
@@ -221,9 +220,9 @@ Cuando una factura se anula con `PUT /invoices/{id}` enviando
 3. Rellena `meta.ticketbai.voided` con el resultado del envío.
 4. Emite el webhook [`invoice.voided`](../sections/invoices.md#webhooks).
 
-La factura **no desaparece**: queda en estado `voided` con
-`meta.ticketbai.voided.sent = true` cuando la anulación se ha
-confirmado. La anulación tiene su propia cola de reintentos.
+La factura **no desaparece**: queda en estado `voided`. La anulación tiene su
+propia cola de reintentos. El campo `meta.ticketbai.voided.sent` no refleja el
+resultado del flujo actual.
 
 ## Rectificativas
 
@@ -251,8 +250,8 @@ Cuando una factura se subsana vía Zuzendu, el servidor:
 2. Lo envía a Batuz.
 3. Rellena `meta.ticketbai.zuzenduAlta` con el `xmlModel` y `xml`
    correspondientes.
-4. Si Batuz acepta, `meta.ticketbai.batuzAcceptedZuzendu` pasa a
-   `true`.
+4. FacturaDirecta conserva el resultado fiscal fuera de los campos de
+   compatibilidad de `meta.ticketbai`.
 
 Para facturas que se emitieron originalmente **fuera de
 FacturaDirecta** (sin Software Garante), el meta es distinto:
@@ -261,22 +260,16 @@ integración debe comprobar la presencia de `meta.batuzNoSG` o
 similar para detectar este caso antes de procesar campos que solo
 existen en uno u otro.
 
-## Monitorizar el estado desde una integración
+## Consultar el estado desde una integración
 
-Como no hay webhooks específicos, el patrón recomendado para
-integraciones que necesitan saber si las facturas se han enviado
-correctamente es:
+La API pública no expone el estado autoritativo de los envíos TicketBAI. Tampoco
+hay webhooks específicos. Por tanto, no puedes confirmar una aceptación o un
+rechazo mediante polling de `meta.ticketbai`.
 
-1. **Tras crear o actualizar** una factura, leer `meta.ticketbai`
-   de la respuesta o consultarla con `GET /invoices/{id}`.
-2. **Si `mustBeSent: true` y `sent: false`**, programar un polling
-   con backoff (por ejemplo, 1 min → 5 min → 30 min) hasta que
-   `sent` pase a `true` o se cumplan 24h.
-3. **Para anulaciones**: el mismo patrón sobre `meta.ticketbai.voided`.
-4. **En Bizkaia**, además, comprobar `batuzAccepted` /
-   `batuzAcceptedWithErrors`.
-5. **Para Zuzendu**, comprobar `meta.ticketbai.zuzenduAlta` y
-   `batuzAcceptedZuzendu`.
+Puedes leer los artefactos de compatibilidad, como el XML generado, pero no uses
+`mustBeSent`, `sent`, `voided.sent` ni `batuzAccepted*` para tomar decisiones.
+Si tu integración necesita conocer el resultado fiscal, esa capacidad no está
+disponible en el contrato público actual.
 
 ## Coexistencia con VeriFactu
 
