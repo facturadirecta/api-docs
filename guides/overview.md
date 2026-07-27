@@ -13,9 +13,12 @@ status: draft
 <!-- source: api.ts -->
 
 La **API pública de FacturaDirecta** te permite integrar tu software con el
-sistema de facturación. Puedes automatizar procesos como crear facturas desde un
-CRM, sincronizar contactos con un ERP, conectar una tienda online o generar
-informes personalizados con datos de facturación y contabilidad.
+sistema de facturación. Está disponible en todos los planes, incluido
+**Gratis**. Cada plan aplica su propio límite de peticiones.
+
+Puedes automatizar procesos como crear facturas desde un CRM, sincronizar
+contactos con un ERP, conectar una tienda online o generar informes
+personalizados con datos de facturación y contabilidad.
 
 La API es REST, usa JSON y se documenta mediante OpenAPI.
 
@@ -125,7 +128,7 @@ En lugar de consultar la API periódicamente, configuras una URL HTTPS y
 FacturaDirecta envía un `POST` a tu servidor cuando se produce un evento al que
 estás suscrito.
 
-Los webhooks están disponibles en los planes **Avanzado** y **Total**.
+Los webhooks están disponibles en todos los planes, incluido **Gratis**.
 
 Consulta:
 
