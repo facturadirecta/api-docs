@@ -283,7 +283,6 @@ consulta el [Swagger UI](https://www.facturadirecta.com/api) o el
 
 | Método | Path | operationId | Scopes | Descripción |
 |---|---|---|---|---|
-| GET | `/{companyId}/apiKeyInfo` | `getPublicApiKeyInfo` | — | Información de la API key actual |
 | GET | `/{companyId}/apiKeys` | `listPublicApiKeys` | `apiKeys:read` | Lista de API keys |
 | GET | `/{companyId}/apiKeys/{id}` | `getPublicApiKey` | `apiKeys:read` | Obtener API key |
 | POST | `/{companyId}/apiKeys` | `createPublicApiKey` | `apiKeys:write` | Crear API key |

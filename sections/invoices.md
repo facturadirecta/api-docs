@@ -101,7 +101,7 @@ Los campos de `main` más importantes para crear una factura:
 | `correctedInvoice` | No | ID de la factura rectificada cuando esta es rectificativa. Ver [Rectificativas](../guides/invoices-rectificativas.md). |
 | `verifactu` | No | Parámetros específicos VeriFactu (`TipoFactura`, `DescripcionOperacion`, etc.). Ver [VeriFactu](../guides/verifactu.md). |
 | `ticketbai` | No | Parámetros específicos TicketBAI (`causaExencion`, `claveTipoFacturaRectificativa`, etc.). Ver [TicketBAI](../guides/ticketbai.md). |
-| `customFields` | No | Map de strings: `{ "miCampo": "valor" }`. |
+| `customFields` | No | Mapa de valores indexado por el ID estable `cfi_<uuid v4>` de cada [campo personalizado](./custom-fields.md). Las definiciones borradas siguen siendo válidas; un ID desconocido o con formato incorrecto produce `400 Bad Request`. |
 | `owner` | No | Usuario responsable de la factura. Se usa con roles personalizados para limitar la visibilidad a documentos asignados. |
 
 Si creas la factura con OAuth y no envías `owner`, la API asigna como

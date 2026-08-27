@@ -34,7 +34,6 @@ Recomendado cuando un usuario conecta su propia empresa de FacturaDirecta a
 tu aplicación. Tú obtienes un token en su nombre y operas dentro de su
 empresa.
 
-
 FacturaDirecta usa Keycloak como servicio de autorización, con realm
 `facturadirecta`. El flujo es `authorizationCode` estándar:
 

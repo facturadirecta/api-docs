@@ -23,6 +23,7 @@ explicaciones, ejemplos, guías y matices de comportamiento.
 - [API keys](./sections/api-keys.md)
 - [Bancos y cuentas de tesorería](./sections/banks.md)
 - [Bandeja de entrada](./sections/inbox.md)
+- [Campos personalizados](./sections/custom-fields.md)
 - [Configuración de la empresa](./sections/settings.md)
 - [Contactos](./sections/contacts.md)
 - [Diario contable](./sections/journal.md)

@@ -42,6 +42,14 @@ limitar la visibilidad a clientes asignados. Si creas el contacto con
 OAuth y no envías `owner`, la API asigna como responsable al usuario
 autenticado; con apiKey se deja vacío salvo que lo envíes en el body.
 
+## Campos personalizados
+
+`content.main.customFields` es un mapa de valores indexado por el ID estable
+`cfi_<uuid v4>` de cada [campo personalizado](./custom-fields.md). Las claves
+deben corresponder a definiciones existentes. También se aceptan definiciones
+borradas para conservar contactos históricos; un ID desconocido o con formato
+incorrecto produce `400 Bad Request`.
+
 ## Operaciones
 
 - [Lista de contactos](#lista-de-contactos)
