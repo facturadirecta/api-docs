@@ -42,6 +42,10 @@ página.
     [modelo 190](#modelo-190)).
   - `paymentMethod` — método de pago.
   - `currency`, `total`, `totalBeforeTaxes`, etc.
+  - `customFields` — mapa de valores indexado por el ID estable
+    `cfi_<uuid v4>` de cada [campo personalizado](./custom-fields.md). Las
+    definiciones borradas siguen siendo válidas; un ID desconocido o con
+    formato incorrecto produce `400 Bad Request`.
 - `content.attachments` — adjuntos (ver [Adjuntos](#adjuntos)).
 - `content.accounting`, `content.books` — overrides contables
   específicos (uso avanzado).

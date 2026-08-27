@@ -54,6 +54,12 @@ Forma común a los documentos de gasto de FacturaDirecta:
 En respuestas, además, en el nivel raíz: `tags`, `creationDate`,
 `modificationDate`, `related`.
 
+`content.main.customFields` es un mapa de valores indexado por el ID estable
+`cfi_<uuid v4>` de cada [campo personalizado](./custom-fields.md). Las claves
+deben corresponder a definiciones existentes. También se aceptan definiciones
+borradas para conservar compras históricas; un ID desconocido o con formato
+incorrecto produce `400 Bad Request`.
+
 ### Líneas de detalle
 
 `content.main.lines` es un array. Cada línea requiere `text`, `quantity` y

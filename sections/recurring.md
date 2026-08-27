@@ -133,11 +133,15 @@ Otros campos del trigger:
 ```
 
 `template.main` es una estructura equivalente a la de una factura de
-venta normal (ver [Crear presupuesto](./estimates.md#crear-presupuesto)
-para el patrón de campos en documentos de venta; `invoices.md` cuando
-exista). Cuando llega el momento programado, FacturaDirecta crea una
-factura con los datos de esta plantilla, asignando un nuevo número de
-documento y la fecha actual.
+venta normal (ver [Facturas de venta](./invoices.md)). Puede incluir
+`customFields`, un mapa de valores indexado por el ID estable `cfi_<uuid v4>`
+de cada [campo personalizado](./custom-fields.md). Las definiciones borradas
+siguen siendo válidas; un ID desconocido o con formato incorrecto produce
+`400 Bad Request`.
+
+Cuando llega el momento programado, FacturaDirecta crea una factura con los
+datos de esta plantilla, asignando un nuevo número de documento y la fecha
+actual.
 
 ## Operaciones
 
