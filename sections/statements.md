@@ -59,7 +59,7 @@ listados por defecto.
 | `state` | enum | `pending`/`reconciled`/`ignored`. |
 | `bank` | string | ID del banco propio del statement (`ban_*`). |
 | `ignore` | boolean | Si está marcado como ignorado. |
-| `matchedDocument` | string | ID del documento sugerido por el matching automático (factura, gasto), cuando aplica. |
+| `matchedDocument` | string \| null | ID del asiento contable (`tra_*`) con el que está conciliado el movimiento. Es `null` cuando no está conciliado o cuando el asiento se ha archivado. |
 | `notes` | string | Notas libres. |
 | `sourceKey` | string | Identificador del statement en la fuente externa (banco). |
 
@@ -82,6 +82,9 @@ empresa, paginados.
 - **`bank`** — ID del banco propio (`ban_*`).
 - **`currency`** — código ISO 4217.
 - **`minAmount`**, **`maxAmount`** — rango de importe.
+- **`matchedDocument`** — ID de un asiento contable (`tra_*`). Devuelve
+  el movimiento conciliado con ese asiento. Si el asiento está archivado o
+  no existe, el resultado queda vacío.
 - **`state`** — filtrar por estado (`pending`, `reconciled`, `ignored`).
 - **`sortBy`** — campo de orden.
 
@@ -98,6 +101,13 @@ Acepta además los parámetros estándar `offset`, `limit`,
 ```shell
 curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
   "https://app.facturadirecta.com/api/$COMPANY_ID/statements?state=pending&bank=ban_5e7d8a31-9c4b-4f6e-a1d3-2b5c7e9f1a4d&limit=50"
+```
+
+Movimiento conciliado con un asiento concreto:
+
+```shell
+curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
+  "https://app.facturadirecta.com/api/$COMPANY_ID/statements?matchedDocument=tra_3a8f1e29-4d7b-4c5e-9a2f-6d8b1c4e7a5f"
 ```
 
 ## Obtener un extracto
@@ -278,10 +288,11 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -X DELETE \
   varias, comisiones, devoluciones), usa
   [conciliar creando nuevo asiento](#conciliar-creando-nuevo-asiento)
   enviando las líneas contables del asiento a crear.
-- **`matchedDocument`** ofrece una sugerencia de matching automático
-  basado en importe + fecha + descripción. Si la sugerencia es
-  correcta, busca su asiento asociado y usa
-  [conciliar con asiento existente](#conciliar-con-asiento-existente).
+- **Para localizar el movimiento de un asiento conciliado**, usa
+  `matchedDocument=<id-asiento>`. El filtro solo devuelve una relación
+  vigente. Si archivas el asiento, el movimiento vuelve a estar pendiente,
+  `matchedDocument` pasa a `null` en la respuesta y el filtro deja de
+  devolverlo.
 - **No abusar de `ignored`**: úsalo para movimientos que realmente no
   deben afectar a contabilidad (transferencias entre cuentas propias,
   movimientos de cobertura). Para movimientos relevantes, concilia
