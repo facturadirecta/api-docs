@@ -86,8 +86,12 @@ paginada por la línea individual (no por asiento).
     todas las cuentas de personal).
   - 6 dígitos: cuenta completa (`700000` → solo apuntes de la cuenta
     de ventas 700000).
+- **`id`** — ID del documento que origina los apuntes. Devuelve todas
+  las líneas de ese asiento, factura, gasto, nómina o remesa.
 - **`document`** — ID del documento que actúa como subcuenta. Filtra
-  los apuntes que afectan al saldo de ese contacto/banco/producto.
+  los apuntes que afectan al saldo de ese contacto, banco o producto.
+  No equivale a `id`: un mismo asiento puede tener líneas imputadas a
+  documentos distintos.
 - **`journalPriority`** — entero. Aísla un tipo concreto de asiento
   (ver tabla arriba).
 - **`sortBy`** — solo se acepta `date` o `-date`. El orden secundario
@@ -136,6 +140,13 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
   "https://app.facturadirecta.com/api/$COMPANY_ID/journal?journalPriority=970&minDate=2025-01-01&maxDate=2025-12-31"
 ```
 
+Todos los apuntes que origina un asiento contable:
+
+```shell
+curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
+  "https://app.facturadirecta.com/api/$COMPANY_ID/journal?id=tra_3a8f1e29-4d7b-4c5e-9a2f-6d8b1c4e7a5f"
+```
+
 Apuntes que afectan a un contacto, con asiento completo y etiquetas:
 
 ```shell
@@ -152,6 +163,9 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 - **Para saldos de cuenta**: usa `account=<6 dígitos>` y suma
   `debit - credit` (o `credit - debit` según el tipo de cuenta) en
   el cliente. La API no agrega saldos.
+- **Para recuperar un asiento completo**: filtra por `id`. No filtres
+  por `document`, porque ese parámetro selecciona las líneas imputadas a
+  una subcuenta y puede dejar fuera otros apuntes del mismo asiento.
 - **Para vincular con documentos**: el `id` del apunte es el ID del
   documento origen. Puedes pedir su detalle con la operación de
   lectura del recurso correspondiente

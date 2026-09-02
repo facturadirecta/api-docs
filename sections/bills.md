@@ -410,6 +410,12 @@ una factura de compra. El body es un **array** de pagos.
   Sustituye al título por defecto.
 - `notes` (opcional) — notas adicionales del pago.
 
+La moneda de la cuenta bancaria debe coincidir con la moneda de la empresa o
+con la de la factura de compra. Si es una tercera moneda, la API devuelve `400`
+porque la petición no incluye el importe real cargado en esa cuenta. Cuando la
+cuenta usa la moneda de la empresa, `companyCurrencyAmount` permite registrar el
+importe exacto que después se compara con el extracto al conciliar.
+
 **Respuesta:** la factura completa actualizada (con los pagos registrados
 visibles en `related.payments` cuando se consulta).
 

@@ -392,24 +392,57 @@ para el patrón común de tags.
 `POST /{companyId}/invoices/{id}/payments` registra uno o varios
 cobros contra la factura.
 
+**Parámetros de cada cobro:**
+
+- **`bank`** (obligatorio) — ID de la cuenta bancaria (`ban_*`) donde
+  se anota el cobro.
+- **`amount`** (opcional) — importe en la moneda de la factura. Si lo
+  omites, se cobra el saldo pendiente completo. Solo se admite un cobro
+  sin `amount` y debe ir en la última posición del array.
+- **`date`** (opcional) — fecha del cobro. Por defecto se usa la fecha
+  actual.
+- **`companyCurrencyAmount`** (opcional) — importe real en la moneda de
+  la empresa cuando la factura usa otra moneda. Si lo omites, el sistema
+  aplica el tipo de cambio de la fecha del cobro.
+- **`description`**, **`notes`** (opcionales) — descripción visible del
+  movimiento y notas adicionales.
+
+La moneda de la cuenta bancaria debe coincidir con la moneda de la empresa o
+con la de la factura. Si es una tercera moneda, la API devuelve `400` porque la
+petición no indica el importe real recibido en esa cuenta.
+
+En una factura en moneda extranjera cobrada en una cuenta que usa la moneda de
+la empresa, envía `amount` en la moneda de la factura y
+`companyCurrencyAmount` en la moneda de la cuenta. El apunte bancario queda así
+en la misma moneda que el extracto y se puede conciliar con él.
+
 **Body:**
 
 ```json
 {
   "payments": [
-    { "date": "2026-05-13", "bank": "ban_…", "amount": 121 }
-  ]
+    {
+      "date": "2026-08-11",
+      "bank": "ban_5e7d8a31-9c4b-4f6e-a1d3-2b5c7e9f1a4d",
+      "amount": 7000,
+      "companyCurrencyAmount": 5909.56
+    }
+  ],
+  "related": ["journal"]
 }
 ```
 
-**Reglas:**
+`related: ["journal"]` incluye en la respuesta los apuntes que afectan al
+saldo de la factura. Toma de `related.journal` el `id` del asiento `tra_*` que
+se ha generado y úsalo como `transactionId` para
+[`PUT /statements/{id}/reconciliation`](./statements.md#conciliar-con-asiento-existente).
+Después puedes localizar el movimiento conciliado con
+`GET /statements?matchedDocument=<id-asiento>`.
 
-- **`bank`** (ID `ban_*`) es obligatorio en cada pago.
-- **`amount`** es opcional: si lo omites, se cobra el saldo
-  pendiente completo. Solo se admite **un pago sin `amount`** y debe
-  ir en la **última** posición del array.
-- Genera asientos contables automáticamente (banco vs cliente).
-- Si los pagos cierran el saldo, el estado pasa a `paid`. Si lo
+**Efectos:**
+
+- Genera los apuntes contables del banco y del cliente.
+- Si los cobros cierran el saldo, el estado pasa a `paid`. Si lo
   exceden, pasa a `overpaid`.
 - Emite el webhook **`invoice.updated`** (no hay evento específico de
   cobro).
