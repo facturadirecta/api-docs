@@ -47,7 +47,10 @@ Forma común a los documentos de gasto de FacturaDirecta:
 - `content.type` — siempre `"bill"`.
 - `content.uuid` — identificador inmutable.
 - `content.main` — datos del documento (contacto, fechas, divisa, líneas,
-  totales, modo de cálculo, fiscalidad, pagos a plazos, ...).
+  totales, modo de cálculo, fiscalidad, pagos a plazos, ...). Puede incluir
+  `warehouse`, el almacén del documento a efectos de stock (si no lo indicas
+  se usa el almacén por defecto de la empresa; ver
+  [Productos](./products.md#control-de-stock)).
 - `content.attachments` — adjuntos vinculados (ver [Adjuntos](#adjuntos)).
 - `content.meta` — metadatos internos.
 
@@ -66,6 +69,9 @@ incorrecto produce `400 Bad Request`.
 `unitPrice`. Otros campos relevantes:
 
 - `discount` o `discountRate` — descuento absoluto o porcentual.
+- `origin` — ID del documento del que procede la línea (típicamente una
+  [orden de compra](./purchase-orders.md)), para que los documentos queden
+  enlazados.
 - `tax` — array de **identificadores de impuesto** (`TaxId`) que aplican
   a la línea. Los IDs se obtienen del catálogo de **compras** de la
   empresa con `GET /{companyId}/settings/taxes/purchases`. Pueden
@@ -246,7 +252,7 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
   - `taskId` (obligatorio dentro de `fromInbox`) — el `tas_*` del item
     de la bandeja.
   - `archive` (opcional, default `true`) — si `true` (por defecto), el
-    inbox item se archiva tras crear la factura.
+    item de la bandeja se borra tras crear la factura.
 
   El adjunto del inbox se **reutiliza** como adjunto de esta factura
   (sin re-upload del binario S3) y queda enlazada al inbox vía

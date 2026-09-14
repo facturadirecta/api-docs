@@ -39,6 +39,7 @@ Puede incluir además:
 | `403 Forbidden` | Credencial válida pero sin los scopes necesarios, o sin acceso a la empresa indicada en el path. |
 | `404 Not Found` | El recurso no existe o no pertenece a la empresa del path. |
 | `409 Conflict` | La operación choca con el estado actual: identificador duplicado, borrado de un recurso con dependencias, etc. |
+| `429 Too Many Requests` | Demasiadas escrituras simultáneas del mismo tipo en la empresa. Reintenta con backoff. Ver [Límite de peticiones](./authentication.md#límite-de-peticiones). |
 | `500 Internal Server Error` | Error inesperado del servidor. No es un error del cliente; conviene reintentar tras un retraso. |
 
 ## Errores de validación (`400`)
@@ -112,9 +113,29 @@ capacidad del plan contratado, la respuesta incluye el código estable
 }
 ```
 
+El mismo código se devuelve al crear una factura con el cupo del plan agotado
+(por año natural: 100 en Gratis, 2.000 en Bronce, 5.000 en Plata y 12.000 en
+Oro; sin cupo en Diamante). Solo bloquea crear facturas: el resto de
+operaciones sigue disponible y la ampliación es subir de plan.
+
+Se comportan igual otras capacidades: número de empleados, productos, productos
+con control de stock, campos personalizados, almacenes y **documentos
+recurrentes activos**. En todos los casos, el mensaje indica el tope alcanzado.
+
 El estado HTTP es siempre `403`. Usa `errors[].code`, no el texto por separado,
 para identificar este caso. No reintentes la misma operación hasta ampliar el
 plan o reducir el uso que supera la capacidad.
+
+### Funcionalidades no incluidas en el plan
+
+El mismo código `plan_limit_exceeded` identifica el `403` de una funcionalidad
+entera que el plan no incluye: las escrituras de [pedidos](../sections/client-orders.md)
+y [órdenes de compra](../sections/purchase-orders.md) («Los pedidos de cliente y las
+órdenes de compra no están disponibles en tu plan») y las operaciones de stock
+de [productos](../sections/products.md) («El control de stock no está disponible en tu
+plan»). La diferencia con un tope de capacidad está solo en el mensaje: aquí no
+hay uso que reducir, y la salida es un plan o un módulo que incluya la
+funcionalidad.
 
 FacturaDirecta también envía un e-mail de aviso al propietario de la empresa,
 al usuario que hizo la solicitud —o al creador de la API key— y a los usuarios

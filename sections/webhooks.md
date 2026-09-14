@@ -58,6 +58,8 @@ actualizar un endpoint:
 | Contactos | `contact.created`, `contact.updated`, `contact.archived`, `contact.unarchived` |
 | Presupuestos | `estimate.created`, `estimate.updated`, `estimate.archived`, `estimate.unarchived` |
 | Albaranes | `delivery_note.created`, `delivery_note.updated`, `delivery_note.archived`, `delivery_note.unarchived` |
+| Pedidos | `client_order.created`, `client_order.updated`, `client_order.archived`, `client_order.unarchived` |
+| Órdenes de compra | `purchase_order.created`, `purchase_order.updated`, `purchase_order.archived`, `purchase_order.unarchived` |
 | Transacciones | `transaction.created`, `transaction.updated`, `transaction.archived`, `transaction.unarchived` |
 | Productos | `product.created`, `product.updated`, `product.archived`, `product.unarchived` |
 | VeriFactu | `verifactu_batch.sent` |
@@ -66,6 +68,22 @@ actualizar un endpoint:
 El catálogo puede ampliarse ante cambios; no asumas un conjunto cerrado.
 Para suscribirte a todos los eventos de una categoría, declara cada tipo
 explícitamente.
+
+Notas sobre categorías concretas:
+
+- **Pedidos** (`client_order.*`) y **Órdenes de compra**
+  (`purchase_order.*`) cubren los dos documentos del Módulo Inventario.
+  Un `client_order.updated` puede llegar **sin que nadie haya tocado el
+  pedido**: guardar o borrar una orden de compra vinculada propaga estados a
+  las líneas del pedido y lo guarda. Ver
+  [Flujo de pedidos y órdenes de compra](../guides/orders-flow.md).
+- **Bandeja de entrada** (`inbox.scanned`) se dispara cuando un documento
+  subido queda procesado, tanto si los datos se extrajeron con el escáner
+  como si el fichero era un Facturae y se leyó directamente. Para el
+  consumidor el resultado es el mismo.
+
+Los eventos `*.archived` y `*.unarchived` conservan ese nombre por
+compatibilidad: corresponden a borrar un documento y a recuperarlo.
 
 ## Entornos sandbox y producción
 
@@ -106,7 +124,12 @@ Notas:
 - `id` (prefijo `whe_`) identifica la entrega. Es el mismo valor que el
   `id` del evento en `GET /webhooks/events/{id}`.
 - `type` coincide con uno de los tipos del catálogo.
-- `object_type` es el tipo de recurso afectado (`invoice`, `contact`...).
+- `object_type` es el tipo de recurso afectado, con el mismo identificador
+  que usa la API REST: `invoice`, `bill`, `contact`, `estimate`,
+  `deliveryNote`, `clientOrder`, `purchaseOrder`, `transaction`, `product`,
+  `verifactu_batch` e `inbox_item`. No lo uses como discriminador en tu
+  integración: `type` ya identifica el evento sin ambigüedad y es el campo
+  estable.
 - `created` es timestamp Unix en segundos.
 - `livemode: true` indica que es un evento real; `false` corresponde a
   eventos simulados (sandbox o reintentos manuales).

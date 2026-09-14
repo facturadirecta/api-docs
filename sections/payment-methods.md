@@ -51,6 +51,14 @@ globales del resultado.
   firma, esquema (B2B o CORE) e IBAN del deudor.
 - **`sepaCreditTransfer`** — **mandato para pagos por transferencia**
   SEPA. El contacto es obligatorio. Lleva IBAN del beneficiario.
+- **`online`** — **cobro online** a través de una pasarela de pago
+  (Stripe). Lo crea FacturaDirecta automáticamente al conectar la cuenta
+  de cobro: la API lo devuelve en lecturas y permite referenciarlo desde
+  facturas (`main.paymentMethod`), pero **no admite crearlo** y en
+  actualizaciones solo acepta cambiar `title` (cualquier otro cambio
+  responde 400). No lleva contacto. Las
+  facturas con este método de pago se pueden pagar desde el portal
+  público de facturas.
 
 La estructura de `content.main.details` cambia según el `subtype` (un
 `oneOf` en el schema). Los detalles relevantes están en
@@ -77,9 +85,11 @@ proveedor).
   - `title` (obligatorio) — nombre del método en los listados.
   - `subtype` (obligatorio) — ver [Tipos](#tipos-manual-y-sepa).
   - `direction` — `send` o `receive`.
-  - `contact` (obligatorio en SEPA, prohibido en manual) — ID del
+  - `contact` (obligatorio en SEPA, prohibido en manual y online) — ID del
     contacto asociado.
-  - `bank` (opcional, solo en manual) — ID del banco propio asociado.
+  - `bank` (opcional en manual, obligatorio en online) — ID del banco
+    propio asociado. En `online` es el banco pasarela (la cuenta de cobro
+    conectada a Stripe).
   - `details` (obligatorio) — varía según el `subtype`.
 
 ### Detalles según `subtype`
@@ -105,6 +115,13 @@ proveedor).
 | `iban` | string | sí | IBAN de la cuenta del beneficiario. |
 | `bic` | string | no | Código BIC/SWIFT (solo necesario internacional). |
 | `iban4` | string | sí (lo calcula la API) | Últimos 4 dígitos del IBAN. |
+
+**`subtype: "online"`** (solo lectura): `details` contiene:
+
+| Campo | Tipo | Significado |
+|---|---|---|
+| `gateways` | array | Bancos pasarela por los que se puede cobrar, como `{ "bank": "ban_…" }`. Actualmente uno, que coincide con `main.bank`. |
+| `managed` | boolean | Siempre `true`: lo crea y gestiona FacturaDirecta al conectar la cuenta de cobro. |
 
 **Nota sobre `iban4`**: el schema lo declara como requerido en
 respuesta, pero al crear se calcula automáticamente a partir del
@@ -161,7 +178,8 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 - `content.type` — siempre `"paymentMethod"`.
 - `content.main.title` — obligatorio.
 - `content.main.subtype` — obligatorio (`manual`, `sepaDirectDebit`,
-  `sepaCreditTransfer`).
+  `sepaCreditTransfer`). El subtipo `online` no se puede crear por API:
+  la petición responde 400.
 - `content.main.contact` — obligatorio en `sepa*`, prohibido en
   `manual`. Si se omite en `manual`, el método es global de la empresa.
 - `content.main.details` — obligatorio. Estructura según `subtype`
@@ -288,8 +306,10 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/j
 **Restricciones:**
 
 - Si el método está referenciado por documentos existentes, la API
-  rechaza el borrado con `409 Conflict`. Para "retirar" un método ya
-  usado, créa uno nuevo y deja el antiguo sin asignar.
+  rechaza el borrado con `409 Conflict`. Para retirar un método ya
+  usado, crea uno nuevo y deja el antiguo sin asignar.
+- El método de subtipo `online` **no se puede borrar**: se creó junto con su
+  cuenta de cobro y desaparece con ella. Intentarlo devuelve `400`.
 
 **Parámetros globales aceptados:** `accept-version`.
 
@@ -335,6 +355,8 @@ truncados.
 - `400 ValidationError` — `details` con estructura que no corresponde
   al `subtype` declarado.
 - `400 ValidationError` — IBAN con formato inválido.
+- `400 ValidationError` — creación de un método de subtipo `online`, cambio
+  de cualquier campo suyo que no sea `title`, o borrado directo.
 - `409 Conflict` — borrado de un método referenciado por documentos.
 
 Ver [Errores y validaciones](../guides/errors.md) para el formato

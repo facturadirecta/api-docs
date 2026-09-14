@@ -223,6 +223,13 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
   esa primera factura hasta que llegue la siguiente ocurrencia mensual.
 - Si `enabled: false`, la recurrente se guarda pero las ejecuciones
   programadas se omiten hasta que se reactive.
+- Los planes 2026 limitan el número de recurrentes **activas a la vez**
+  (Gratis 2, Bronce 20, Plata 200, Oro y Diamante sin límite; cuentan
+  todas las automatizaciones activas, no solo las facturas). Con el cupo lleno, crear
+  una recurrente con `enabled: true` devuelve `403` con el código
+  `plan_limit_exceeded` (ver [Errores](../guides/errors.md)); crearla con
+  `enabled: false` siempre es posible. Desactivar o borrar una recurrente
+  libera hueco.
 - La respuesta es la recurrente creada completa, en el mismo formato que
   [Obtener una factura recurrente](#obtener-una-factura-recurrente).
 
@@ -318,7 +325,9 @@ Casos típicos:
   actualización si todavía no hubo una ejecución correcta.
 - Activar o desactivar (`enabled`): conserva la configuración. Al reactivar una
   recurrente sin ejecuciones correctas, no se recuperan ocurrencias anteriores
-  al día de la actualización.
+  al día de la actualización. Reactivar con el cupo de recurrentes activas del
+  plan lleno devuelve `403` `plan_limit_exceeded`; editar una recurrente que ya
+  está activa no consume hueco.
 
 **Parámetros globales aceptados:** `accept-version`.
 

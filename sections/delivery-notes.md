@@ -64,7 +64,10 @@ Forma común a los documentos de venta de FacturaDirecta:
 - `content.uuid` — identificador inmutable.
 - `content.main` — datos del documento (contacto, fechas, divisa,
   líneas, totales, condiciones, plantilla). Puede incluir `owner`, el
-  usuario responsable del albarán cuando trabajas con roles personalizados.
+  usuario responsable del albarán cuando trabajas con roles personalizados,
+  y `warehouse`, el almacén del documento a efectos de stock (si no lo
+  indicas se usa el almacén por defecto de la empresa; ver
+  [Productos](./products.md#control-de-stock)).
 - `content.attachments` — adjuntos vinculados (ver [Adjuntos](#adjuntos)).
 - `content.meta` — metadatos internos.
 
@@ -93,6 +96,8 @@ y `unitPrice`. Otros campos relevantes:
   [Impuestos](../guides/taxes.md).
 - `lineTotal` — total de la línea; la API lo calcula si lo omites.
 - `document` — ID del producto del catálogo si la línea proviene de uno.
+- `origin` — ID del documento del que procede la línea (presupuesto o
+  pedido de cliente), para que los documentos queden enlazados.
 - `account` — cuenta contable de la línea; por defecto se toma de la
   cuenta asociada al producto o, en su defecto, la de ventas de la empresa.
 

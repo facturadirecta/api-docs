@@ -74,7 +74,7 @@ mensaje explicativo.
 
 | # | Regla | Mensaje de error si falla |
 |---|---|---|
-| 1 | Todas existen y no están archivadas | `Invoices not found: <ids>` |
+| 1 | Todas existen y no están borradas | `Invoices not found: <ids>` |
 | 2 | Todas son simplificadas (`main.simplified === true`) | `Invoice <id> is not a simplified invoice` |
 | 3 | Ninguna es externa (`main.external !== true`) | `Invoice <id> is an external invoice and cannot be substituted` |
 | 4 | Todas comparten la misma `currency` | `All substituted invoices must have the same currency` |

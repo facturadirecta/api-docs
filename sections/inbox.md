@@ -9,8 +9,8 @@ status: draft
 
 La bandeja de entrada (`inbox`) es el flujo para **incorporar documentos
 externos** (PDFs de facturas de proveedores, tickets escaneados o
-ficheros Facturae) y convertirlos automáticamente en
-gastos o tickets, con datos pre-rellenados.
+ficheros Facturae, además de nóminas) y convertirlos automáticamente en
+gastos o tickets, o en nóminas, con datos pre-rellenados.
 
 El flujo conceptual tiene cuatro pasos:
 
@@ -23,6 +23,9 @@ El flujo conceptual tiene cuatro pasos:
    o `proposeTicket`. Devuelve un prototipo listo para enviar a
    `POST /bills` con un campo adicional `fromInbox: { taskId }` que
    vincula los dos documentos.
+
+Para una nómina, usa `POST /inbox/{id}/proposePayroll` y envía después
+el prototipo a `POST /payrolls` con el mismo campo `fromInbox`.
 
 Los `propose*` **no crean nada en BD**: son funciones puras que mapean
 los datos extraídos al shape esperado por la API de creación. Permite
@@ -98,7 +101,7 @@ escaneo y los datos estructurados:
   `GET /inbox/{id}`**, no en el listado (optimización de tamaño).
 - `scan.extraction` — datos estructurados. El shape depende del tipo
   de documento detectado: `InboxExtractionInvoice` para facturas y
-  tickets.
+  tickets, `InboxExtractionPayroll` para nóminas.
 
 La extracción contiene campos como `date`, `name` (emisor), `contact`
 (NIF/CIF), `number`, `total`, `currency`, `direction` (`RECEIVE` o
@@ -114,14 +117,19 @@ Suscribirse permite reaccionar en cuanto los datos están disponibles
 en vez de hacer polling. Ver [Webhooks](./webhooks.md) para los
 detalles del flujo.
 
+El evento es el mismo tanto si los datos se han obtenido con el escáner como
+si el adjunto era un Facturae y se ha leído de forma nativa: para el consumidor
+el item queda procesado igual y solo cambia cómo se produjo la extracción.
+
 ## Operaciones
 
 - [Lista de items](#lista-de-items)
 - [Crear item (subir documento)](#crear-item-subir-documento)
 - [Obtener un item](#obtener-un-item)
-- [Archivar un item](#archivar-un-item)
+- [Borrar un item](#borrar-un-item)
 - [Proponer factura de compra](#proponer-factura-de-compra)
 - [Proponer ticket](#proponer-ticket)
+- [Proponer nómina](#proponer-nómina)
 
 ## Lista de items
 
@@ -137,7 +145,7 @@ detalles del flujo.
   (ISO 8601).
 - **`archived`** — controla qué items aparecen en el resultado:
   - `false` (por defecto): solo activos.
-  - `true`: solo archivados.
+  - `true`: solo borrados.
   - `all`: ambos.
 
 **Parámetros globales aceptados:**
@@ -150,9 +158,9 @@ Acepta además los parámetros estándar `offset`, `limit` y el header
 
 - `scan.text` **no se incluye** en los items del listado para evitar
   cargas grandes. Para verlo, usa `GET /inbox/{id}`.
-- Por defecto, los items archivados se omiten. Esto es coherente con
-  el comportamiento del `DELETE /inbox/{id}` (que archiva en lugar de
-  borrar físicamente).
+- Por defecto, los items borrados se omiten. Esto es coherente con
+  el comportamiento del `DELETE /inbox/{id}` (borrado recuperable, no
+  físico).
 
 ###### Copy as cURL
 
@@ -229,10 +237,10 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
   "https://app.facturadirecta.com/api/$COMPANY_ID/inbox/tas_3a7f9c12-2d4e-4b8a-9c1f-5d6e8f0a3b2c"
 ```
 
-## Archivar un item
+## Borrar un item
 
-`DELETE /{companyId}/inbox/{id}` **archiva** el item (no lo borra
-físicamente). Los items archivados:
+`DELETE /{companyId}/inbox/{id}` **borra** el item de forma recuperable
+(no lo elimina físicamente: queda con `archived: true`). Los items borrados:
 
 - No aparecen en el listado por defecto.
 - Conservan sus adjuntos (las URLs S3 siguen siendo accesibles).
@@ -240,9 +248,9 @@ físicamente). Los items archivados:
 - Aparecen en listados con `archived=true` o `archived=all`.
 
 Si vinculas un inbox item a un documento real vía `fromInbox`, el
-sistema archiva el inbox automáticamente (por defecto). Ese es el
+sistema borra el item automáticamente (por defecto). Ese es el
 camino habitual; este endpoint cubre los casos en que quieres
-archivar manualmente sin crear un documento (p. ej. spam).
+borrarlo manualmente sin crear un documento (p. ej. spam).
 
 **Respuesta:** `{ result: true }`.
 
@@ -304,7 +312,7 @@ haya cambiado).
    - Pon el ID resultante en `content.main.contact`.
 3. Llama a `POST /bills` con `{ content, fromInbox: { taskId, archive } }`:
    - `taskId` es el `tas_*` del item de la bandeja.
-   - `archive: true` (por defecto) archiva el inbox tras crear el bill.
+   - `archive: true` (por defecto) borra el item de la bandeja tras crear el bill.
    - Esto vincula el bill al inbox; se puede ver desde la interfaz.
 
 **Parámetros globales aceptados:** `accept-version`.
@@ -355,9 +363,30 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/j
   "https://app.facturadirecta.com/api/$COMPANY_ID/inbox/tas_3a7f9c12-2d4e-4b8a-9c1f-5d6e8f0a3b2c/proposeTicket"
 ```
 
+## Proponer nómina
+
+`POST /{companyId}/inbox/{id}/proposePayroll` es equivalente a las
+anteriores pero construye un prototipo de **nómina** (`PayrollWrite`).
+El item debe haber sido escaneado y reconocido como nómina por el
+extractor (`scan.extraction` debe ser `InboxExtractionPayroll`).
+
+Misma forma de respuesta: `{ content, matchedContact, candidateContacts,
+newContactProposal }`. El contacto en este caso es el empleado.
+
+Para crear la nómina real tras revisar el prototipo, llama a
+`POST /payrolls` con `{ content, fromInbox: { taskId, archive } }`.
+
+###### Copy as cURL
+
+```shell
+curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/json" \
+  -d '{}' \
+  "https://app.facturadirecta.com/api/$COMPANY_ID/inbox/tas_3a7f9c12-2d4e-4b8a-9c1f-5d6e8f0a3b2c/proposePayroll"
+```
+
 ## Vinculación con `fromInbox`
 
-Al crear un bill desde un inbox item, se incluye en el
+Al crear un bill o un payroll desde un inbox item, se incluye en el
 body del create el campo opcional:
 
 ```json
@@ -371,14 +400,14 @@ body del create el campo opcional:
 ```
 
 - **`taskId`** — el `tas_*` del inbox item.
-- **`archive`** (opcional, default `true`) — si `true`, el inbox se
-  archiva automáticamente al crear el documento.
+- **`archive`** (opcional, default `true`) — si `true`, el item de la bandeja se
+  borra automáticamente al crear el documento.
 
-`fromInbox` está disponible en `POST /bills`. No
+`fromInbox` está disponible en `POST /bills` y `POST /payrolls`. No
 está disponible en `POST /invoices` (no hay flujo "subir factura de
 venta a inbox" a día de hoy).
 
-El vínculo persiste: la factura creada queda enlazada al inbox
+El vínculo persiste: la factura o nómina creada queda enlazada al inbox
 item en sus `attachments`, y la interfaz puede mostrar el original.
 
 ## Recomendaciones
@@ -396,9 +425,9 @@ item en sus `attachments`, y la interfaz puede mostrar el original.
   saber que la propuesta será fiable sin ajuste manual.
 - **`fromInbox.archive: false`** solo si necesitas mantener el inbox
   activo (por ejemplo, para vincularlo a varios bills). El uso normal
-  es archivar.
+  es borrarlo.
 - **Para integraciones agentic**, los `propose*` son ideales: solo
-  requieren `inbox:read`, no `bills:write`. Un
+  requieren `inbox:read`, no `bills:write` ni `payrolls:write`. Un
   agente puede proponer y dejar al humano (o a otro agente con scopes
   superiores) el acto de crear.
 
@@ -409,6 +438,8 @@ item en sus `attachments`, y la interfaz puede mostrar el original.
 - `404 Not Found` — `tas_*` no existe en la empresa.
 - `409 Conflict` — `propose*` sobre un item con `status: pending` (el
   escaneo aún no ha terminado).
+- `409 Conflict` — `proposePayroll` sobre un item cuya extracción no
+  es de nómina.
 
 Ver [Errores y validaciones](../guides/errors.md) para el formato
 general.
@@ -428,6 +459,7 @@ consulta el [Swagger UI](https://www.facturadirecta.com/api) o el
 | GET | `/{companyId}/inbox/{id}` | `getInboxItem` | `inbox:read` | Detalle de un item de la bandeja |
 | POST | `/{companyId}/inbox` | `createInboxItem` | `inbox:write` | Subir un documento a la bandeja de entrada |
 | POST | `/{companyId}/inbox/{id}/proposeBill` | `proposeBill` | `inbox:read` | Propuesta de factura de compra desde un item de la bandeja |
+| POST | `/{companyId}/inbox/{id}/proposePayroll` | `proposePayroll` | `inbox:read` | Propuesta de nómina desde un item de la bandeja |
 | POST | `/{companyId}/inbox/{id}/proposeTicket` | `proposeTicket` | `inbox:read` | Propuesta de ticket de compra desde un item de la bandeja |
 | DELETE | `/{companyId}/inbox/{id}` | `deleteInboxItem` | `inbox:write` | Archivar un item de la bandeja |
 

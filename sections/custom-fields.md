@@ -25,7 +25,8 @@ definición, no su título visible.
 ```
 
 La API valida las claves al crear o actualizar facturas, presupuestos,
-albaranes, gastos, nóminas, contactos y facturas recurrentes. Una clave debe
+albaranes, pedidos de cliente, órdenes de compra, gastos, nóminas, contactos y
+facturas recurrentes. Una clave debe
 corresponder a una definición existente. Las definiciones borradas siguen
 siendo válidas para conservar y editar documentos históricos; una clave
 desconocida produce `400 Bad Request`.
@@ -38,7 +39,7 @@ Todas las operaciones que devuelven un campo usan estos atributos:
 | --- | --- | --- |
 | `id` | string | `cfi_` seguido de UUID v4 en minúsculas. |
 | `title` | string | Nombre visible. |
-| `docTypes` | string[] | Uno o más de `invoice`, `estimate`, `deliveryNote`, `bill`, `payroll`, `contact`. |
+| `docTypes` | string[] | Uno o más de `invoice`, `estimate`, `deliveryNote`, `clientOrder`, `purchaseOrder`, `bill`, `payroll`, `contact`. |
 | `archived` | boolean | `true` si el campo está borrado. |
 
 Las respuestas de recurso individual envuelven la representación en
