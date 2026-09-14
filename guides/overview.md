@@ -14,7 +14,15 @@ status: draft
 
 La **API pública de FacturaDirecta** te permite integrar tu software con el
 sistema de facturación. Está disponible en todos los planes, incluido
-**Gratis**. Cada plan aplica su propio límite de peticiones.
+**Gratis**. Cada plan aplica su propio límite de peticiones por minuto: 30 en
+Gratis, 60 en Bronce, 120 en Plata, 300 en Oro y 600 en Diamante. El detalle y
+las cabeceras que devuelve la API están en
+[Autenticación](./authentication.md#límite-de-peticiones).
+
+Algunos recursos dependen además del plan contratado: los
+[pedidos](../sections/client-orders.md), las [órdenes de compra](../sections/purchase-orders.md) y
+el control de stock de los [productos](../sections/products.md) forman parte del
+**Módulo Inventario**.
 
 Puedes automatizar procesos como crear facturas desde un CRM, sincronizar
 contactos con un ERP, conectar una tienda online o generar informes
@@ -100,6 +108,8 @@ La API ofrece acceso, entre otros, a estos recursos:
 | [Facturas recurrentes](../sections/recurring.md) | Automatizaciones de facturación recurrente. |
 | [Presupuestos](../sections/estimates.md) | Presupuestos y proformas. |
 | [Albaranes](../sections/delivery-notes.md) | Albaranes de entrega. |
+| [Pedidos](../sections/client-orders.md) | Encargos de clientes, con estado por línea. Requiere el Módulo Inventario. |
+| [Órdenes de compra](../sections/purchase-orders.md) | Encargos a proveedores, con estado por línea. Requiere el Módulo Inventario. |
 | [Facturas de compra y tickets](../sections/bills.md) | Gastos, compras y tickets. |
 | [Nóminas](../sections/payrolls.md) | Nóminas de empleados. |
 | [Bancos](../sections/banks.md) | Cuentas bancarias y tesorería. |
@@ -122,7 +132,7 @@ La API ofrece acceso, entre otros, a estos recursos:
 
 Los **webhooks** permiten recibir notificaciones en tiempo real cuando ocurre un
 cambio relevante en tu empresa: una factura creada, un contacto modificado, un
-gasto archivado, etc.
+gasto borrado, etc.
 
 En lugar de consultar la API periódicamente, configuras una URL HTTPS y
 FacturaDirecta envía un `POST` a tu servidor cuando se produce un evento al que

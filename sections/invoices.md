@@ -103,6 +103,7 @@ Los campos de `main` más importantes para crear una factura:
 | `ticketbai` | No | Parámetros específicos TicketBAI (`causaExencion`, `claveTipoFacturaRectificativa`, etc.). Ver [TicketBAI](../guides/ticketbai.md). |
 | `customFields` | No | Mapa de valores indexado por el ID estable `cfi_<uuid v4>` de cada [campo personalizado](./custom-fields.md). Las definiciones borradas siguen siendo válidas; un ID desconocido o con formato incorrecto produce `400 Bad Request`. |
 | `owner` | No | Usuario responsable de la factura. Se usa con roles personalizados para limitar la visibilidad a documentos asignados. |
+| `warehouse` | No | Almacén del documento a efectos de stock. Solo tiene efecto si la empresa usa el control de stock y varios almacenes; si no lo indicas se usa el almacén por defecto. Ver [Productos](./products.md#control-de-stock). |
 
 Si creas la factura con OAuth y no envías `owner`, la API asigna como
 responsable al usuario autenticado. Si usas una apiKey, la factura queda
@@ -149,7 +150,7 @@ Cada elemento de `lines` (`InvoiceMainLine`):
 | `lineTotal` | Sí | Total de la línea (`quantity * unitPrice * (1 - discountRate/100) - discount`). |
 | `tax` | Sí | Array de IDs de impuestos. Ver [guía de Impuestos](../guides/taxes.md). |
 | `text` | Sí | Descripción. |
-| `origin` | No | ID del documento de origen (presupuesto, albarán) para trazar procedencia. |
+| `origin` | No | ID del documento de origen (presupuesto, albarán o pedido de cliente) para trazar procedencia. |
 | `document` | No | ID del producto si la línea se genera de catálogo. |
 | `facturae`, `verifactu` | No | Sub-campos específicos para Facturae y VeriFactu por línea. |
 
@@ -357,18 +358,18 @@ factura.
 
 Una factura **anulada no es lo mismo que una factura borrada**: la
 anulada queda en el sistema con estado `voided`; la borrada se
-archiva y desaparece de los listados (ver siguiente sección).
+conserva con `archived: true` y desaparece de los listados (ver siguiente sección).
 
 ## Borrar factura
 
-`DELETE /{companyId}/invoices/{id}` archiva la factura.
+`DELETE /{companyId}/invoices/{id}` borra la factura (borrado recuperable).
 
 **Restricciones:**
 
 - Solo se pueden borrar facturas **no contabilizadas** (típicamente
   en `draft`). Si la factura ya generó asientos contables, el borrado
   fallará: usa **anulación** en su lugar.
-- El borrado es **archivado lógico** (`archived = true`); la factura
+- El borrado es **lógico y recuperable** (`archived = true`); la factura
   no se elimina físicamente y desaparece de los listados.
 
 **Parámetros globales aceptados:** `accept-version`.
@@ -524,9 +525,9 @@ Eventos que emite el recurso:
 - **`invoice.created`** — alta de factura.
 - **`invoice.updated`** — modificación del `content`, incluido el
   registro de pagos.
-- **`invoice.archived`** — borrado (archivado lógico).
-- **`invoice.unarchived`** — restauración (no expuesta hoy por API
-  pública; reservada para procesos internos).
+- **`invoice.archived`** — borrado (lógico, recuperable).
+- **`invoice.unarchived`** — recuperación de una factura borrada (no
+  expuesta hoy por API pública; reservada para procesos internos).
 - **`invoice.sent`** — envío por email completado.
 - **`invoice.voided`** — anulación.
 - **`invoice.verifactu_sent`** — envío exitoso a AEAT confirmado.
@@ -584,7 +585,7 @@ Detalle de la entrega (HMAC, reintentos, formato) en
 - `400` en `POST /invoices/substitution` — alguna restricción no se
   cumple (factura no simplificada, monedas distintas, ya
   sustituida...).
-- `404 Not Found` — factura inexistente o archivada.
+- `404 Not Found` — factura inexistente o borrada.
 - `409 Conflict` — intento de borrar una factura ya contabilizada.
   Anula en su lugar.
 - `413 Payload Too Large` — adjuntos por encima del límite (10).

@@ -190,6 +190,14 @@ El recurso no existe o la URL no es correcta. Comprueba:
 - que el path del endpoint existe;
 - que el ID del recurso (`inv_...`, `con_...`) pertenece a esa empresa.
 
+## Ritmo de llamadas
+
+Cada empresa tiene un límite de peticiones por minuto según su plan (30 en
+Gratis, 60 en Bronce, 120 en Plata, 300 en Oro y 600 en Diamante). Cada
+respuesta lleva las cabeceras `X-RateLimit-Limit`, `X-RateLimit-Remaining` y
+`X-RateLimit-Reset`; úsalas para espaciar las llamadas en cargas masivas. Ver
+[Autenticación](./authentication.md#límite-de-peticiones).
+
 ## Siguientes pasos
 
 - Consulta la [API Pública de FacturaDirecta](https://help.facturadirecta.com/es/articles/13538823-api-publica-de-facturadirecta) para ver la visión

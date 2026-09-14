@@ -46,6 +46,8 @@ de numeración disponibles para un tipo de documento.
   - `invoice` — facturas de venta.
   - `estimate` — presupuestos.
   - `deliveryNote` — albaranes.
+  - `clientOrder` — pedidos de cliente.
+  - `purchaseOrder` — órdenes de compra.
 
 **Parámetros globales aceptados:** `accept-version`.
 
@@ -67,6 +69,8 @@ Cada `SeriesItem` tiene:
 
 - Las series se configuran desde la interfaz; este endpoint solo las
   expone. La API pública no crea, modifica ni borra series.
+- Las series de pedidos de cliente y de órdenes de compra solo existen si la
+  empresa las ha configurado; si no, `items` es una lista vacía.
 - Para series de facturas, `invoiceType` distingue los regímenes
   fiscales aplicables. El campo `correction` queda por
   compatibilidad pero **no debe usarse en código nuevo**.

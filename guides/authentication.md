@@ -121,6 +121,61 @@ El conjunto exacto de scopes y su descripción está en el openapi público y
 en cada página de recurso de esta documentación. Pide siempre los scopes
 mínimos necesarios para la integración.
 
+Dos scopes se salen del patrón y conviene conocerlos:
+
+- **`banks:readIban`** — scope adicional que añade el IBAN completo a las
+  consultas de bancos y de métodos de pago. Ver [Bancos](../sections/banks.md).
+- **`files:write`** — permite subir archivos para adjuntarlos a documentos.
+  Ver [Uploads](../sections/uploads.md).
+
+Los documentos del **Módulo Inventario** tienen sus propios scopes:
+`clientOrders:read` y `clientOrders:write` para
+[pedidos](../sections/client-orders.md), y `purchaseOrders:read` y
+`purchaseOrders:write` para [órdenes de compra](../sections/purchase-orders.md).
+Tener el scope no basta: si el plan de la empresa no incluye esos
+documentos, las escrituras responden `403`. Las operaciones de stock de
+productos siguen usando `products:read` y `products:write`, y también
+dependen de que el plan incluya el control de stock.
+
+## Límite de peticiones
+
+Cada empresa tiene un **límite de peticiones por minuto** que depende de su
+plan. El límite se cuenta por empresa (no por credencial) en ventanas de un
+minuto naturales, y solo se aplica al tráfico de integración: llamadas con API
+key y con clientes OAuth de integración.
+
+| Plan | Peticiones por minuto |
+|---|---|
+| Gratis | 30 |
+| Bronce | 60 |
+| Plata | 120 |
+| Oro | 300 |
+| Diamante | 600 |
+
+Esos son los valores de la familia de planes vigente. Algunas cuentas con
+planes anteriores o con condiciones particulares tienen otro límite: no lo
+supongas a partir del plan, léelo de la cabecera de la respuesta.
+
+Cada respuesta incluye estas cabeceras:
+
+```http
+X-RateLimit-Limit: 120
+X-RateLimit-Remaining: 118
+X-RateLimit-Reset: 1789012860
+```
+
+- **`X-RateLimit-Limit`** — peticiones permitidas en la ventana actual.
+- **`X-RateLimit-Remaining`** — peticiones que te quedan en esta ventana.
+- **`X-RateLimit-Reset`** — timestamp Unix (segundos) en que empieza la ventana
+  siguiente.
+
+Cuando una petición supera el límite, la respuesta añade además
+**`Retry-After`** con los segundos que faltan para la ventana siguiente. Hoy
+esa petición **se sigue atendiendo**: el exceso queda registrado pero no se
+rechaza. Aun así, diseña la integración para respetar el límite —lee
+`X-RateLimit-Remaining` y espacia las llamadas— y para tratar un
+`429 Too Many Requests` con reintento tras `Retry-After`.
+
 ## Errores de autenticación
 
 - **`401 Unauthorized`** — token expirado, ausente, mal formado, emitido
@@ -143,7 +198,7 @@ Para el formato general de errores ver [Errores y validaciones](./errors.md).
 - **Limita los scopes** al mínimo necesario. Si solo lees contactos, no
   pidas `contacts:write`.
 - **Una API key por integración.** Si una integración deja de usarse,
-  rota la API key antes de archivarla.
+  rota la API key antes de borrarla.
 - **Para multi-tenant SaaS**, OAuth2 con `offline_access` es el patrón
   correcto. API keys son por empresa y no escalan a "una clave para
   varias empresas".

@@ -90,7 +90,7 @@ Acepta además los parámetros estándar `offset`, `limit`,
 
 **Notas:**
 
-- El listado **excluye los bancos archivados**: solo aparecen las
+- El listado **excluye los bancos borrados**: solo aparecen las
   cuentas activas de la empresa.
 - El orden por defecto es por número total de comentarios y luego
   por fecha de creación descendente. Si tu integración depende del
@@ -136,7 +136,7 @@ Respuesta típica (sin scope `banks:readIban`):
 - **Cachea el listado**. Las cuentas cambian con muy baja frecuencia;
   no hace falta consultar el endpoint en cada operación. Refresca el
   cache cuando una creación de cobro/pago falle con `400` por `bank`
-  desconocido (alguien puede haber archivado o añadido cuentas desde
+  desconocido (alguien puede haber borrado o añadido cuentas desde
   la interfaz).
 - **Para mostrar al usuario**, usa `name` (o `title` si está
   informado) e `iban4`. No pidas `banks:readIban` solo para mostrar

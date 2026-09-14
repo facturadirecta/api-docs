@@ -59,7 +59,7 @@ listados por defecto.
 | `state` | enum | `pending`/`reconciled`/`ignored`. |
 | `bank` | string | ID del banco propio del statement (`ban_*`). |
 | `ignore` | boolean | Si está marcado como ignorado. |
-| `matchedDocument` | string \| null | ID del asiento contable (`tra_*`) con el que está conciliado el movimiento. Es `null` cuando no está conciliado o cuando el asiento se ha archivado. |
+| `matchedDocument` | string \| null | ID del asiento contable (`tra_*`) con el que está conciliado el movimiento. Es `null` cuando no está conciliado o cuando el asiento se ha borrado. |
 | `notes` | string | Notas libres. |
 | `sourceKey` | string | Identificador del statement en la fuente externa (banco). |
 
@@ -83,7 +83,7 @@ empresa, paginados.
 - **`currency`** — código ISO 4217.
 - **`minAmount`**, **`maxAmount`** — rango de importe.
 - **`matchedDocument`** — ID de un asiento contable (`tra_*`). Devuelve
-  el movimiento conciliado con ese asiento. Si el asiento está archivado o
+  el movimiento conciliado con ese asiento. Si el asiento está borrado o
   no existe, el resultado queda vacío.
 - **`state`** — filtrar por estado (`pending`, `reconciled`, `ignored`).
 - **`sortBy`** — campo de orden.
@@ -290,7 +290,7 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -X DELETE \
   enviando las líneas contables del asiento a crear.
 - **Para localizar el movimiento de un asiento conciliado**, usa
   `matchedDocument=<id-asiento>`. El filtro solo devuelve una relación
-  vigente. Si archivas el asiento, el movimiento vuelve a estar pendiente,
+  vigente. Si borras el asiento, el movimiento vuelve a estar pendiente,
   `matchedDocument` pasa a `null` en la respuesta y el filtro deja de
   devolverlo.
 - **No abusar de `ignored`**: úsalo para movimientos que realmente no

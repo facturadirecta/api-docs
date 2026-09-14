@@ -141,6 +141,23 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 - La respuesta es el contacto creado completo, en el mismo formato que
   [Obtener un contacto](#obtener-un-contacto).
 
+**Límites del plan.** Los planes limitan cuántos **clientes** y cuántos
+**empleados** puede tener la empresa a la vez:
+
+| Plan | Clientes | Empleados |
+|---|---|---|
+| Gratis | 10 | 1 |
+| Bronce | 100 | 2 |
+| Plata | Sin límite | 5 |
+| Oro | Sin límite | 20 |
+| Diamante | Sin límite | Sin límite |
+
+Los límites solo bloquean **crear**: los contactos que ya existen siguen
+funcionando aunque la empresa baje de plan, y borrar uno libera hueco. Al
+superarlos, la respuesta es `403` con el código `plan_limit_exceeded` (ver
+[Errores](../guides/errors.md)). Cuentan solo los contactos con la faceta
+correspondiente: un proveedor no consume cupo de cliente ni de empleado.
+
 ###### Ejemplo de request JSON
 
 ```json
@@ -304,8 +321,8 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/j
 
 **Restricciones.** Si el contacto tiene documentos asociados (facturas,
 gastos, nóminas), la API rechaza el borrado con `409 Conflict` y un mensaje
-indicando el motivo. En ese caso conviene archivar el contacto o reasignar sus
-documentos antes de borrarlo.
+indicando el motivo. En ese caso, reasigna sus documentos a otro contacto antes de
+borrarlo.
 
 **Respuesta:** `{ "result": true }`.
 
@@ -356,6 +373,8 @@ con prefijo de país: `ESB12345674`).
 ## Errores comunes
 
 - `400 ValidationError` — `fiscalId` con formato inválido para el país indicado.
+- `403` con código `plan_limit_exceeded` — se ha alcanzado el máximo de
+  clientes o de empleados del plan.
 - `409 Conflict` — borrado de contacto con documentos asociados.
 - `409 Conflict` — `fiscalId` duplicado en la empresa.
 
