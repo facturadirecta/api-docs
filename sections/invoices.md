@@ -38,8 +38,8 @@ factura. El "tipo" emerge de la combinación de varios campos:
 
 | Subtipo | Cómo se identifica |
 |---|---|
-| **Completa** | `main.contact` informado (cliente identificado con datos fiscales). |
-| **Simplificada** | `main.simplified === true` — el destinatario no tiene datos fiscales completos. Típicamente `main.contact` es `null`. |
+| **Completa** | `main.simplified !== true`. Normalmente tiene `main.contact` con datos fiscales. Con VeriFactu también puede ser una F2 para un contacto extracomunitario sin identificador fiscal. |
+| **Simplificada** | `main.simplified === true`. Típicamente `main.contact` es `null` o el destinatario no tiene datos fiscales suficientes. |
 | **Externa** | `main.external === true` — generada fuera del programa. **No emite a TicketBAI ni VeriFactu**, aunque sí contabiliza. |
 | **Sustitutiva** | `main.substitution === true` con `main.substitutedInvoices` rellenado. Se crea con el endpoint dedicado [`POST /invoices/substitution`](#crear-factura-sustitutiva). Corresponde a F3 en VeriFactu. Ver [guía de Sustitutivas](../guides/invoices-sustitutivas.md). |
 | **Rectificativa** | Asociada a una factura previa vía `main.correctedInvoice` y/o emitida en una serie de rectificativas (`invoiceType: complete_correction` o `simplified_correction` en [settings](./settings.md)). Ver [guía de Rectificativas](../guides/invoices-rectificativas.md). |
@@ -336,9 +336,27 @@ factura.
 - `docNumber` **inmutable** una vez asignado.
 - Pasar `main.voided=true` **anula** la factura (ver
   [Anular](#anular-factura)).
-- Si la factura tiene metadatos de TicketBAI/VeriFactu ya enviados,
-  algunos cambios disparan reemisión o anulación + nueva emisión.
-  Detalles en las respectivas guías.
+- Si la factura ya tiene un registro de alta VeriFactu, el primer
+  intento de hacer un cambio subsanable devuelve HTTP 400 con
+  `type: "verifactuSubsanacion"`. Revisa la clasificación de los
+  cambios en `hint.verifactuChanges.changes` y, si quieres confirmar
+  la subsanación, repite el mismo PUT añadiendo este campo al nivel
+  superior del body:
+
+  ```json
+  {
+    "verifactuOperation": { "subsanacion": true }
+  }
+  ```
+
+  El segundo PUT devuelve la factura actualizada y genera un nuevo
+  registro de alta con `meta.verifactu.registroAlta.Subsanacion = "S"`.
+  Esta confirmación no permite modificar importes, impuestos ni datos
+  del destinatario: esos cambios requieren anular o emitir una factura
+  rectificativa. Ver [Subsanaciones VeriFactu](../guides/verifactu.md#subsanaciones).
+- Si la factura tiene metadatos de TicketBAI ya enviados, algunos
+  cambios disparan reemisión o anulación + nueva emisión. Ver la
+  [guía de TicketBAI](../guides/ticketbai.md).
 
 **Parámetros globales aceptados:** `accept-version`.
 

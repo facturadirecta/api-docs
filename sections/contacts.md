@@ -366,9 +366,12 @@ formato (NIF, CIF o NIE) y se almacena sin separadores ni espacios. Si no
 indicas `fiscalIdCountry`, se asume el mismo país que la dirección fiscal del
 contacto.
 
-Para contactos extracomunitarios sin identificador fiscal válido, deja el
-campo vacío. Para contactos intracomunitarios, usa el campo `vatEU` (formato
-con prefijo de país: `ESB12345674`).
+Para contactos extracomunitarios sin identificador fiscal, deja el campo vacío
+e informa el nombre y el domicilio completos. Si VeriFactu está activo, sus
+facturas se emiten por defecto como facturas completas F2 sin identificación
+del destinatario (art. 6.1.d del RD 1619/2012), no como simplificadas. Para
+contactos intracomunitarios, usa el campo `vatEU` (formato con prefijo de país:
+`ESB12345674`).
 
 ## Errores comunes
 
