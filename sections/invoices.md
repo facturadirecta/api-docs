@@ -336,9 +336,27 @@ factura.
 - `docNumber` **inmutable** una vez asignado.
 - Pasar `main.voided=true` **anula** la factura (ver
   [Anular](#anular-factura)).
-- Si la factura tiene metadatos de TicketBAI/VeriFactu ya enviados,
-  algunos cambios disparan reemisión o anulación + nueva emisión.
-  Detalles en las respectivas guías.
+- Si la factura ya tiene un registro de alta VeriFactu, el primer
+  intento de hacer un cambio subsanable devuelve HTTP 400 con
+  `type: "verifactuSubsanacion"`. Revisa la clasificación de los
+  cambios en `hint.verifactuChanges.changes` y, si quieres confirmar
+  la subsanación, repite el mismo PUT añadiendo este campo al nivel
+  superior del body:
+
+  ```json
+  {
+    "verifactuOperation": { "subsanacion": true }
+  }
+  ```
+
+  El segundo PUT devuelve la factura actualizada y genera un nuevo
+  registro de alta con `meta.verifactu.registroAlta.Subsanacion = "S"`.
+  Esta confirmación no permite modificar importes, impuestos ni datos
+  del destinatario: esos cambios requieren anular o emitir una factura
+  rectificativa. Ver [Subsanaciones VeriFactu](../guides/verifactu.md#subsanaciones).
+- Si la factura tiene metadatos de TicketBAI ya enviados, algunos
+  cambios disparan reemisión o anulación + nueva emisión. Ver la
+  [guía de TicketBAI](../guides/ticketbai.md).
 
 **Parámetros globales aceptados:** `accept-version`.
 

@@ -209,6 +209,33 @@ automáticamente. Tu integración no necesita gestionarlo, pero
 puede observar el efecto si nota un retraso entre creación de
 facturas y `meta.verifactu.registroAlta` rellenado.
 
+## Subsanaciones
+
+Una subsanación corrige determinados datos de una factura que ya tiene
+un registro de alta VeriFactu sin anularla. La API pública usa un flujo
+de confirmación en dos pasos:
+
+1. Envía `PUT /invoices/{id}` con el `content` completo modificado y
+   sin `verifactuOperation`. Si el cambio es subsanable, la API devuelve
+   HTTP 400 con `type: "verifactuSubsanacion"`. Consulta
+   `hint.verifactuChanges.changes`: cada cambio incluye su `path` y la
+   `consequence` que le corresponde.
+2. Tras revisar los cambios, repite exactamente el mismo PUT y añade
+   `verifactuOperation: { "subsanacion": true }` al nivel superior del
+   body para confirmarlo.
+
+Cuando la confirmación es válida, la respuesta HTTP 200 contiene la
+factura actualizada. `meta.verifactu.registroAlta.Subsanacion` vale
+`"S"` y se genera un nuevo registro de alta, encadenado tras el último
+registro de la empresa. En `mode_verifactu` también se despacha a AEAT;
+en `mode_no_verifactu` queda firmado y encadenado localmente.
+
+La confirmación solo acepta cambios clasificados como `subsanacion`.
+Los cambios de importes, impuestos o datos del destinatario aparecen
+como `voidOrCorrective` y siguen devolviendo HTTP 400: debes anular la
+factura o emitir una rectificativa. No reintentes esos cambios con
+`verifactuOperation` porque la opción no omite esa validación.
+
 ## Anulación
 
 Cuando una factura se anula con `PUT /invoices/{id}` enviando
