@@ -73,7 +73,7 @@ calcula el servidor.
 
 | Campo | Tipo | Significado |
 |---|---|---|
-| `TipoFactura` | enum (ver tabla) | Tipo de la factura según RD 1619/2012 y régimen rectificativo. Por defecto, el servidor lo deduce: `F1` para completas, `F2` para simplificadas. |
+| `TipoFactura` | enum (ver tabla) | Tipo de la factura según RD 1619/2012 y régimen rectificativo. Por defecto, el servidor lo deduce: `F1` para completas identificadas y `F2` para simplificadas o completas sin identificación del destinatario. |
 | `DescripcionOperacion` | string (≤ 500 chars) | Descripción libre de la operación. Útil cuando las líneas no la describen suficientemente. |
 | `FacturaSimplificadaArt7273` | `"S"` o `"N"` | `"S"` si es una factura simplificada cualificada (con identificación del destinatario, Art. 7.2/7.3 del RD 1619/2012). |
 | `defaultOperacionExenta` | enum `E1`-`E6` | Valor por defecto de `OperacionExenta` cuando una línea exenta no lo indica explícitamente. |
@@ -109,6 +109,23 @@ VeriFactu y los reproduce literalmente nuestro schema.
 Detalles de cuándo usar cada `R#` en la
 [guía de Rectificativas](./invoices-rectificativas.md). Para crear
 una `F3` se utiliza el [endpoint dedicado de sustitutivas](../sections/invoices.md#crear-factura-sustitutiva).
+
+### Facturas completas sin identificación del destinatario
+
+Con VeriFactu activo, el servidor puede deducir `F2` para una factura
+completa dirigida a un contacto extracomunitario sin identificador fiscal.
+Informa el nombre, el domicilio y el país del contacto. La factura conserva
+`main.simplified = false`, y sus datos aparecen en el documento impreso.
+
+El registro de alta lleva
+`FacturaSinIdentifDestinatarioArt61d = "S"` y omite `Destinatarios`. Si la
+factura es rectificativa, el tipo deducido es `R5`. Este tratamiento no se
+aplica a facturas sustitutivas F3 ni a empresas con TicketBAI activo.
+
+Si envías manualmente un `TipoFactura` que exige identificar al destinatario,
+la API rechaza la factura hasta que informes un identificador fiscal o uses el
+tipo `F2` —`R5` para una rectificativa—. También puedes omitir `TipoFactura`
+para que el servidor lo deduzca.
 
 ### `CalificacionOperacion`
 
@@ -208,6 +225,33 @@ segundos, los siguientes envíos de esa empresa se posponen
 automáticamente. Tu integración no necesita gestionarlo, pero
 puede observar el efecto si nota un retraso entre creación de
 facturas y `meta.verifactu.registroAlta` rellenado.
+
+## Subsanaciones
+
+Una subsanación corrige determinados datos de una factura que ya tiene
+un registro de alta VeriFactu sin anularla. La API pública usa un flujo
+de confirmación en dos pasos:
+
+1. Envía `PUT /invoices/{id}` con el `content` completo modificado y
+   sin `verifactuOperation`. Si el cambio es subsanable, la API devuelve
+   HTTP 400 con `type: "verifactuSubsanacion"`. Consulta
+   `hint.verifactuChanges.changes`: cada cambio incluye su `path` y la
+   `consequence` que le corresponde.
+2. Tras revisar los cambios, repite exactamente el mismo PUT y añade
+   `verifactuOperation: { "subsanacion": true }` al nivel superior del
+   body para confirmarlo.
+
+Cuando la confirmación es válida, la respuesta HTTP 200 contiene la
+factura actualizada. `meta.verifactu.registroAlta.Subsanacion` vale
+`"S"` y se genera un nuevo registro de alta, encadenado tras el último
+registro de la empresa. En `mode_verifactu` también se despacha a AEAT;
+en `mode_no_verifactu` queda firmado y encadenado localmente.
+
+La confirmación solo acepta cambios clasificados como `subsanacion`.
+Los cambios de importes, impuestos o datos del destinatario aparecen
+como `voidOrCorrective` y siguen devolviendo HTTP 400: debes anular la
+factura o emitir una rectificativa. No reintentes esos cambios con
+`verifactuOperation` porque la opción no omite esa validación.
 
 ## Anulación
 
