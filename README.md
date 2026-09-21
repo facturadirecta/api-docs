@@ -49,6 +49,7 @@ explicaciones, ejemplos, guías y matices de comportamiento.
 - [Facturas rectificativas](./guides/invoices-rectificativas.md)
 - [Facturas sustitutivas (F3)](./guides/invoices-sustitutivas.md)
 - [Flujo de pedidos y órdenes de compra](./guides/orders-flow.md)
+- [Idempotencia y reintentos seguros](./guides/idempotency.md)
 - [Impuestos](./guides/taxes.md)
 - [Inicio rápido con la API](./guides/quickstart.md)
 - [Paginación y filtros estándar](./guides/pagination.md)

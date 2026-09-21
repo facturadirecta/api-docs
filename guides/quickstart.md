@@ -204,6 +204,8 @@ respuesta lleva las cabeceras `X-RateLimit-Limit`, `X-RateLimit-Remaining` y
   general.
 - Revisa [Autenticación](./authentication.md) para API keys y OAuth2.
 - Revisa [Paginación y filtros estándar](./pagination.md).
+- Revisa [Idempotencia y reintentos seguros](./idempotency.md) antes de
+  automatizar altas, cobros o una migración.
 - Explora la [referencia OpenAPI](https://www.facturadirecta.com/api).
 - Configura [webhooks](https://help.facturadirecta.com/es/articles/13905261-webhooks) si tu integración necesita recibir cambios
   en tiempo real.

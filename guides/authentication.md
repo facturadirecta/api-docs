@@ -102,12 +102,16 @@ La API key se envía como header propio, **no** como `Authorization: Bearer`.
 ## Versión de la API
 
 Todas las peticiones aceptan el header `accept-version` con el número de
-versión de la API. Si no lo envías, se usa la versión por defecto definida
-por el servidor. Para producción se recomienda fijarlo explícitamente:
+versión de la API. Si no lo envías, se usa la versión vigente definida por el
+servidor. Para producción se recomienda fijarlo explícitamente:
 
 ```http
-accept-version: 1.0.9
+accept-version: 1.0.10
 ```
+
+El servidor solo aplica versiones que se hayan publicado. Si envías una
+versión desconocida o con un formato no válido, aplica la versión vigente. La
+cabecera `X-Api-Version` de la respuesta indica qué versión se ha aplicado.
 
 ## Scopes
 

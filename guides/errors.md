@@ -38,7 +38,8 @@ Puede incluir además:
 | `401 Unauthorized` | Falta credencial, está expirada o es inválida. Ver [Autenticación](./authentication.md). |
 | `403 Forbidden` | Credencial válida pero sin los scopes necesarios, o sin acceso a la empresa indicada en el path. |
 | `404 Not Found` | El recurso no existe o no pertenece a la empresa del path. |
-| `409 Conflict` | La operación choca con el estado actual: identificador duplicado, borrado de un recurso con dependencias, etc. |
+| `409 Conflict` | La operación choca con el estado actual: identificador duplicado, borrado de un recurso con dependencias, etc. También lo devuelve una petición con `Idempotency-Key` cuando la original sigue en curso. Ver [Idempotencia](./idempotency.md). |
+| `422 Unprocessable Entity` | La `Idempotency-Key` enviada ya se usó con otra petición distinta. Ver [Idempotencia](./idempotency.md). |
 | `429 Too Many Requests` | Demasiadas escrituras simultáneas del mismo tipo en la empresa. Reintenta con backoff. Ver [Límite de peticiones](./authentication.md#límite-de-peticiones). |
 | `500 Internal Server Error` | Error inesperado del servidor. No es un error del cliente; conviene reintentar tras un retraso. |
 
@@ -143,6 +144,20 @@ con permiso completo de configuración de empresa. El aviso identifica la
 petición y el motivo. Se envía como máximo una vez por empresa cada 7 días,
 aunque el error se repita.
 
+## Errores de idempotencia (`400`, `409`, `422`)
+
+Las peticiones con cabecera `Idempotency-Key` pueden devolver cuatro códigos
+estables en `errors[0].code`:
+
+| Código HTTP | `errors[0].code` | Significado |
+|---|---|---|
+| `400` | `invalid_idempotency_key` | La clave no cumple el formato (de 16 a 255 caracteres ASCII visibles, sin espacios). |
+| `409` | `idempotency_key_in_use` | Hay otra petición en curso con la misma clave. La respuesta trae `Retry-After`. |
+| `422` | `idempotency_key_reused` | La clave ya se usó con otra petición: otro método, otra ruta u otro cuerpo. |
+| `409` | `idempotency_result_not_replayable` | La petición original se completó, pero su respuesta llevaba un secreto que no se conserva. `errors[0].resource` identifica lo que se creó. |
+
+El detalle de cada caso y qué hacer está en [Idempotencia](./idempotency.md).
+
 ## Recursos no encontrados (`404`)
 
 `404` significa siempre **una de estas dos cosas**:
@@ -160,9 +175,10 @@ Trata ambos casos como "no existe para mí" en tu integración.
   backoff exponencial.
 - **Para `400 ValidationError`, recorre `errors[]`** y muestra al
   usuario los `message` específicos en vez del `message` general.
-- **Idempotencia.** Repetir un `POST /contacts` con el mismo
-  `fiscalId` da `409 Conflict`, no duplicado. Aprovecha esto para
-  reintentos seguros en sincronizaciones.
+- **Reintentos seguros.** Envía la cabecera `Idempotency-Key` en las
+  operaciones que modifican datos: si reintentas con la misma clave tras un
+  timeout o un corte de conexión, la operación no se ejecuta dos veces y
+  recibes la respuesta original. Ver [Idempotencia](./idempotency.md).
 - **No deduzcas estado a partir del código HTTP solo.** Combina código y
   contenido (`type`, `message`, `errors[].code`) para clasificar el error en tu
   lógica.
