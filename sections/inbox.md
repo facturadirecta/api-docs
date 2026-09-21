@@ -187,9 +187,13 @@ upload previo.
   `POST /uploads`.
 - **`title`** (opcional) — título descriptivo. Si se omite, se usa el
   nombre del archivo del upload.
-- **`idempotencyKey`** (opcional) — clave de idempotencia. Reintentos
-  con la misma clave devuelven el mismo item; útil para no duplicar
-  cuando el cliente reintenta.
+- **`idempotencyKey`** (opcional) — clave para que el mismo documento no
+  entre dos veces en la bandeja. Si ya existe un item activo (sin archivar)
+  con esa clave en la empresa, se devuelve ese item con su estado actual y no
+  se crea otro. No caduca mientras el item siga activo y no compara el
+  fichero: con la misma clave devuelve el item existente aunque envíes otro
+  documento. Lo habitual es usar una clave natural del documento, por
+  ejemplo un hash del fichero.
 
 **Notas:**
 
@@ -415,9 +419,12 @@ item en sus `attachments`, y la interfaz puede mostrar el original.
 - **Suscríbete al webhook `inbox.scanned`** en vez de hacer polling
   sobre el listado. El polling funciona pero gasta cuota
   innecesariamente.
-- **Usa `idempotencyKey` al crear** items si tu pipeline puede
-  reintentar el `POST /inbox` (errores de red, jobs reencolados...).
-  Te ahorra duplicados.
+- **Usa `idempotencyKey` al crear** items si tu proceso puede enviar dos
+  veces el mismo documento (jobs reencolados, reenvíos periódicos...). Te
+  ahorra duplicados sin límite de tiempo, mientras el item no se archive.
+  Es un mecanismo propio de la bandeja: `POST /inbox` no admite la cabecera
+  `Idempotency-Key` del resto de operaciones. Ver
+  [Idempotencia](../guides/idempotency.md#post-inbox-es-distinto).
 - **Llama a `propose*` solo cuando `status: scanned`**. Si lo llamas
   antes, la propuesta saldrá vacía o sin datos extraídos.
 - **Para Facturae, la extracción es nativa y exacta**: usa
