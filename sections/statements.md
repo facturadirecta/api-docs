@@ -22,9 +22,8 @@ gasto, etc.) para mantener la contabilidad alineada con el banco.
 
 ## Los statements no se crean por API
 
-Los statements los **importa el sistema automáticamente** desde la
-integración bancaria configurada en la empresa (Afterbanks, ArcoPay,
-importación de extractos en CSV, etc.). La API pública solo expone
+Los statements los **importa el sistema automáticamente** mediante la conexión
+con el banco o la importación de extractos en CSV. La API pública solo expone
 **lectura y conciliación**: no hay `POST /statements` ni
 `DELETE /statements/{id}`. Para crear un statement nuevo hay que pasar
 por los flujos de importación bancaria de la interfaz.
