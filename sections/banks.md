@@ -20,8 +20,8 @@ cobros y pagos, y son lo que se concilia contra los
 
 Este recurso es **solo lectura**. La API pública no expone crear,
 modificar ni borrar bancos: ese flujo vive solo en la interfaz, donde
-se configuran las credenciales de Afterbanks/ArcoPay, los datos de
-SEPA y demás detalles operativos. La API solo expone los datos
+se configura la conexión automática con el banco, los datos de SEPA y demás
+detalles operativos. La API solo expone los datos
 necesarios para integraciones (registrar pagos contra una cuenta,
 mostrar listado al usuario).
 
