@@ -95,6 +95,17 @@ Además, los planes limitan cuántos productos pueden llevar control de stock a
 la vez (500 en Bronce y Plata; sin límite en Oro y Diamante). Al superarlo, la
 API responde `403` con el código `plan_limit_exceeded`.
 
+## Enlace a la aplicación
+
+Las respuestas que devuelven un producto incluyen `webUrl` junto al resto de
+los datos. En los listados, cada elemento de `items` lleva su propio enlace.
+
+`webUrl` abre la ficha del elemento en la aplicación web de FacturaDirecta.
+Puedes mostrarlo como enlace en tu integración sin construir rutas internas.
+El navegador pedirá iniciar sesión con un usuario que tenga acceso a la
+empresa. Es un campo opcional y no es un endpoint de la API: trátalo como una
+URL para el usuario, no como una URL a la que enviar `$ACCESS_TOKEN`.
+
 ## Operaciones
 
 - [Lista de productos](#lista-de-productos)

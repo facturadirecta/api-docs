@@ -93,6 +93,18 @@ Authorization: Bearer access_token
 Consulta [Autenticación](./authentication.md) para el detalle del flujo OAuth2,
 scopes y endpoints de autorización.
 
+## Abrir un resultado en FacturaDirecta
+
+Las respuestas de documentos, contactos, productos y bancos incluyen el campo
+opcional `webUrl`. Es la URL de la ficha del elemento en la aplicación web.
+Puedes mostrarla como enlace para que el usuario pase de tu integración al
+elemento correspondiente sin construir rutas internas.
+
+`webUrl` requiere una sesión de FacturaDirecta con acceso a la empresa y no es
+un endpoint de la API. No envíes `$ACCESS_TOKEN` a esa URL. Los recursos sin
+ficha propia, como métodos de pago, extractos, campos personalizados, webhooks,
+claves de API, uploads e inbox, no incluyen este campo.
+
 ## Recursos disponibles
 
 <!-- source: api-docs-map -->

@@ -154,6 +154,17 @@ Cada elemento de `lines` (`InvoiceMainLine`):
 | `document` | No | ID del producto si la línea se genera de catálogo. |
 | `facturae`, `verifactu` | No | Sub-campos específicos para Facturae y VeriFactu por línea. |
 
+## Enlace a la aplicación
+
+Las respuestas que devuelven una factura incluyen `webUrl` junto al resto de
+los datos. En los listados, cada elemento de `items` lleva su propio enlace.
+
+`webUrl` abre la ficha del elemento en la aplicación web de FacturaDirecta.
+Puedes mostrarlo como enlace en tu integración sin construir rutas internas.
+El navegador pedirá iniciar sesión con un usuario que tenga acceso a la
+empresa. Es un campo opcional y no es un endpoint de la API: trátalo como una
+URL para el usuario, no como una URL a la que enviar `$ACCESS_TOKEN`.
+
 ## Operaciones
 
 - [Lista de facturas](#lista-de-facturas)
@@ -195,7 +206,7 @@ completa en el Swagger UI):
   `total`, `currency`, `country`, `creationDate` y `modificationDate`.
   Repite el parámetro para combinar criterios y antepone `-` para orden
   descendente (por ejemplo, `sortBy=-date&sortBy=number`).
-- **Tags**: `allTheseTags`, `anyOfTheseTags`, `hasTags`.
+- **Tags**: `allTheseTags` y `anyOfTheseTags` filtran por etiquetas concretas; `hasTags=true` devuelve solo facturas con al menos una etiqueta y `hasTags=false`, solo facturas sin etiquetas.
 
 **Parámetros globales aceptados:**
 

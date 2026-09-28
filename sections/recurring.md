@@ -143,6 +143,17 @@ Cuando llega el momento programado, FacturaDirecta crea una factura con los
 datos de esta plantilla, asignando un nuevo número de documento y la fecha
 actual.
 
+## Enlace a la aplicación
+
+Las respuestas que devuelven una factura recurrente incluyen `webUrl` junto al resto de
+los datos. En los listados, cada elemento de `items` lleva su propio enlace.
+
+`webUrl` abre la ficha del elemento en la aplicación web de FacturaDirecta.
+Puedes mostrarlo como enlace en tu integración sin construir rutas internas.
+El navegador pedirá iniciar sesión con un usuario que tenga acceso a la
+empresa. Es un campo opcional y no es un endpoint de la API: trátalo como una
+URL para el usuario, no como una URL a la que enviar `$ACCESS_TOKEN`.
+
 ## Operaciones
 
 - [Lista de facturas recurrentes](#lista-de-facturas-recurrentes)
@@ -174,7 +185,8 @@ de la empresa, paginadas.
 - **`minTotal`**, **`maxTotal`** — rango de importe de la plantilla.
 - **`currency`** — código ISO 4217.
 - **`country`** — código país ISO 3166-1 Alpha-2.
-- **`allTheseTags`**, **`anyOfTheseTags`**, **`hasTags`** — filtros por etiquetas.
+- **`allTheseTags`**, **`anyOfTheseTags`** — filtros por etiquetas concretas.
+- **`hasTags`** — `true` devuelve solo facturas recurrentes con al menos una etiqueta y `false`, solo facturas recurrentes sin etiquetas.
 - **`sortBy`** — campo de orden.
 - **`related`** — valores admitidos:
   - `nextScheduledTime` — devuelve la próxima fecha-hora prevista.

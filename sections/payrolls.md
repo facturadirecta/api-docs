@@ -103,6 +103,17 @@ anual de retenciones (modelo 190 de Hacienda):
 Consulta el catálogo oficial del modelo 190 de la AEAT para la
 correspondencia exacta entre claves y casos.
 
+## Enlace a la aplicación
+
+Las respuestas que devuelven una nómina incluyen `webUrl` junto al resto de
+los datos. En los listados, cada elemento de `items` lleva su propio enlace.
+
+`webUrl` abre la ficha del elemento en la aplicación web de FacturaDirecta.
+Puedes mostrarlo como enlace en tu integración sin construir rutas internas.
+El navegador pedirá iniciar sesión con un usuario que tenga acceso a la
+empresa. Es un campo opcional y no es un endpoint de la API: trátalo como una
+URL para el usuario, no como una URL a la que enviar `$ACCESS_TOKEN`.
+
 ## Operaciones
 
 - [Lista de nóminas](#lista-de-nóminas)
@@ -130,7 +141,8 @@ paginadas.
   - `overdue` — no pagada y vencida.
   - `paid` — pagada en su totalidad.
   - `overpaid` — pagada de más (importe registrado superior al total).
-- **`allTheseTags`**, **`anyOfTheseTags`**, **`hasTags`** — filtros por etiquetas.
+- **`allTheseTags`**, **`anyOfTheseTags`** — filtros por etiquetas concretas.
+- **`hasTags`** — `true` devuelve solo nóminas con al menos una etiqueta y `false`, solo nóminas sin etiquetas.
 - **`sortBy`** — campo de orden.
 - **`related`** — recursos a expandir.
 

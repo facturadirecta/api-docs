@@ -157,6 +157,17 @@ cantidad se derivan el stock comprometido y el aviso de bajo mínimo.
 `totalBeforeTaxes`, `linesTotal`, `taxes`) se calculan a partir de las líneas.
 Conviene dejarlos vacíos al crear o actualizar y leerlos de la respuesta.
 
+## Enlace a la aplicación
+
+Las respuestas que devuelven un pedido de cliente incluyen `webUrl` junto al resto de
+los datos. En los listados, cada elemento de `items` lleva su propio enlace.
+
+`webUrl` abre la ficha del elemento en la aplicación web de FacturaDirecta.
+Puedes mostrarlo como enlace en tu integración sin construir rutas internas.
+El navegador pedirá iniciar sesión con un usuario que tenga acceso a la
+empresa. Es un campo opcional y no es un endpoint de la API: trátalo como una
+URL para el usuario, no como una URL a la que enviar `$ACCESS_TOKEN`.
+
 ## Operaciones
 
 - [Lista de pedidos](#lista-de-pedidos)
@@ -191,7 +202,7 @@ paginados.
   mayúsculas y acentos; todas las palabras deben coincidir.
 - **`allTheseTags`** — el pedido debe llevar todas las etiquetas indicadas.
 - **`anyOfTheseTags`** — basta con una de las etiquetas indicadas.
-- **`hasTags`** — `true` para recibir solo pedidos sin ninguna etiqueta.
+- **`hasTags`** — `true` devuelve solo pedidos con al menos una etiqueta y `false`, solo pedidos sin etiquetas.
 - **`sortBy`** — orden de los resultados. Valores: `date`, `series`,
   `formattedSeries`, `number`, `total`, `currency`, `country`, `creationDate`,
   `modificationDate`. Prefija con `-` para orden descendente y repite el

@@ -130,6 +130,17 @@ Por defecto el documento se trata como presupuesto. Para marcarlo como
 factura proforma, pon `content.main.isProforma: true` (ver
 [Factura proforma](#factura-proforma)).
 
+## Enlace a la aplicación
+
+Las respuestas que devuelven un presupuesto incluyen `webUrl` junto al resto de
+los datos. En los listados, cada elemento de `items` lleva su propio enlace.
+
+`webUrl` abre la ficha del elemento en la aplicación web de FacturaDirecta.
+Puedes mostrarlo como enlace en tu integración sin construir rutas internas.
+El navegador pedirá iniciar sesión con un usuario que tenga acceso a la
+empresa. Es un campo opcional y no es un endpoint de la API: trátalo como una
+URL para el usuario, no como una URL a la que enviar `$ACCESS_TOKEN`.
+
 ## Operaciones
 
 - [Lista de presupuestos](#lista-de-presupuestos)
@@ -157,7 +168,8 @@ factura proforma, pon `content.main.isProforma: true` (ver
 - `currency` — código ISO 4217 (`EUR`, `USD`...).
 - `country` — código país ISO 3166-1 Alpha-2.
 - `emails` — buscar por destinatario.
-- `allTheseTags`, `anyOfTheseTags`, `hasTags` — filtros por etiquetas.
+- `allTheseTags`, `anyOfTheseTags` — filtros por etiquetas concretas.
+- `hasTags` — `true` devuelve solo presupuestos con al menos una etiqueta y `false`, solo presupuestos sin etiquetas.
 - `sortBy` — campo de orden.
 - `related` — recursos a expandir.
 
