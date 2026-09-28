@@ -65,6 +65,17 @@ completo (por ejemplo, generación de remesas SEPA externas).
 > [métodos de pago](./payment-methods.md) (allí se enmascara el IBAN
 > del deudor del SEPA Direct Debit por la misma razón).
 
+## Enlace a la aplicación
+
+Las respuestas que devuelven un banco incluyen `webUrl` junto al resto de
+los datos. En los listados, cada elemento de `items` lleva su propio enlace.
+
+`webUrl` abre la ficha del elemento en la aplicación web de FacturaDirecta.
+Puedes mostrarlo como enlace en tu integración sin construir rutas internas.
+El navegador pedirá iniciar sesión con un usuario que tenga acceso a la
+empresa. Es un campo opcional y no es un endpoint de la API: trátalo como una
+URL para el usuario, no como una URL a la que enviar `$ACCESS_TOKEN`.
+
 ## Operaciones
 
 - [Lista de bancos](#lista-de-bancos)

@@ -109,6 +109,17 @@ respuesta.
 `taxIncludedPrices: true` indica que `unitPrice` ya incluye IVA. Por
 defecto es `false`.
 
+## Enlace a la aplicación
+
+Las respuestas que devuelven un albarán incluyen `webUrl` junto al resto de
+los datos. En los listados, cada elemento de `items` lleva su propio enlace.
+
+`webUrl` abre la ficha del elemento en la aplicación web de FacturaDirecta.
+Puedes mostrarlo como enlace en tu integración sin construir rutas internas.
+El navegador pedirá iniciar sesión con un usuario que tenga acceso a la
+empresa. Es un campo opcional y no es un endpoint de la API: trátalo como una
+URL para el usuario, no como una URL a la que enviar `$ACCESS_TOKEN`.
+
 ## Operaciones
 
 - [Lista de albaranes](#lista-de-albaranes)
@@ -137,7 +148,8 @@ paginados.
 - `currency` — código ISO 4217.
 - `country` — código país ISO 3166-1 Alpha-2.
 - `emails` — buscar por destinatario.
-- `allTheseTags`, `anyOfTheseTags`, `hasTags` — filtros por etiquetas.
+- `allTheseTags`, `anyOfTheseTags` — filtros por etiquetas concretas.
+- `hasTags` — `true` devuelve solo albaranes con al menos una etiqueta y `false`, solo albaranes sin etiquetas.
 - `sortBy` — campo de orden.
 - `related` — recursos a expandir.
 

@@ -190,6 +190,17 @@ guía menciona pero no desarrolla, porque cada uno merece su propia guía:
   manuales para casos donde la lógica automática no aplica.
 - **`nonDeductibleInIRPF`** — gasto no deducible en IRPF.
 
+## Enlace a la aplicación
+
+Las respuestas que devuelven una factura de compra o un ticket incluyen `webUrl` junto al resto de
+los datos. En los listados, cada elemento de `items` lleva su propio enlace.
+
+`webUrl` abre la ficha del elemento en la aplicación web de FacturaDirecta.
+Puedes mostrarlo como enlace en tu integración sin construir rutas internas.
+El navegador pedirá iniciar sesión con un usuario que tenga acceso a la
+empresa. Es un campo opcional y no es un endpoint de la API: trátalo como una
+URL para el usuario, no como una URL a la que enviar `$ACCESS_TOKEN`.
+
 ## Operaciones
 
 - [Lista de facturas de compra](#lista-de-facturas-de-compra)
@@ -222,7 +233,7 @@ empresa, paginados.
   devuelve solo borradores y `all` mezcla definitivos y borradores. Los
   borradores no generan asientos contables, por lo que al incluirlos el
   recuento puede no coincidir con el diario.
-- `allTheseTags`, `anyOfTheseTags`, `hasTags`.
+- `allTheseTags`, `anyOfTheseTags` y `hasTags`. En `hasTags`, `true` devuelve solo documentos con al menos una etiqueta y `false`, solo documentos sin etiquetas.
 - `sortBy` — admite `date`, `total`, `currency`, `country`,
   `creationDate` y `modificationDate`. Repite el parámetro para combinar
   criterios y antepone `-` para orden descendente.

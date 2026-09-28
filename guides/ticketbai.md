@@ -190,6 +190,12 @@ la factura como definitiva**:
 5. Pasadas **24 horas** desde el primer error sin éxito, los reintentos
    automáticos cesan.
 
+Los rechazos provocados por un certificado inválido, caducado o no censado se
+mantienen pendientes. Cuando la empresa corrige el certificado o instala uno
+nuevo, FacturaDirecta vuelve a procesar automáticamente las altas y anulaciones
+afectadas dentro de la ventana fiscal. Los errores propios de los datos del
+documento siguen siendo definitivos y requieren corregir el documento.
+
 Los campos `mustBeSent`, `sent` y `batuzAccepted*` de `meta.ticketbai` no
 se actualizan con el resultado. Se conservan por compatibilidad y no debes
 usarlos para monitorizar el envío.

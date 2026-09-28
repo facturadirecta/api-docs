@@ -111,7 +111,7 @@ paginada por la línea individual (no por asiento).
 **Filtros por etiquetas:**
 
 Soporta los parámetros estándar `allTheseTags`, `anyOfTheseTags` y
-`hasTags` para filtrar por etiquetas del documento que origina el
+`hasTags` (`true` para documentos con alguna etiqueta y `false` para documentos sin etiquetas) para filtrar por etiquetas del documento que origina el
 apunte. Ver [Etiquetas en otros documentos] para la semántica.
 
 **Parámetros globales aceptados:**

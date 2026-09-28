@@ -50,6 +50,17 @@ deben corresponder a definiciones existentes. También se aceptan definiciones
 borradas para conservar contactos históricos; un ID desconocido o con formato
 incorrecto produce `400 Bad Request`.
 
+## Enlace a la aplicación
+
+Las respuestas que devuelven un contacto incluyen `webUrl` junto al resto de
+los datos. En los listados, cada elemento de `items` lleva su propio enlace.
+
+`webUrl` abre la ficha del elemento en la aplicación web de FacturaDirecta.
+Puedes mostrarlo como enlace en tu integración sin construir rutas internas.
+El navegador pedirá iniciar sesión con un usuario que tenga acceso a la
+empresa. Es un campo opcional y no es un endpoint de la API: trátalo como una
+URL para el usuario, no como una URL a la que enviar `$ACCESS_TOKEN`.
+
 ## Operaciones
 
 - [Lista de contactos](#lista-de-contactos)
@@ -73,7 +84,8 @@ paginados.
 - `phone` — teléfono exacto.
 - `country` — código país ISO 3166-1 Alpha-2 (`ES`, `FR`...).
 - `isClient`, `isProvider`, `isEmployee` — facetas (ver sección superior).
-- `allTheseTags`, `anyOfTheseTags`, `hasTags` — filtros por etiquetas.
+- `allTheseTags`, `anyOfTheseTags` — filtros por etiquetas concretas.
+- `hasTags` — `true` devuelve solo contactos con al menos una etiqueta y `false`, solo contactos sin etiquetas.
 - `sortBy` — campo de orden.
 - `related` — recursos relacionados a expandir.
 
