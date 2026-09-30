@@ -8,9 +8,13 @@ status: draft
 # Perfil de usuario
 
 El recurso `profile` devuelve los datos básicos del **usuario
-autenticado** y la lista de **empresas a las que tiene acceso**. Es
-la operación que usa toda integración OAuth para resolver qué
-`companyId` puede usar en el resto de llamadas.
+autenticado** y las **empresas disponibles para la credencial actual**. Es
+la operación que usa una integración OAuth para resolver qué `companyId` puede
+usar en el resto de llamadas.
+
+Cuando la petición procede de una aplicación conectada, la respuesta incluye
+solo las empresas que el usuario autorizó para esa conexión y añade sus permisos
+efectivos.
 
 ## Excepciones de este endpoint
 
@@ -41,7 +45,16 @@ El endpoint devuelve `{ profile }` con la siguiente forma:
 | `email` | string | Mismo valor que `username`. Se mantiene por compatibilidad. |
 | `firstName` | string | Nombre del usuario (del campo `given_name` del JWT). |
 | `lastName` | string | Apellidos del usuario (del campo `family_name` del JWT). |
-| `companies` | array | Empresas a las que tiene acceso este usuario. |
+| `companies` | array | Empresas disponibles para la credencial actual. |
+| `connection` | object | Solo con una aplicación conectada. Identifica la conexión y permite abrir su gestión. |
+
+El objeto opcional `connection` contiene:
+
+| Campo | Tipo | Significado |
+|---|---|---|
+| `id` | string | Identificador de la conexión. |
+| `clientName` | string | Nombre de la aplicación conectada. |
+| `manageUrl` | string | Página de FacturaDirecta donde el usuario puede cambiar sus empresas y permisos. |
 
 Cada elemento de `companies`:
 
@@ -53,6 +66,8 @@ Cada elemento de `companies`:
 | `brand` | string | Marca comercial, si está informada (opcional). |
 | `owner` | string | Email del propietario de la empresa. |
 | `role` | string | Rol del usuario autenticado en esa empresa concreta. |
+| `permissions` | object | Solo con una aplicación conectada. Permisos efectivos por recurso: `read` para lectura y `full` para lectura y escritura. |
+| `manageUrl` | string | Solo con una aplicación conectada. Página para cambiar los permisos de esa empresa. |
 
 ## Operaciones
 
@@ -104,28 +119,63 @@ Respuesta típica:
 }
 ```
 
+### Respuesta de una aplicación conectada
+
+Una aplicación conectada recibe solo la selección autorizada. Los permisos ya
+están limitados por la concesión, el rol actual del usuario y el plan de cada
+empresa:
+
+```json
+{
+  "profile": {
+    "username": "ana@ejemplo.com",
+    "email": "ana@ejemplo.com",
+    "firstName": "Ana",
+    "lastName": "García López",
+    "companies": [
+      {
+        "id": "com_3a7e8d29-4f5b-4c6e-9a1d-2b8c4e7f5d3a",
+        "name": "Estudio Diseño SL",
+        "taxCode": "B12345674",
+        "owner": "ana@ejemplo.com",
+        "role": "admin",
+        "permissions": {
+          "contacts": "read",
+          "invoices": "full"
+        },
+        "manageUrl": "https://app.facturadirecta.com/connections/<id-conexion>?company=<id-empresa>"
+      }
+    ],
+    "connection": {
+      "id": "<id-conexion>",
+      "clientName": "Asistente de ejemplo",
+      "manageUrl": "https://app.facturadirecta.com/connections/<id-conexion>"
+    }
+  }
+}
+```
+
 ## Flujo típico de integración
 
 1. El usuario completa el login OAuth. Tu integración recibe el
    `access_token`.
-2. Llamas a `GET /profile` para descubrir las empresas accesibles.
-3. Eliges una empresa (UI: dejas que el usuario seleccione; o
-   automatización: filtras por `taxCode` o `id` conocido).
-4. Usas su `id` como `{companyId}` en todas las llamadas siguientes
-   a la API.
+2. Llamas a `GET /profile` para descubrir las empresas disponibles.
+3. Si aparece `connection`, respetas la selección y los `permissions` de cada
+   empresa. Los `manageUrl` permiten que el usuario amplíe el acceso sin volver
+   a conectar.
+4. Eliges una empresa entre las devueltas.
+5. Usas su `id` como `{companyId}` en las llamadas siguientes a la API.
 
 ## Recomendaciones
 
-- **No cachees indefinidamente**: la lista de empresas accesibles
-  cambia cuando el propietario invita/expulsa al usuario, cuando se
-  crean empresas nuevas o cuando el usuario se da de baja. Refresca
-  al iniciar sesión y cuando una llamada a otra empresa devuelva
-  `401`/`403`.
-- **`role` informa, no autoriza**: el rol en una empresa no
-  determina por sí solo qué endpoints puedes llamar. La autorización
-  efectiva la dan los **scopes** del access token. Para descubrir
-  qué scopes tienes, decodifica el JWT o consulta la
-  [guía de Autenticación](../guides/authentication.md).
+- **No cachees indefinidamente**: la lista de empresas y sus permisos pueden
+  cambiar cuando el usuario modifica la conexión, cambia de rol o deja una
+  empresa. Refresca al iniciar sesión y ante un `401` o `403`.
+- **`role` informa, no autoriza por sí solo**: la autorización efectiva combina
+  los scopes de la credencial y los permisos del rol. En una aplicación
+  conectada también se limita por la concesión de cada empresa.
+- **Usa `permissions` cuando esté presente** para adaptar las acciones de tu
+  aplicación antes de intentar una escritura.
 - **Para API Keys, no llames a `/profile`**: la API key ya conoce su
   empresa. Si tu integración alterna entre OAuth y API Key,
   detéctalo en el cliente y omite el paso.
@@ -136,6 +186,9 @@ Respuesta típica:
   válido o ha expirado. Refresca el token vía OAuth.
 - `403 Forbidden` — intento de llamar con una API key. Este endpoint
   es OAuth-only por diseño.
+- Una empresa que no pertenece a la conexión no aparece en `companies`. Si se
+  intenta usar directamente, el resto de endpoints responde `403` con
+  `code: "company_not_in_connection"` y puede incluir `manageUrl`.
 
 Ver [Errores y validaciones](../guides/errors.md) y
 [Autenticación](../guides/authentication.md) para los detalles del
