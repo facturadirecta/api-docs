@@ -63,10 +63,15 @@ La fuente autoritativa es el `openapi.json` público en
 
 La API pública solo acepta tokens emitidos para clientes OAuth autorizados
 por FacturaDirecta. Los clientes gestionados por FacturaDirecta para
-integraciones propias, como conectores MCP autorizados, pueden usar su
-propio `client_id`, pero siguen sujetos a los scopes del token. Un token
-válido del realm no basta si el cliente OAuth que lo emitió no está
-autorizado para la API pública.
+integraciones propias, como conectores MCP autorizados y el CLI, pueden usar su
+propio `client_id`. Un token válido del realm no basta si el cliente OAuth que
+lo emitió no está autorizado para la API pública.
+
+En esos clientes, el usuario elige además las empresas y los permisos de cada
+conexión. La autorización efectiva es la intersección entre lo que admite el
+token, lo concedido a la conexión, el rol actual del usuario y el plan de la
+empresa. Los cambios de **Aplicaciones conectadas** se aplican sin repetir el
+flujo OAuth.
 
 **`offline_access`** como scope te permite obtener un `refresh_token` para
 operar sin nueva intervención del usuario.
@@ -136,10 +141,14 @@ Los documentos del **Módulo Inventario** tienen sus propios scopes:
 `clientOrders:read` y `clientOrders:write` para
 [pedidos](../sections/client-orders.md), y `purchaseOrders:read` y
 `purchaseOrders:write` para [órdenes de compra](../sections/purchase-orders.md).
-Tener el scope no basta: si el plan de la empresa no incluye esos
-documentos, las escrituras responden `403`. Las operaciones de stock de
-productos siguen usando `products:read` y `products:write`, y también
-dependen de que el plan incluya el control de stock.
+Tener el scope no basta: también se aplican el rol del usuario y el plan de la
+empresa. En una aplicación conectada se comprueba además la empresa y el nivel
+concedido para el recurso.
+
+Si el plan no incluye los documentos del Módulo Inventario, las escrituras
+responden `403`. Las operaciones de stock de productos siguen usando
+`products:read` y `products:write`, y también dependen de que el plan incluya el
+control de stock.
 
 ## Límite de peticiones
 
@@ -186,12 +195,16 @@ rechaza. Aun así, diseña la integración para respetar el límite —lee
   por un cliente OAuth no autorizado para la API pública, o API key inválida.
   Refresca el token (si tienes `refresh_token`), revisa el `client_id` o
   regenera la API key.
-- **`403 Forbidden`** — el token o la API key son válidos, pero les falta
-  algún scope para la operación. Revisa los scopes asignados.
+- **`403 Forbidden`** — la credencial es válida, pero falta un scope, el rol no
+  permite la operación, el plan no incluye la API o la aplicación conectada no
+  tiene concedida esa empresa o ese recurso.
+- **`403 Forbidden` con `manageUrl`** — el usuario puede abrir esa página para
+  ampliar la conexión y repetir la llamada sin volver a autorizar la
+  aplicación.
 - **`403 Forbidden` con `companyId` ajeno** — el token no tiene acceso a
   la empresa indicada en el path. En OAuth, el usuario solo accede a
-  empresas en las que tiene rol; en API key, solo a la empresa en la que
-  se creó.
+  empresas en las que tiene rol y, cuando hay una conexión, a las que haya
+  autorizado. Una API key solo accede a la empresa en la que se creó.
 
 Para el formato general de errores ver [Errores y validaciones](./errors.md).
 

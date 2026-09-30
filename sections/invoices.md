@@ -90,7 +90,7 @@ Los campos de `main` más importantes para crear una factura:
 | `docNumber` | Sí | `{ series: "...", number?: N }`. Si omites `number`, se asigna automáticamente. |
 | `fiscalPosition` | Sí | Régimen tributario aplicable. Determina los impuestos disponibles. |
 | `lines` | Sí | Array de líneas (ver más abajo). |
-| `theme` | Sí | ID de la plantilla de impresión. Obtenible con [`GET /settings/themes`](./settings.md#lista-de-plantillas). |
+| `theme` | No | ID de la plantilla de impresión. Si se omite, se usa la plantilla de la serie o la predeterminada de la empresa. Obtenible con [`GET /settings/themes`](./settings.md#lista-de-plantillas). |
 | `account` | Sí | Cuenta contable de ingresos (típicamente 700*). |
 | `draft` | Sí | `true` → provisional; `false` → definitiva (contabiliza). |
 | `voided` | Sí | `true` solo para anular. |

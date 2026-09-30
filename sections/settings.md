@@ -61,7 +61,7 @@ Cada `SeriesItem` tiene:
 | `reset` | `"never"` \| `"year"` | Si reinicia la numeración con el cambio de año (`year`) o si continúa desde el último número del año anterior (`never`). |
 | `manual` | boolean | Si la serie acepta numeración manual desde la interfaz. |
 | `notes` | string | Notas descriptivas. |
-| `theme` | string | ID de plantilla por defecto que se aplica a documentos de esta serie. |
+| `theme` | string | ID efectivo de la plantilla de la serie. Si la serie no tiene una asociación específica, devuelve la predeterminada de la empresa. |
 | `invoiceType` | enum | Solo en series de facturas. Valores: `complete`, `complete_correction`, `simplified`, `simplified_correction`, `external`. |
 | `correction` | boolean | **OBSOLETO** — usar `invoiceType` en su lugar. Indica si la serie es para rectificativas. |
 
@@ -77,6 +77,8 @@ Cada `SeriesItem` tiene:
 - `##`/`####` en `serie` se sustituye por el año al guardar el
   documento. Ejemplo: serie `"F-##-"` con fecha 2026 produce números
   como `F-26-1`, `F-26-2`...
+- Si una serie no tiene plantilla propia, `theme` contiene la predeterminada
+  vigente de la empresa. No presupongas que siempre será `thm_master`.
 
 ###### Copy as cURL
 
@@ -105,8 +107,12 @@ Cada `ThemeItem` tiene:
 
 - Las plantillas se configuran desde la interfaz; este endpoint solo
   las expone.
-- Para aplicar una plantilla a un documento, indica su `id` en
+- Para aplicar una plantilla concreta a un documento, indica su `id` en
   `content.main.theme` al crear o actualizar el documento.
+- Si omites `content.main.theme` al crear un documento, FacturaDirecta usa la
+  plantilla de su serie y, si la serie no tiene una asociación específica, la
+  predeterminada de la empresa. `thm_master` es la alternativa final cuando no
+  hay una selección válida.
 
 ###### Copy as cURL
 

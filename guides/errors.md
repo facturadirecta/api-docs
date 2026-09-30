@@ -27,6 +27,11 @@ Puede incluir además:
 - **`type`** — categoría del error cuando aplica.
 - **`errors`** — array con detalles por campo en errores de validación
   (solo en `400 ValidationError`).
+- **`code`** — motivo estable de algunos errores de autorización.
+- **`requiredScope`** — scope necesario para completar la operación.
+- **`companyId`** — empresa en la que se ha denegado el acceso.
+- **`manageUrl`** — página donde el usuario puede ampliar una aplicación
+  conectada, cuando esa acción resuelve el error.
 
 `Content-Type` siempre es `application/json`.
 
@@ -91,6 +96,42 @@ bloqueante, valor duplicado), se devuelven en campos adicionales del JSON.
 - **`403`** — la credencial es válida pero le falta algo:
   - Scopes insuficientes para la operación (por ejemplo, intentar `POST` con scope `read`).
   - La empresa del path no es accesible para esta credencial.
+  - El rol del usuario en la empresa no permite la operación. Con OAuth se
+    aplican los scopes del token y los permisos del rol del usuario en esa
+    empresa, también si es un rol personalizado.
+
+El `403` por permisos indica el scope en `requiredScope` y el motivo en
+`code`:
+
+```json
+{
+  "statusCode": 403,
+  "message": "No tienes permisos para realizar esta operación",
+  "requiredScope": "invoices:write",
+  "code": "user_role_insufficient",
+  "companyId": "com_…"
+}
+```
+
+| `code` | Motivo | Qué hacer |
+| --- | --- | --- |
+| `token_scope_missing` | El token o la API key no incluye el scope. | Volver a autorizar pidiendo el scope, o usar una API key que lo tenga. |
+| `user_role_insufficient` | El usuario no pertenece a la empresa o su rol no lo permite. El nivel de rol «solo lo asignado» no da acceso por la API. | Pedir el permiso a un administrador de la empresa: volver a autorizar no lo arregla. |
+| `plan_api_not_available` | El plan de la empresa no incluye el acceso por la API. | Cambiar de plan. |
+| `connection_permission_insufficient` | La aplicación conectada no tiene el permiso necesario en esa empresa. | Abrir `manageUrl`, ampliar el permiso y repetir la llamada. |
+| `company_not_in_connection` | La empresa no está autorizada para esa aplicación conectada. | Abrir `manageUrl`, añadir la empresa y repetir la llamada. |
+| `connection_required` | El cliente MCP o CLI exige una conexión, pero la petición no la presenta. | Volver a conectar la aplicación o iniciar sesión de nuevo en el CLI. |
+| `connection_revoked` | La conexión no existe, se ha desconectado o no corresponde al usuario del token. | Iniciar una conexión nueva. |
+
+`companyId` solo aparece si el usuario pertenece a la empresa del path.
+`manageUrl` aparece cuando el acceso se puede ampliar desde **Aplicaciones
+conectadas**. Usa `code`, no el texto, para distinguir los casos.
+
+Un contacto puede tener varias facetas. Si una escritura afecta, por ejemplo,
+a un contacto que también es proveedor, la credencial necesita permiso sobre
+todas las facetas implicadas. El `403` usa
+`connection_permission_insufficient` o `user_role_insufficient` y explica el
+permiso que falta.
 
 Para detalles del flujo de auth y rotación de tokens, ver
 [Autenticación](./authentication.md).

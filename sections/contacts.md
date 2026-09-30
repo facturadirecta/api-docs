@@ -42,6 +42,24 @@ limitar la visibilidad a clientes asignados. Si creas el contacto con
 OAuth y no envías `owner`, la API asigna como responsable al usuario
 autenticado; con apiKey se deja vacío salvo que lo envíes en el body.
 
+### Permisos por faceta
+
+Con una aplicación conectada o un rol personalizado, los permisos de clientes,
+proveedores y empleados se evalúan por separado:
+
+- Los listados y las consultas solo devuelven contactos con al menos una faceta
+  que la credencial pueda leer.
+- Crear, actualizar, etiquetar o borrar exige permiso de escritura sobre todas
+  las facetas del contacto.
+- Al actualizar también se comprueban las facetas anteriores. Quitar una cuenta
+  de proveedor, por ejemplo, sigue requiriendo permiso para modificar
+  proveedores.
+
+Si falta un permiso, la respuesta es `403`. Una aplicación conectada recibe
+`code: "connection_permission_insufficient"` y `manageUrl` cuando el usuario
+puede ampliar la conexión. Si la limitación procede del rol, el código es
+`user_role_insufficient`. Consulta [Errores y validaciones](../guides/errors.md).
+
 ## Campos personalizados
 
 `content.main.customFields` es un mapa de valores indexado por el ID estable
@@ -390,6 +408,8 @@ contactos intracomunitarios, usa el campo `vatEU` (formato con prefijo de país:
 - `400 ValidationError` — `fiscalId` con formato inválido para el país indicado.
 - `403` con código `plan_limit_exceeded` — se ha alcanzado el máximo de
   clientes o de empleados del plan.
+- `403` con código `connection_permission_insufficient` o
+  `user_role_insufficient` — falta permiso sobre alguna faceta del contacto.
 - `409 Conflict` — borrado de contacto con documentos asociados.
 - `409 Conflict` — `fiscalId` duplicado en la empresa.
 
