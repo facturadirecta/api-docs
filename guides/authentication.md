@@ -76,6 +76,12 @@ flujo OAuth.
 **`offline_access`** como scope te permite obtener un `refresh_token` para
 operar sin nueva intervención del usuario.
 
+Cerrar la sesión de la web o de la aplicación móvil no revoca los tokens del
+MCP, del CLI ni de las integraciones OAuth que el usuario ya ha autorizado.
+Estas autorizaciones se retiran desde **Aplicaciones conectadas** o por el
+mecanismo de revocación de la integración. Los tokens de la propia sesión web o
+móvil sí dejan de aceptarse al cerrar esa sesión.
+
 ### Ejemplo de cabecera
 
 ```http
