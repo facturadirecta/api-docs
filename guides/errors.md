@@ -44,7 +44,7 @@ Puede incluir además:
 | `403 Forbidden` | Credencial válida pero sin los scopes necesarios, o sin acceso a la empresa indicada en el path. |
 | `404 Not Found` | El recurso no existe o no pertenece a la empresa del path. |
 | `409 Conflict` | La operación choca con el estado actual: identificador duplicado, borrado de un recurso con dependencias, etc. También lo devuelve una petición con `Idempotency-Key` cuando la original sigue en curso. Ver [Idempotencia](./idempotency.md). |
-| `422 Unprocessable Entity` | La `Idempotency-Key` enviada ya se usó con otra petición distinta. Ver [Idempotencia](./idempotency.md). |
+| `422 Unprocessable Entity` | La `Idempotency-Key` enviada ya se usó con otra petición distinta. Ver [Idempotencia](./idempotency.md). También lo devuelve una consulta de la [actividad](../sections/activity.md) que tarda demasiado (`activity_query_timeout`): acótala con `minDate` y `maxDate`. |
 | `429 Too Many Requests` | Demasiadas escrituras simultáneas del mismo tipo en la empresa. Reintenta con backoff. Ver [Límite de peticiones](./authentication.md#límite-de-peticiones). |
 | `500 Internal Server Error` | Error inesperado del servidor. No es un error del cliente; conviene reintentar tras un retraso. |
 

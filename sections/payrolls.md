@@ -467,6 +467,15 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -X DELETE \
   del empleado, sí es un gasto contable de la empresa y debe quedar
   reflejado en la nómina.
 
+## Versiones
+
+`GET /{companyId}/payrolls/{id}/versions` lista las versiones de la nómina: su alta, cada
+modificación, su eliminación y su recuperación, con quién y cuándo, aunque se haya eliminado.
+`GET /{companyId}/payrolls/{id}/versions/{versionId}` devuelve la copia de una versión, en el
+mismo formato que `GET /{companyId}/payrolls/{id}`, y los cambios respecto a la versión anterior.
+Sirven para ver qué se cambió y recuperar datos: ver
+[Versiones de documentos](../guides/document-versions.md).
+
 ## Errores comunes
 
 - `400 ValidationError` — `contact` sin faceta `employee` configurada.
@@ -493,6 +502,8 @@ consulta el [Swagger UI](https://www.facturadirecta.com/api) o el
 | GET | `/{companyId}/payrolls` | `getPayrolls` | `payrolls:read` | Lista de nóminas |
 | GET | `/{companyId}/payrolls/{id}` | `getPayroll` | `payrolls:read` | Obtener una nómina |
 | GET | `/{companyId}/payrolls/{id}/attachments` | `getPayrollAttachments` | `payrolls:read` | Listar adjuntos de una nómina |
+| GET | `/{companyId}/payrolls/{id}/versions` | `getPayrollVersions` | `payrolls:read` | Versiones de la nómina |
+| GET | `/{companyId}/payrolls/{id}/versions/{versionId}` | `getPayrollVersion` | `payrolls:read` | Versión de la nómina |
 | POST | `/{companyId}/payrolls` | `createPayroll` | `payrolls:write` | Crear nómina |
 | POST | `/{companyId}/payrolls/{id}/attachments` | `addPayrollAttachments` | `payrolls:write` | Vincular adjuntos a una nómina |
 | POST | `/{companyId}/payrolls/{id}/payments` | `createPayrollPayments` | `payrolls:write` | Crear pagos para una nómina |

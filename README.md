@@ -19,6 +19,7 @@ explicaciones, ejemplos, guías y matices de comportamiento.
 
 ## Recursos
 
+- [Actividad](./sections/activity.md)
 - [Albaranes](./sections/delivery-notes.md)
 - [API keys](./sections/api-keys.md)
 - [Bancos y cuentas de tesorería](./sections/banks.md)
@@ -55,6 +56,7 @@ explicaciones, ejemplos, guías y matices de comportamiento.
 - [Paginación y filtros estándar](./guides/pagination.md)
 - [TicketBAI](./guides/ticketbai.md)
 - [VeriFactu](./guides/verifactu.md)
+- [Versiones de documentos](./guides/document-versions.md)
 
 ## Feedback
 

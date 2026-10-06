@@ -372,11 +372,12 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 - `type` — filtrar por tipo de evento (p. ej. `invoice.created`).
 - `status` — filtrar por estado: `pending`, `delivered`, `failed`.
 - `limit` — máximo `100`.
-- `cursor` — `created_at` del último evento de la página anterior, en
-  formato ISO 8601 UTC. Omitir para la primera página.
+- `cursor` — el `nextCursor` de la página anterior, tal cual se recibió.
+  Omitir para la primera página.
 
-**Respuesta:** `{ items: WebhookEvent[], hasMore: boolean }`. El cursor
-para la siguiente página es el `created_at` del último elemento.
+**Respuesta:** `{ items: WebhookEvent[], hasMore: boolean, nextCursor: string | null }`,
+de más reciente a más antiguo. Para pedir la página siguiente, pasa
+`nextCursor` en `cursor`; cuando es `null`, no hay más.
 
 ###### Copy as cURL
 
@@ -387,11 +388,11 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
   "https://app.facturadirecta.com/api/$COMPANY_ID/webhooks/events?status=failed&limit=100"
 ```
 
-Siguiente página:
+Siguiente página, con el `nextCursor` de la anterior:
 
 ```shell
 curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
-  "https://app.facturadirecta.com/api/$COMPANY_ID/webhooks/events?status=failed&limit=100&cursor=2026-04-15T10:22:31.000Z"
+  "https://app.facturadirecta.com/api/$COMPANY_ID/webhooks/events?status=failed&limit=100&cursor=d2hlXzdjMWUyZjQwLTVhOGItNGQzYy05ZTZmLTJiMWEwYzlkOGU3Zg"
 ```
 
 ### Obtener un evento
@@ -440,8 +441,8 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 - **Trata `event.id` como llave primaria.** El campo `id` (`whe_...`) es
   único por entrega y persiste entre reintentos.
 - **Para sincronizaciones desde cero**, en vez de paginar todo el
-  historial guarda el `created_at` del último evento procesado con éxito
-  y reanuda desde ahí.
+  historial guarda el `nextCursor` de la última página procesada con
+  éxito y reanuda desde ahí.
 - **Tras rotar el secret**, soporta brevemente ambos secrets (antiguo y
   nuevo) hasta que confirmes que todos los eventos en vuelo se firmaron
   con el nuevo.

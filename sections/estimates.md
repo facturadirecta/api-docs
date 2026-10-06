@@ -464,6 +464,15 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -X DELETE \
   "https://app.facturadirecta.com/api/$COMPANY_ID/estimates/est_8d3b6c14-2f5e-4a7b-b0c8-1d2e3f4a5b6c/attachments/0"
 ```
 
+## Versiones
+
+`GET /{companyId}/estimates/{id}/versions` lista las versiones de el presupuesto: su alta, cada
+modificación, su eliminación y su recuperación, con quién y cuándo, aunque se haya eliminado.
+`GET /{companyId}/estimates/{id}/versions/{versionId}` devuelve la copia de una versión, en el
+mismo formato que `GET /{companyId}/estimates/{id}`, y los cambios respecto a la versión anterior.
+Sirven para ver qué se cambió y recuperar datos: ver
+[Versiones de documentos](../guides/document-versions.md).
+
 ## Errores comunes
 
 - `400 ValidationError` — falta `contact`, o líneas con `quantity` o `unitPrice` inválidos.
@@ -481,6 +490,8 @@ respuestas de error.
 | GET | `/{companyId}/estimates` | `getEstimates` | `estimates:read` | Lista de presupuestos |
 | GET | `/{companyId}/estimates/{id}` | `getEstimate` | `estimates:read` | Obtener un presupuesto |
 | GET | `/{companyId}/estimates/{id}/attachments` | `getEstimateAttachments` | `estimates:read` | Listar adjuntos de un presupuesto |
+| GET | `/{companyId}/estimates/{id}/versions` | `getEstimateVersions` | `estimates:read` | Versiones de el presupuesto |
+| GET | `/{companyId}/estimates/{id}/versions/{versionId}` | `getEstimateVersion` | `estimates:read` | Versión de el presupuesto |
 | POST | `/{companyId}/estimates` | `createEstimate` | `estimates:write` | Crear presupuesto |
 | POST | `/{companyId}/estimates/{id}/attachments` | `addEstimateAttachments` | `estimates:write` | Vincular adjuntos a un presupuesto |
 | PUT | `/{companyId}/estimates/{id}` | `updateEstimate` | `estimates:write` | Actualizar presupuesto |

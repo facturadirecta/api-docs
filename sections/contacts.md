@@ -403,6 +403,15 @@ del destinatario (art. 6.1.d del RD 1619/2012), no como simplificadas. Para
 contactos intracomunitarios, usa el campo `vatEU` (formato con prefijo de país:
 `ESB12345674`).
 
+## Versiones
+
+`GET /{companyId}/contacts/{id}/versions` lista las versiones de el contacto: su alta, cada
+modificación, su eliminación y su recuperación, con quién y cuándo, aunque se haya eliminado.
+`GET /{companyId}/contacts/{id}/versions/{versionId}` devuelve la copia de una versión, en el
+mismo formato que `GET /{companyId}/contacts/{id}`, y los cambios respecto a la versión anterior.
+Sirven para ver qué se cambió y recuperar datos: ver
+[Versiones de documentos](../guides/document-versions.md).
+
 ## Errores comunes
 
 - `400 ValidationError` — `fiscalId` con formato inválido para el país indicado.
@@ -422,6 +431,8 @@ respuestas de error.
 |---|---|---|---|---|
 | GET | `/{companyId}/contacts` | `getContacts` | `contacts:read` | Lista de contactos |
 | GET | `/{companyId}/contacts/{id}` | `getContact` | `contacts:read` | Obtener un contacto |
+| GET | `/{companyId}/contacts/{id}/versions` | `getContactVersions` | `contacts:read` | Versiones de el contacto |
+| GET | `/{companyId}/contacts/{id}/versions/{versionId}` | `getContactVersion` | `contacts:read` | Versión de el contacto |
 | POST | `/{companyId}/contacts` | `createContact` | `contacts:write` | Crear contacto |
 | PUT | `/{companyId}/contacts/{id}` | `updateContact` | `contacts:write` | Actualizar contacto |
 | PUT | `/{companyId}/contacts/{id}/tags` | `updateContactTags` | `contacts:write` | Actualizar etiquetas de contacto |

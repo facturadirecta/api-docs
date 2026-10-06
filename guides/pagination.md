@@ -13,8 +13,9 @@ recurso. La página de cada recurso indica cuál aplica:
 
 - **Offset paginado** (`{ pagination, items }`) — el más común. Para
   recursos navegables por páginas.
-- **Cursor paginado** (`{ items, hasMore }`) — para secuencias temporales
-  largas (eventos de webhook). El cliente avanza con un timestamp.
+- **Cursor paginado** (`{ items, hasMore, nextCursor }`) — para secuencias
+  temporales largas (eventos de webhook, actividad, versiones). El cliente
+  avanza pasando el cursor que recibe con cada página.
 - **Sin paginación** (`{ items }`) — para catálogos pequeños y listas
   anidadas, donde devolver todo el conjunto de una vez es razonable.
 
@@ -63,50 +64,69 @@ Para recorrer el resultado completo, incrementa `offset` en pasos de
 
 Aplica a:
 
-- `GET /{companyId}/webhooks/events` (`listPublicWebhookEvents`).
+- `GET /{companyId}/activity` (`getActivity`), el
+  [registro de actividad](../sections/activity.md).
+- `GET /{companyId}/<recurso>/{id}/versions`, las
+  [versiones de un documento](./document-versions.md).
+- `GET /{companyId}/webhooks/events` (`listPublicWebhookEvents`), los
+  [eventos de webhook](../sections/webhooks.md).
 
 ### Parámetros
 
 - **`limit`** — número máximo de resultados. Máximo `100`.
-- **`cursor`** — opcional. Para la primera página se omite. Para páginas
-  posteriores, se envía el timestamp `created_at` del **último elemento**
-  devuelto en la página anterior.
+- **`cursor`** — opcional. Para la primera página se omite. Para las
+  siguientes, se envía el `nextCursor` que devolvió la página anterior,
+  **tal cual se recibió**.
 
 ### Respuesta
 
 ```json
 {
   "items": [ { "...": "..." } ],
-  "hasMore": true
+  "hasMore": true,
+  "nextCursor": "NDgyODc3"
 }
 ```
 
-- **`items`** ordenados de más reciente a más antiguo (`created_at` desc).
-- **`hasMore`** indica si quedan más resultados que la página actual.
+- **`items`** ordenados de más reciente a más antiguo. La actividad y las
+  versiones admiten además el orden inverso con `sortBy=timestamp`.
+- **`hasMore`** indica si quedan más resultados detrás de esta página.
+- **`nextCursor`** es el cursor de la página siguiente, o `null` cuando
+  `hasMore` es `false`.
 - **No hay `pagination.total`.** En este patrón no se devuelve el total.
 
 ### Cómo paginar
 
 1. Primera petición sin `cursor`:
    ```
-   GET /{companyId}/webhooks/events?limit=100
+   GET /{companyId}/activity?limit=100
    ```
-2. Procesa `items` (típicamente del más reciente al más antiguo).
-3. Si `hasMore` es `true`, toma el `created_at` del **último elemento**
-   del array y úsalo como `cursor` en la siguiente petición:
+2. Procesa `items`.
+3. Si `nextCursor` no es `null`, pásalo en la siguiente petición con los
+   mismos filtros y el mismo `sortBy`:
    ```
-   GET /{companyId}/webhooks/events?limit=100&cursor=<created_at>
+   GET /{companyId}/activity?limit=100&cursor=NDgyODc3
    ```
-4. Repite hasta que `hasMore` sea `false`.
+4. Repite hasta que `nextCursor` sea `null` (o, lo que es lo mismo,
+   `hasMore` sea `false`).
 
 ### Notas
 
-- El `cursor` es un timestamp en formato ISO 8601 UTC (`YYYY-MM-DDTHH:mm:ss.sssZ`),
-  no un identificador opaco. Coincide con el campo `created_at` de los
-  eventos.
+- **El cursor es opaco.** Es una cadena que identifica la posición de la
+  última fila de la página; su formato no forma parte del contrato y
+  puede cambiar. No lo construyas a partir de los datos del listado (por
+  ejemplo, del `id` del último elemento) ni lo interpretes: un valor que
+  no haya devuelto la API responde `400`.
+- **El cursor marca una posición, no una consulta.** Si cambias los
+  filtros o el `sortBy` entre dos páginas, la petición sigue siendo
+  válida, pero la paginación continúa desde esa posición con la nueva
+  consulta. Para recorrer un listado completo, mantén los mismos
+  parámetros en todas las páginas.
 - Para reanudar una sincronización desde un punto conocido (por ejemplo,
-  reanudar tras una caída), guarda el `created_at` del último evento que
-  procesaste con éxito y úsalo como `cursor` en la próxima ejecución.
+  tras una caída), guarda el `nextCursor` de la última página que
+  procesaste con éxito y úsalo como `cursor` en la próxima ejecución. En
+  la actividad y las versiones, pide además `sortBy=timestamp` para
+  avanzar hacia lo más reciente.
 
 ## Patrón C — Sin paginación
 
@@ -164,8 +184,10 @@ su página. Sin `sortBy`, cada recurso aplica un orden por defecto razonable
 (habitualmente fecha descendente para documentos, alfabético para
 catálogos).
 
-En el patrón de cursor (eventos de webhook), el orden es fijo: `created_at`
-descendente. No admite `sortBy`.
+En el patrón de cursor, los eventos de webhook tienen un orden fijo:
+`created_at` descendente, sin `sortBy`. La actividad y las versiones
+admiten `sortBy=-timestamp` (por defecto, lo más reciente primero) y
+`sortBy=timestamp`.
 
 ## Recomendaciones
 
@@ -174,9 +196,9 @@ descendente. No admite `sortBy`.
 - **Para sincronizaciones masivas en patrón A**, filtra por
   `minModificationDate` con el timestamp de tu última sincronización
   exitosa en vez de paginar el recurso completo desde cero.
-- **Para eventos de webhook (patrón B)**, persiste el `created_at` del
-  último evento procesado y úsalo como cursor en la siguiente sesión:
-  no recorras todo el log cada vez.
+- **Para la actividad, las versiones y los eventos de webhook (patrón
+  B)**, persiste el cursor de la última página procesada y úsalo en la
+  siguiente sesión: no recorras todo el historial cada vez.
 - **Comprueba `pagination.total` antes de paginar** en el patrón A; si
   es pequeño, una sola petición basta.
 - **No asumas orden estable** en el patrón A si no envías `sortBy`. Si

@@ -348,6 +348,15 @@ truncados.
   FacturaDirecta). Por defecto, opera con `iban4` para minimizar el
   manejo de datos bancarios sensibles.
 
+## Versiones
+
+`GET /{companyId}/paymentMethods/{id}/versions` lista las versiones de el método de pago: su alta, cada
+modificación, su eliminación y su recuperación, con quién y cuándo, aunque se haya eliminado.
+`GET /{companyId}/paymentMethods/{id}/versions/{versionId}` devuelve la copia de una versión, en el
+mismo formato que `GET /{companyId}/paymentMethods/{id}`, y los cambios respecto a la versión anterior.
+Sirven para ver qué se cambió y recuperar datos: ver
+[Versiones de documentos](../guides/document-versions.md).
+
 ## Errores comunes
 
 - `400 ValidationError` — `subtype: "manual"` con `contact` asignado.
@@ -375,6 +384,8 @@ consulta el [Swagger UI](https://www.facturadirecta.com/api) o el
 |---|---|---|---|---|
 | GET | `/{companyId}/paymentMethods` | `getPaymentMethods` | `paymentMethods:read` | Lista de métodos de pago |
 | GET | `/{companyId}/paymentMethods/{id}` | `getPaymentMethod` | `paymentMethods:read` | Obtener un método de pago |
+| GET | `/{companyId}/paymentMethods/{id}/versions` | `getPaymentMethodVersions` | `paymentMethods:read` | Versiones de el método de pago |
+| GET | `/{companyId}/paymentMethods/{id}/versions/{versionId}` | `getPaymentMethodVersion` | `paymentMethods:read` | Versión de el método de pago |
 | POST | `/{companyId}/paymentMethods` | `createPaymentMethod` | `paymentMethods:write` | Crear método de pago |
 | PUT | `/{companyId}/paymentMethods/{id}` | `updatePaymentMethod` | `paymentMethods:write` | Actualizar método de pago |
 | DELETE | `/{companyId}/paymentMethods/{id}` | `deletePaymentMethod` | `paymentMethods:write` | Borrar método de pago |
