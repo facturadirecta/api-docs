@@ -526,6 +526,15 @@ Ten en cuenta que un pedido puede emitir `client_order.updated` **sin que tú lo
 hayas tocado**: guardar o borrar una orden de compra vinculada propaga estados
 a sus líneas. Ver [Flujo de pedidos y órdenes de compra](../guides/orders-flow.md).
 
+## Versiones
+
+`GET /{companyId}/clientOrders/{id}/versions` lista las versiones de el pedido: su alta, cada
+modificación, su eliminación y su recuperación, con quién y cuándo, aunque se haya eliminado.
+`GET /{companyId}/clientOrders/{id}/versions/{versionId}` devuelve la copia de una versión, en el
+mismo formato que `GET /{companyId}/clientOrders/{id}`, y los cambios respecto a la versión anterior.
+Sirven para ver qué se cambió y recuperar datos: ver
+[Versiones de documentos](../guides/document-versions.md).
+
 ## Errores comunes
 
 - `400` — el documento tiene referencias que no existen (contacto, producto,
@@ -565,6 +574,8 @@ referencia exhaustiva de todos los campos del body y la respuesta, consulta el
 | GET | `/{companyId}/clientOrders` | `getClientOrders` | `clientOrders:read` | Lista de pedidos |
 | GET | `/{companyId}/clientOrders/{id}` | `getClientOrder` | `clientOrders:read` | Obtener un pedido |
 | GET | `/{companyId}/clientOrders/{id}/attachments` | `getClientOrderAttachments` | `clientOrders:read` | Listar adjuntos de un pedido |
+| GET | `/{companyId}/clientOrders/{id}/versions` | `getClientOrderVersions` | `clientOrders:read` | Versiones de el pedido |
+| GET | `/{companyId}/clientOrders/{id}/versions/{versionId}` | `getClientOrderVersion` | `clientOrders:read` | Versión de el pedido |
 | POST | `/{companyId}/clientOrders` | `createClientOrder` | `clientOrders:write` | Crear pedido |
 | POST | `/{companyId}/clientOrders/{id}/attachments` | `addClientOrderAttachments` | `clientOrders:write` | Vincular adjuntos a un pedido |
 | PUT | `/{companyId}/clientOrders/{id}` | `updateClientOrder` | `clientOrders:write` | Actualizar pedido |

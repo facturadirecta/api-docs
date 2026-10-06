@@ -379,6 +379,15 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -X DELETE \
   "https://app.facturadirecta.com/api/$COMPANY_ID/deliveryNotes/den_3a7b9c14-2f5e-4a7b-b0c8-1d2e3f4a5b6c/attachments/0"
 ```
 
+## Versiones
+
+`GET /{companyId}/deliveryNotes/{id}/versions` lista las versiones de el albarán: su alta, cada
+modificación, su eliminación y su recuperación, con quién y cuándo, aunque se haya eliminado.
+`GET /{companyId}/deliveryNotes/{id}/versions/{versionId}` devuelve la copia de una versión, en el
+mismo formato que `GET /{companyId}/deliveryNotes/{id}`, y los cambios respecto a la versión anterior.
+Sirven para ver qué se cambió y recuperar datos: ver
+[Versiones de documentos](../guides/document-versions.md).
+
 ## Errores comunes
 
 - `400 ValidationError` — falta `contact` o `lines` con `quantity` /
@@ -399,6 +408,8 @@ de respuestas de error.
 | GET | `/{companyId}/deliveryNotes` | `getDeliveryNotes` | `deliveryNotes:read` | Lista de albaranes |
 | GET | `/{companyId}/deliveryNotes/{id}` | `getDeliveryNote` | `deliveryNotes:read` | Obtener un albarán |
 | GET | `/{companyId}/deliveryNotes/{id}/attachments` | `getDeliveryNoteAttachments` | `deliveryNotes:read` | Listar adjuntos de un albarán |
+| GET | `/{companyId}/deliveryNotes/{id}/versions` | `getDeliveryNoteVersions` | `deliveryNotes:read` | Versiones de el albarán |
+| GET | `/{companyId}/deliveryNotes/{id}/versions/{versionId}` | `getDeliveryNoteVersion` | `deliveryNotes:read` | Versión de el albarán |
 | POST | `/{companyId}/deliveryNotes` | `createDeliveryNote` | `deliveryNotes:write` | Crear albarán |
 | POST | `/{companyId}/deliveryNotes/{id}/attachments` | `addDeliveryNoteAttachments` | `deliveryNotes:write` | Vincular adjuntos a un albarán |
 | PUT | `/{companyId}/deliveryNotes/{id}` | `updateDeliveryNote` | `deliveryNotes:write` | Actualizar albarán |

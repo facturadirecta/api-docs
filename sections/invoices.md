@@ -599,6 +599,15 @@ Detalle de la entrega (HMAC, reintentos, formato) en
   marcando `correctedInvoice` y la serie apropiada; las sustitutivas
   tienen un endpoint dedicado. Lee las guías antes de implementar.
 
+## Versiones
+
+`GET /{companyId}/invoices/{id}/versions` lista las versiones de la factura: su alta, cada
+modificación, su eliminación y su recuperación, con quién y cuándo, aunque se haya eliminado.
+`GET /{companyId}/invoices/{id}/versions/{versionId}` devuelve la copia de una versión, en el
+mismo formato que `GET /{companyId}/invoices/{id}`, y los cambios respecto a la versión anterior.
+Sirven para ver qué se cambió y recuperar datos: ver
+[Versiones de documentos](../guides/document-versions.md).
+
 ## Errores comunes
 
 - `400 ValidationError` — combinaciones incoherentes:
@@ -647,6 +656,8 @@ guías dedicadas:
 | GET | `/{companyId}/invoices` | `getInvoices` | `invoices:read` | Lista de facturas |
 | GET | `/{companyId}/invoices/{id}` | `getInvoice` | `invoices:read` | Obtener una factura |
 | GET | `/{companyId}/invoices/{id}/attachments` | `getInvoiceAttachments` | `invoices:read` | Listar adjuntos de una factura de venta |
+| GET | `/{companyId}/invoices/{id}/versions` | `getInvoiceVersions` | `invoices:read` | Versiones de la factura |
+| GET | `/{companyId}/invoices/{id}/versions/{versionId}` | `getInvoiceVersion` | `invoices:read` | Versión de la factura |
 | POST | `/{companyId}/invoices` | `createInvoice` | `invoices:write` | Crear factura |
 | POST | `/{companyId}/invoices/{id}/attachments` | `addInvoiceAttachments` | `invoices:write` | Vincular adjuntos a una factura |
 | POST | `/{companyId}/invoices/{id}/payments` | `createInvoicePayments` | `invoices:write` | Crear pagos para una factura |

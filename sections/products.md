@@ -481,6 +481,15 @@ Respuesta:
 - **Antes de asignar un proveedor a líneas de pedido**, comprueba que el
   producto tiene la faceta `purchases`: sin ella, la línea se rechaza.
 
+## Versiones
+
+`GET /{companyId}/products/{id}/versions` lista las versiones de el producto: su alta, cada
+modificación, su eliminación y su recuperación, con quién y cuándo, aunque se haya eliminado.
+`GET /{companyId}/products/{id}/versions/{versionId}` devuelve la copia de una versión, en el
+mismo formato que `GET /{companyId}/products/{id}`, y los cambios respecto a la versión anterior.
+Sirven para ver qué se cambió y recuperar datos: ver
+[Versiones de documentos](../guides/document-versions.md).
+
 ## Errores comunes
 
 - `400 ValidationError` — falta `name`, `currency` o alguno de los
@@ -520,6 +529,8 @@ consulta el [Swagger UI](https://www.facturadirecta.com/api) o el
 | GET | `/{companyId}/products/{id}` | `getProduct` | `products:read` | Obtener un producto |
 | GET | `/{companyId}/products/{id}/stock` | `getProductStock` | `products:read` | Stock de un producto |
 | GET | `/{companyId}/products/{id}/stockMovements` | `listProductStockMovements` | `products:read` | Movimientos de stock de un producto |
+| GET | `/{companyId}/products/{id}/versions` | `getProductVersions` | `products:read` | Versiones de el producto |
+| GET | `/{companyId}/products/{id}/versions/{versionId}` | `getProductVersion` | `products:read` | Versión de el producto |
 | POST | `/{companyId}/products` | `createProduct` | `products:write` | Crear producto |
 | POST | `/{companyId}/products/{id}/stockAdjustments` | `adjustProductStock` | `products:write` | Ajuste manual de stock |
 | PUT | `/{companyId}/products/{id}` | `updateProduct` | `products:write` | Actualizar producto |

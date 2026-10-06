@@ -515,6 +515,15 @@ Los cambios en órdenes de compra emiten `purchase_order.created`,
 Cada guardado o borrado que afecte a pedidos vinculados emite además un
 `client_order.updated` por cada pedido afectado.
 
+## Versiones
+
+`GET /{companyId}/purchaseOrders/{id}/versions` lista las versiones de la orden de compra: su alta, cada
+modificación, su eliminación y su recuperación, con quién y cuándo, aunque se haya eliminado.
+`GET /{companyId}/purchaseOrders/{id}/versions/{versionId}` devuelve la copia de una versión, en el
+mismo formato que `GET /{companyId}/purchaseOrders/{id}`, y los cambios respecto a la versión anterior.
+Sirven para ver qué se cambió y recuperar datos: ver
+[Versiones de documentos](../guides/document-versions.md).
+
 ## Errores comunes
 
 - `400` — el documento tiene referencias que no existen (proveedor, producto,
@@ -554,6 +563,8 @@ referencia exhaustiva de todos los campos del body y la respuesta, consulta el
 | GET | `/{companyId}/purchaseOrders` | `getPurchaseOrders` | `purchaseOrders:read` | Lista de órdenes de compra |
 | GET | `/{companyId}/purchaseOrders/{id}` | `getPurchaseOrder` | `purchaseOrders:read` | Obtener una orden de compra |
 | GET | `/{companyId}/purchaseOrders/{id}/attachments` | `getPurchaseOrderAttachments` | `purchaseOrders:read` | Listar adjuntos de una orden de compra |
+| GET | `/{companyId}/purchaseOrders/{id}/versions` | `getPurchaseOrderVersions` | `purchaseOrders:read` | Versiones de la orden de compra |
+| GET | `/{companyId}/purchaseOrders/{id}/versions/{versionId}` | `getPurchaseOrderVersion` | `purchaseOrders:read` | Versión de la orden de compra |
 | POST | `/{companyId}/purchaseOrders` | `createPurchaseOrder` | `purchaseOrders:write` | Crear orden de compra |
 | POST | `/{companyId}/purchaseOrders/{id}/attachments` | `addPurchaseOrderAttachments` | `purchaseOrders:write` | Vincular adjuntos a una orden de compra |
 | PUT | `/{companyId}/purchaseOrders/{id}` | `updatePurchaseOrder` | `purchaseOrders:write` | Actualizar orden de compra |

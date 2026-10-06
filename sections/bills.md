@@ -505,6 +505,15 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -X DELETE \
   "https://app.facturadirecta.com/api/$COMPANY_ID/bills/bil_4a9c2e58-3b1f-4d6a-8e2c-7f1a9b3d5c4e/attachments/0"
 ```
 
+## Versiones
+
+`GET /{companyId}/bills/{id}/versions` lista las versiones de la factura de compra o el ticket: su alta, cada
+modificación, su eliminación y su recuperación, con quién y cuándo, aunque se haya eliminado.
+`GET /{companyId}/bills/{id}/versions/{versionId}` devuelve la copia de una versión, en el
+mismo formato que `GET /{companyId}/bills/{id}`, y los cambios respecto a la versión anterior.
+Sirven para ver qué se cambió y recuperar datos: ver
+[Versiones de documentos](../guides/document-versions.md).
+
 ## Errores comunes
 
 - `400 ValidationError` — falta `subtype: "ticket"` o `contact` cuando
@@ -526,6 +535,8 @@ de respuestas de error.
 | GET | `/{companyId}/bills` | `getBills` | `bills:read` | Lista de facturas de compra o tickets |
 | GET | `/{companyId}/bills/{id}` | `getBill` | `bills:read` | Obtener una factura de compra o ticket |
 | GET | `/{companyId}/bills/{id}/attachments` | `getBillAttachments` | `bills:read` | Listar adjuntos de una factura de compra o ticket |
+| GET | `/{companyId}/bills/{id}/versions` | `getBillVersions` | `bills:read` | Versiones de la factura de compra o el ticket |
+| GET | `/{companyId}/bills/{id}/versions/{versionId}` | `getBillVersion` | `bills:read` | Versión de la factura de compra o el ticket |
 | POST | `/{companyId}/bills` | `createBill` | `bills:write` | Crear factura de compra o ticket |
 | POST | `/{companyId}/bills/{id}/attachments` | `addBillAttachments` | `bills:write` | Vincular adjuntos a una factura de compra o ticket |
 | POST | `/{companyId}/bills/{id}/payments` | `createBillPayments` | `bills:write` | Crear pagos para una factura de compra o ticket |

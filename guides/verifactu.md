@@ -76,7 +76,64 @@ calcula el servidor.
 | `TipoFactura` | enum (ver tabla) | Tipo de la factura según RD 1619/2012 y régimen rectificativo. Por defecto, el servidor lo deduce: `F1` para completas identificadas y `F2` para simplificadas o completas sin identificación del destinatario. |
 | `DescripcionOperacion` | string (≤ 500 chars) | Descripción libre de la operación. Útil cuando las líneas no la describen suficientemente. |
 | `FacturaSimplificadaArt7273` | `"S"` o `"N"` | `"S"` si es una factura simplificada cualificada (con identificación del destinatario, Art. 7.2/7.3 del RD 1619/2012). |
+| `FechaOperacion` | string `DD-MM-AAAA` | Fecha de operación (devengo) cuando es distinta de la fecha de la factura. Si no la envías, no se comunica ninguna. Ver [Fecha de expedición y fecha de operación](#fecha-de-expedición-y-fecha-de-operación). |
 | `defaultOperacionExenta` | enum `E1`-`E6` | Valor por defecto de `OperacionExenta` cuando una línea exenta no lo indica explícitamente. |
+
+### Fecha de expedición y fecha de operación
+
+La fecha de expedición del registro (`FechaExpedicionFactura`) es la
+fecha de la factura, `main.date`: la misma que se imprime y que lleva
+el QR. Queda fijada al generar el primer registro de alta, porque forma
+parte del identificador de la factura en AEAT (NIF, serie y número y
+fecha de expedición). Cambiar `main.date` en una factura ya comunicada
+no es subsanable: la API lo rechaza con un cambio de tipo
+`voidOrCorrective` en `hint.verifactuChanges`; anula la factura o emite
+una rectificativa.
+
+Al crear una factura definitiva, `main.date` no puede ser posterior a
+hoy ni anterior al inicio del periodo de declaración que sigue abierto:
+
+| Hasta | Se admite desde |
+|---|---|
+| 30 de enero | 1 de octubre del año anterior |
+| 20 de abril | 1 de enero |
+| 20 de julio | 1 de abril |
+| 20 de octubre | 1 de julio |
+
+Si el día límite cae en sábado o domingo, el plazo llega al lunes
+siguiente. Fuera de ese margen la API rechaza la factura con el mensaje
+«La fecha de factura no puede ser anterior al [fecha], inicio del
+periodo de declaración que sigue abierto».
+
+`FechaOperacion` solo se incluye en el registro si la envías: cuando la
+operación (el devengo) fue en una fecha distinta de la de la factura,
+como en rectificativas (fecha de la operación original), claves de
+régimen `14` y `15` (devengo futuro) o anticipos.
+
+Las facturas comunicadas antes de este criterio conservan la fecha de
+expedición con la que se registraron, el día en que pasaron a
+definitivas, y su fecha de operación si difería.
+
+Reglas que aplica la AEAT y que la API valida antes de enviar:
+
+- No puede ser anterior a veinte años ni posterior a un año desde la
+  fecha actual.
+- Solo puede ser posterior a la fecha de expedición, o futura, si
+  **todos** los detalles del desglose llevan `ClaveRegimen` `14` o
+  `15` (IVA pendiente de devengo). Una factura con una línea de
+  régimen general y otra con clave `15` se rechaza aunque la fecha
+  sea válida para la segunda.
+- Con `ClaveRegimen` `14` la fecha de operación es obligatoria y
+  posterior a la expedición; además, el destinatario debe tener NIF que
+  empiece por P, Q, S o V y el tipo de factura ser `F1` o `R1`-`R4`.
+
+Cambiar `FechaOperacion` en una factura que ya tiene registro de alta
+es un cambio subsanable: sigue el flujo de
+[Subsanaciones](#subsanaciones).
+
+En las plantillas de tareas recurrentes el campo se descarta al guardar:
+cada factura generada parte sin fecha de operación y la deduce de su
+propia fecha.
 
 ### Por línea
 
@@ -87,6 +144,20 @@ Cada elemento de `lines` puede llevar un sub-objeto `verifactu`:
 | `ClaveRegimen` | string | Clave del régimen aplicable según AEAT (`01`-`19`, dependiendo del tipo de operación). |
 | `CalificacionOperacion` | enum (ver tabla) | Sólo para operaciones **sujetas** o no sujetas. Mutuamente excluyente con `OperacionExenta`. |
 | `OperacionExenta` | enum `E1`-`E6` | Sólo para operaciones **exentas**. Mutuamente excluyente con `CalificacionOperacion`. |
+
+Basta con enviar el campo que quieras fijar. Lo que la línea no indica
+se deduce de su impuesto, igual que cuando ninguna línea lleva datos de
+VeriFactu: `ClaveRegimen` `01` y `CalificacionOperacion` `S1` para el
+IVA repercutido, `S2` con inversión del sujeto pasivo, `N2` en
+operaciones intracomunitarias, y `ClaveRegimen` `02` con
+`OperacionExenta` `E2` en exportaciones. Por ejemplo, para una operación
+de tracto sucesivo basta con `{ "ClaveRegimen": "15" }`: el detalle
+sale como `15` / `S1` con el tipo y la cuota de la línea.
+
+Si una línea indica `OperacionExenta`, no se le deduce ninguna
+`CalificacionOperacion`, y viceversa. Para una línea sin impuestos o
+con IVA 0 %, la causa de exención sale de `OperacionExenta` en la línea
+o, si no lo indicas, de `defaultOperacionExenta`.
 
 ## Códigos oficiales
 
@@ -299,6 +370,11 @@ asumas la misma información: en unas facturas tendrás
 - **`CalificacionOperacion` y `OperacionExenta` enviados a la
   vez** en una línea: son mutuamente excluyentes. Si la operación
   es exenta, usa `OperacionExenta`. Si no, `CalificacionOperacion`.
+- **`FechaOperacion` futura con líneas de régimen general**: AEAT
+  solo la admite si todos los detalles del desglose llevan
+  `ClaveRegimen` `14` o `15` (error 1146). La API rechaza la factura
+  antes de enviarla; pon la clave en todas las líneas o quita la
+  fecha.
 - **Mezclar códigos de TicketBAI y VeriFactu**: los `E1`-`E6`
   refieren a artículos diferentes en cada régimen. Tu integración
   debe seleccionar el conjunto correcto según el régimen activo en

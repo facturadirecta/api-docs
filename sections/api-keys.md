@@ -20,7 +20,7 @@ clave que autentica la llamada actual.
 > En los ejemplos de esta página, los IDs y prefijos son ilustrativos.
 > Los reales se devuelven al crear cada API key.
 
-## Cuatro principios duros del recurso
+## Cinco principios duros del recurso
 
 Estas reglas son distintas a las de cualquier otro recurso y conviene
 tenerlas claras antes de operar:
@@ -39,6 +39,10 @@ tenerlas claras antes de operar:
    las credenciales que un humano configuró.
 4. **Una API key no puede borrarse a sí misma.** Si autenticas con la
    API key `K` e intentas `DELETE /apiKeys/K`, la API rechaza con `403`.
+5. **Una API key no tiene más permisos que quien la crea.** En cada
+   petición solo cuentan sus scopes, sin rol de usuario ni aplicación
+   conectada, así que al crearla cada scope tiene que poder usarlo, en
+   esa empresa, quien hace la llamada. Si no, la API rechaza con `403`.
 
 ## Formato de la clave
 
@@ -150,9 +154,19 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 - `name` (obligatorio) — nombre descriptivo para identificarla en la
   lista.
 - `scopes` (obligatorio, mínimo 1) — lista de scopes que la nueva clave
-  podrá usar. **Si el caller es una API key, los scopes deben ser
-  subconjunto de los suyos**. Si el caller es OAuth, puede asignar
-  cualquier scope disponible.
+  podrá usar. **Cada scope tiene que poder usarlo quien crea la clave
+  en la empresa:**
+  - Si el caller es una API key, los scopes deben ser subconjunto de
+    los suyos.
+  - Si el caller es OAuth, cada scope tiene que estar en el token y
+    permitirlo el rol del usuario en la empresa y, si la llamada viene
+    de una aplicación conectada, los permisos de esa conexión en la
+    empresa.
+  - Con una aplicación conectada o un rol personalizado,
+    `contacts:read` y `contacts:write` exigen ese nivel sobre clientes,
+    proveedores y empleados (ver
+    [Permisos por faceta](./contacts.md#permisos-por-faceta)): la API
+    key ve todos los contactos, sin distinguir el tipo.
 
 **Respuesta:**
 
@@ -266,8 +280,10 @@ rotación se hace siempre creando nueva y borrando antigua.
   intento de auto-eliminación.
 - `401 Unauthorized` — llamada a `GET /apiKeyInfo` autenticada con
   OAuth2 en lugar de API key.
-- `403 Forbidden` — scope solicitado fuera del subconjunto del caller
-  (cuando el caller autentica con API key).
+- `403 Forbidden` — al crear, un scope solicitado que el caller no
+  puede usar en la empresa: fuera de los de su API key o, con OAuth,
+  fuera de su token, de su rol o de la aplicación conectada. El mensaje
+  nombra el scope.
 
 Ver [Errores y validaciones](../guides/errors.md) para el formato
 general.

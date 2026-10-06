@@ -155,6 +155,15 @@ Respuesta típica (sin scope `banks:readIban`):
 - **Para registrar pagos** (`POST /bills/{id}/payments` o
   `POST /payrolls/{id}/payments`), basta con el `uuid` del banco.
 
+## Versiones
+
+`GET /{companyId}/banks/{id}/versions` lista las versiones de el banco: su alta, cada
+modificación, su eliminación y su recuperación, con quién y cuándo, aunque se haya eliminado.
+`GET /{companyId}/banks/{id}/versions/{versionId}` devuelve la copia de una versión, en el
+mismo formato que el listado `GET /{companyId}/banks`, y los cambios respecto a la versión anterior.
+Sirven para ver qué se cambió y recuperar datos: ver
+[Versiones de documentos](../guides/document-versions.md).
+
 ## Errores comunes
 
 - **No hay `404` específico**: este endpoint solo devuelve lista. Si
@@ -177,6 +186,8 @@ del schema (incluyendo los `oneOf` por `subtype`), consulta el
 | Método | Path | operationId | Scopes | Descripción |
 |---|---|---|---|---|
 | GET | `/{companyId}/banks` | `getBanks` | `banks:read` | Lista de bancos |
+| GET | `/{companyId}/banks/{id}/versions` | `getBankVersions` | `banks:read` | Versiones de el banco |
+| GET | `/{companyId}/banks/{id}/versions/{versionId}` | `getBankVersion` | `banks:read` | Versión de el banco |
 
 ## Scopes
 
