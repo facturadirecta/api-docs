@@ -217,8 +217,12 @@ Para pedir la página siguiente, pasa `nextCursor` en `cursor`; cuando es
 - `documentType` — tipos del documento afectado (`invoice`, `bill`,
   `contact`…). Admite varios.
 - `minDate` / `maxDate` — fecha y hora mínima y máxima, ambas incluidas,
-  en formato ISO 8601 (`YYYY-MM-DDTHH:mm:ss.sssZ`). Codifica el valor en
-  la URL (`:` como `%3A`).
+  en formato ISO 8601 (`YYYY-MM-DDTHH:mm:ss.sssZ`). Los `:` pueden ir sin
+  codificar; el `+` de un desfase horario se codifica como `%2B`, o llega
+  como un espacio. Admiten también solo la fecha (`YYYY-MM-DD`),
+  que cuenta el día entero en la zona horaria de la empresa (por defecto,
+  `Europe/Madrid`): `minDate=2026-09-01&maxDate=2026-09-30` es todo
+  septiembre.
 
 **Parámetros globales aceptados:**
 
@@ -301,7 +305,7 @@ Documentos eliminados en septiembre:
 
 ```shell
 curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
-  "https://app.facturadirecta.com/api/$COMPANY_ID/activity?type=archived&minDate=2026-09-01T00%3A00%3A00.000Z&maxDate=2026-09-30T23%3A59%3A59.999Z"
+  "https://app.facturadirecta.com/api/$COMPANY_ID/activity?type=archived&minDate=2026-09-01T00:00:00.000Z&maxDate=2026-09-30T23:59:59.999Z"
 ```
 
 ## Recomendaciones
@@ -324,7 +328,8 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 ## Errores comunes
 
 - `400 ValidationError` — `cursor` no es un cursor devuelto por la API,
-  `minDate`/`maxDate` no son fechas ISO 8601, `type` o `sortBy` tienen
+  `minDate`/`maxDate` no son una fecha o una fecha y hora ISO 8601 que
+  exista, `type` o `sortBy` tienen
   un valor desconocido, o `limit` está fuera de `1`–`100`.
 - `422 Unprocessable Entity` (`code: "activity_query_timeout"`) — la
   consulta ha tardado demasiado. Acota la búsqueda con `minDate` y

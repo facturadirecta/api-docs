@@ -160,9 +160,14 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
   siempre con `minDate`/`maxDate` razonables, no pidas el diario
   entero. Para exportaciones, itera mes a mes o trimestre a
   trimestre.
-- **Para saldos de cuenta**: usa `account=<6 dígitos>` y suma
-  `debit - credit` (o `credit - debit` según el tipo de cuenta) en
-  el cliente. La API no agrega saldos.
+- **Para ingresos, gastos y beneficio**: usa el
+  [resumen de resultados](./reports.md), que da los totales ya calculados
+  con las mismas reglas que la web. No los reconstruyas sumando apuntes:
+  una suma propia puede incluir el asiento de regularización y no
+  coincidir con lo que ve el usuario.
+- **Para el saldo de una cuenta concreta**: usa `account=<6 dígitos>` y
+  suma `debit - credit` (o `credit - debit` según el tipo de cuenta) en
+  el cliente.
 - **Para recuperar un asiento completo**: filtra por `id`. No filtres
   por `document`, porque ese parámetro selecciona las líneas imputadas a
   una subcuenta y puede dejar fuera otros apuntes del mismo asiento.
@@ -181,6 +186,8 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 
 ## Errores comunes
 
+- `400` — `minDate` o `maxDate` es una fecha que no existe, como
+  `2026-02-30`. Ver [Fechas que no existen](../guides/errors.md#fechas-que-no-existen-400).
 - `400 ValidationError` (`code: "invalidParams"`) — valor incorrecto
   para `sortBy`. Solo se acepta `date` o `-date`.
 - `400 ValidationError` — `account` con formato distinto a 1-6

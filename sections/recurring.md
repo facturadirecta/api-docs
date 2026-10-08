@@ -172,10 +172,16 @@ de la empresa, paginadas.
 
 **Parámetros de consulta específicos:**
 
-- **`minNextScheduledDate`**, **`maxNextScheduledDate`** — rango de
-  fecha de la próxima ejecución programada (ISO 8601). Útil para
-  identificar qué recurrentes están a punto de ejecutarse o cuáles ya
-  vencieron.
+- **`minNextScheduledDate`**, **`maxNextScheduledDate`** — rango por la
+  próxima ejecución programada (el `nextScheduledTime` de `related`), con
+  los dos extremos incluidos. Útil para identificar qué recurrentes están
+  a punto de ejecutarse o cuáles ya vencieron. Cada uno admite:
+  - Una fecha y hora ISO 8601 (`YYYY-MM-DDTHH:mm:ss.sssZ`). Se compara el
+    instante exacto, con su desfase horario si lo lleva (`+02:00`). Los
+    `:` pueden ir sin codificar; el `+` se codifica como `%2B`, o llega
+    como un espacio.
+  - Solo la fecha (`YYYY-MM-DD`). Cuenta el día entero en la zona horaria
+    de la empresa (por defecto, `Europe/Madrid`).
 - **`series`** — serie de numeración de la factura plantilla.
 - **`enabled`** — `true`/`false` para filtrar activas/inactivas.
 - **`freq`** — frecuencia (`daily`/`weekly`/`monthly`/`yearly`).
@@ -472,6 +478,8 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -X DELETE \
 
 ## Errores comunes
 
+- `400` — `minNextScheduledDate` o `maxNextScheduledDate` es una fecha o
+  una fecha y hora que no existe, como `2026-02-30`. Ver [Fechas que no existen](../guides/errors.md#fechas-que-no-existen-400).
 - `400 ValidationError` — `rrule` con combinación inválida (`until` y
   `count` a la vez, `bymonthday > 28` con `freq: monthly`, `bysetpos`
   sin `byweekday`...).

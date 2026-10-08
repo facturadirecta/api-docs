@@ -44,7 +44,7 @@ Puede incluir además:
 | `403 Forbidden` | Credencial válida pero sin los scopes necesarios, o sin acceso a la empresa indicada en el path. |
 | `404 Not Found` | El recurso no existe o no pertenece a la empresa del path. |
 | `409 Conflict` | La operación choca con el estado actual: identificador duplicado, borrado de un recurso con dependencias, etc. También lo devuelve una petición con `Idempotency-Key` cuando la original sigue en curso. Ver [Idempotencia](./idempotency.md). |
-| `422 Unprocessable Entity` | La `Idempotency-Key` enviada ya se usó con otra petición distinta. Ver [Idempotencia](./idempotency.md). También lo devuelve una consulta de la [actividad](../sections/activity.md) que tarda demasiado (`activity_query_timeout`): acótala con `minDate` y `maxDate`. |
+| `422 Unprocessable Entity` | La `Idempotency-Key` enviada ya se usó con otra petición distinta. Ver [Idempotencia](./idempotency.md). También lo devuelve una consulta de la [actividad](../sections/activity.md) que tarda demasiado (`activity_query_timeout`): acótala con `minDate` y `maxDate`. Y un [informe](../sections/reports.md) que tarda demasiado (`report_query_timeout`): acota el periodo, el nivel de detalle o las columnas. |
 | `429 Too Many Requests` | Demasiadas escrituras simultáneas del mismo tipo en la empresa. Reintenta con backoff. Ver [Límite de peticiones](./authentication.md#límite-de-peticiones). |
 | `500 Internal Server Error` | Error inesperado del servidor. No es un error del cliente; conviene reintentar tras un retraso. |
 
@@ -75,6 +75,50 @@ Cada entrada del array localiza el campo problemático y explica qué falla.
 Para integraciones que muestran el error al usuario final, basta con
 mostrar el `message` de cada entrada; el `path` ayuda al developer a
 depurar.
+
+## Fechas que no existen (`400`)
+
+Los filtros de fecha de los listados tienen que ser una fecha del
+calendario. Una fecha con la forma correcta que no existe, como
+`2026-02-30`, `2026-13-01` o `2025-02-29`, responde `400` con un
+`message` que nombra el parámetro. El filtro nunca se ignora ni se
+sustituye por otro valor.
+
+```json
+{
+  "statusCode": 400,
+  "message": "'minDate' no es una fecha válida (AAAA-MM-DD)"
+}
+```
+
+Qué admite cada filtro depende del campo que filtra:
+
+- **Filtros por día**, como la fecha de un documento: solo admiten
+  `AAAA-MM-DD`, sin hora. Son `minDate` y `maxDate` de
+  [facturas](../sections/invoices.md), [presupuestos](../sections/estimates.md),
+  [pedidos](../sections/client-orders.md), [órdenes de compra](../sections/purchase-orders.md),
+  [albaranes](../sections/delivery-notes.md), [nóminas](../sections/payrolls.md),
+  [facturas de compra](../sections/bills.md), [movimientos bancarios](../sections/statements.md)
+  y [diario](../sections/journal.md). Una fecha que no existe responde con el
+  mensaje anterior.
+- **Filtros por instante**, como la fecha de creación o la de un registro
+  de actividad: admiten fecha y hora ISO 8601 o solo la fecha, que cuenta
+  el día entero. Son los filtros comunes `minCreationDate`,
+  `maxCreationDate`, `minModificationDate` y `maxModificationDate` (ver
+  [Paginación](./pagination.md#filtros-estándar-de-fecha)), `minDate` y
+  `maxDate` de la [bandeja de entrada](../sections/inbox.md) y de la
+  [actividad](../sections/activity.md), y `minNextScheduledDate` y
+  `maxNextScheduledDate` de [facturas recurrentes](../sections/recurring.md). Con
+  solo la fecha (`2026-02-30`), el mensaje es el anterior; con fecha y
+  hora (`2026-02-30T10:00:00.000Z`), es
+  `Valor incorrecto para 'minCreationDate': debe ser una fecha y hora en formato ISO 8601`.
+
+El mismo nombre puede ser de los dos tipos: `minDate` de las facturas es
+un día, y el de la bandeja de entrada, un instante. La página de cada
+recurso indica cuál es.
+
+Una fecha con otra forma, como `2026-2-3` o `03/02/2026`, también responde
+`400`.
 
 ## Errores de negocio (`400`, `409`)
 
@@ -184,6 +228,32 @@ al usuario que hizo la solicitud —o al creador de la API key— y a los usuari
 con permiso completo de configuración de empresa. El aviso identifica la
 petición y el motivo. Se envía como máximo una vez por empresa cada 7 días,
 aunque el error se repita.
+
+### Informes no incluidos en el plan
+
+Los [informes contables](../sections/reports.md) (pérdidas y ganancias, balance de
+situación y sumas y saldos) necesitan el módulo de Contabilidad. Sin él
+responden `403` con `plan_limit_exceeded` y la funcionalidad que falta en
+`hint`:
+
+```json
+{
+  "statusCode": 403,
+  "message": "Este informe no está disponible en tu plan",
+  "errors": [
+    {
+      "message": "Este informe no está disponible en tu plan",
+      "code": "plan_limit_exceeded",
+      "hint": { "features": ["fullAccounting"] }
+    }
+  ]
+}
+```
+
+Este error no envía el e-mail de aviso a los administradores. Para saber de
+antemano si una empresa tiene el módulo, una aplicación conectada puede leer
+`accountingModule` en el [perfil](../sections/profile.md). El
+[resumen de resultados](../sections/reports.md) está disponible en todos los planes.
 
 ## Errores de idempotencia (`400`, `409`, `422`)
 

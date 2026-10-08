@@ -478,6 +478,8 @@ Sirven para ver qué se cambió y recuperar datos: ver
 
 ## Errores comunes
 
+- `400` — `minDate` o `maxDate` es una fecha que no existe, como
+  `2026-02-30`. Ver [Fechas que no existen](../guides/errors.md#fechas-que-no-existen-400).
 - `400 ValidationError` — `contact` sin faceta `employee` configurada.
 - `400 ValidationError` — `lines` vacío (debe tener al menos 1).
 - `400 ValidationError` — `modelo190.clavePercepcion` con valor

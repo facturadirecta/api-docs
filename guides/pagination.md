@@ -156,19 +156,36 @@ patrones paginados.
 
 ## Filtros estándar de fecha
 
-Sobre los recursos de tipo documento (`invoices`, `bills`, `estimates`,
-`deliveryNotes`, `payrolls`, `recurring`), las listas con paginación
-offset aceptan además cuatro filtros temporales comunes, en formato
-ISO 8601 UTC:
+Las listas con paginación offset de facturas, presupuestos, pedidos,
+órdenes de compra, albaranes, nóminas, facturas de compra, facturas
+recurrentes, contactos, productos, bancos, métodos de pago, movimientos
+bancarios y campos personalizados aceptan además cuatro filtros
+temporales comunes:
 
 - **`minCreationDate`** / **`maxCreationDate`** — rango por fecha de creación del documento en FacturaDirecta.
 - **`minModificationDate`** / **`maxModificationDate`** — rango por fecha de última modificación.
 
-Formato esperado: `YYYY-MM-DDTHH:mm:ss.sssZ` (UTC). Ejemplo:
+Los dos extremos del rango se incluyen. Cada filtro admite:
+
+- Una fecha y hora ISO 8601 (`YYYY-MM-DDTHH:mm:ss.sssZ`). Se compara el
+  instante exacto, con su desfase horario si lo lleva (`+02:00`).
+  Los `:` pueden ir sin codificar; el `+` se codifica como `%2B`, o llega
+  como un espacio.
+- Solo la fecha (`YYYY-MM-DD`). Cuenta el día entero en la zona horaria
+  de la empresa (por defecto, `Europe/Madrid`): el filtro mínimo empieza
+  en el primer instante de ese día y el máximo acaba en el último.
+
+Ejemplos:
 
 ```
-GET /{companyId}/invoices?minCreationDate=2026-01-01T00:00:00.000Z&maxCreationDate=2026-04-01T00:00:00.000Z
+GET /{companyId}/invoices?minCreationDate=2026-01-01&maxCreationDate=2026-03-31
+GET /{companyId}/invoices?minModificationDate=2026-04-01T08:00:00.000Z
+GET /{companyId}/invoices?minModificationDate=2026-04-01T10:00:00%2B02:00
 ```
+
+Una fecha que no existe, como `2026-02-30` o `2026-02-30T00:00:00.000Z`,
+responde `400` con el nombre del parámetro en el mensaje. Ver
+[Fechas que no existen](./errors.md#fechas-que-no-existen-400).
 
 Estos filtros existen para detectar cambios desde un timestamp conocido
 (sincronizaciones incrementales). Cada recurso documento añade además

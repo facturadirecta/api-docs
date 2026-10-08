@@ -142,7 +142,15 @@ el item queda procesado igual y solo cambia cómo se produjo la extracción.
 - **`source`** — filtra por origen: `upload`, `inbox`, `googleDrive`,
   `scanner`.
 - **`minDate`**, **`maxDate`** — rango por fecha de creación del item
-  (ISO 8601).
+  (`createdAt`), con los dos extremos incluidos. Cada uno admite:
+  - Una fecha y hora ISO 8601 (`YYYY-MM-DDTHH:mm:ss.sssZ`). Se compara el
+    instante exacto, con su hora y su desfase horario si lo lleva
+    (`+02:00`). Los `:` pueden ir sin codificar; el `+` se codifica como
+    `%2B`, o llega como un espacio.
+  - Solo la fecha (`YYYY-MM-DD`). Cuenta el día entero en la zona horaria
+    de la empresa (por defecto, `Europe/Madrid`):
+    `minDate=2026-10-07&maxDate=2026-10-07` devuelve los items creados
+    ese día.
 - **`archived`** — controla qué items aparecen en el resultado:
   - `false` (por defecto): solo activos.
   - `true`: solo borrados.
@@ -440,6 +448,8 @@ item en sus `attachments`, y la interfaz puede mostrar el original.
 
 ## Errores comunes
 
+- `400` — `minDate` o `maxDate` es una fecha y hora que no existe, como
+  `2026-02-30T10:00:00Z`. Ver [Fechas que no existen](../guides/errors.md#fechas-que-no-existen-400).
 - `400 ValidationError` — `upload` con formato inválido o que no
   existe.
 - `404 Not Found` — `tas_*` no existe en la empresa.

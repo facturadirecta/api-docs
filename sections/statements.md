@@ -299,6 +299,8 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -X DELETE \
 
 ## Errores comunes
 
+- `400` — `minDate` o `maxDate` es una fecha que no existe, como
+  `2026-02-30`. Ver [Fechas que no existen](../guides/errors.md#fechas-que-no-existen-400).
 - `400 ValidationError` — líneas que no cuadran (debits ≠ credits) en
   `reconcileWithNewTransaction`.
 - `400 ValidationError` — `transactionId` apunta a un asiento con
