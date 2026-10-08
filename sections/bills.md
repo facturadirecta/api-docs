@@ -516,6 +516,8 @@ Sirven para ver qué se cambió y recuperar datos: ver
 
 ## Errores comunes
 
+- `400` — `minDate` o `maxDate` es una fecha que no existe, como
+  `2026-02-30`. Ver [Fechas que no existen](../guides/errors.md#fechas-que-no-existen-400).
 - `400 ValidationError` — falta `subtype: "ticket"` o `contact` cuando
   el documento no es un ticket.
 - `400 ValidationError` — `lines` con `quantity` o `unitPrice` inválidos.

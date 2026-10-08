@@ -526,6 +526,8 @@ Sirven para ver qué se cambió y recuperar datos: ver
 
 ## Errores comunes
 
+- `400` — `minDate` o `maxDate` es una fecha que no existe, como
+  `2026-02-30`. Ver [Fechas que no existen](../guides/errors.md#fechas-que-no-existen-400).
 - `400` — el documento tiene referencias que no existen (proveedor, producto,
   método de pago o plantilla).
 - `400` — dos líneas con el mismo `id`, vínculo con pedido incompleto

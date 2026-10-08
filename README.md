@@ -32,6 +32,7 @@ explicaciones, ejemplos, guías y matices de comportamiento.
 - [Facturas de compra y tickets](./sections/bills.md)
 - [Facturas de venta](./sections/invoices.md)
 - [Facturas de venta recurrentes](./sections/recurring.md)
+- [Informes](./sections/reports.md)
 - [Métodos de pago](./sections/payment-methods.md)
 - [Nóminas](./sections/payrolls.md)
 - [Órdenes de compra](./sections/purchase-orders.md)

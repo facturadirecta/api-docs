@@ -67,6 +67,7 @@ Cada elemento de `companies`:
 | `owner` | string | Email del propietario de la empresa. |
 | `role` | string | Rol del usuario autenticado en esa empresa concreta. |
 | `permissions` | object | Solo con una aplicación conectada. Permisos efectivos por recurso: `read` para lectura y `full` para lectura y escritura. |
+| `accountingModule` | boolean | Solo con una aplicación conectada. `true` si la empresa tiene el módulo de Contabilidad, contratado o incluido en su plan o en la prueba. Sin él no están disponibles los informes contables: pérdidas y ganancias, balance de situación y sumas y saldos. |
 | `manageUrl` | string | Solo con una aplicación conectada. Página para cambiar los permisos de esa empresa. |
 
 ## Operaciones
@@ -143,6 +144,7 @@ empresa:
           "contacts": "read",
           "invoices": "full"
         },
+        "accountingModule": false,
         "manageUrl": "https://app.facturadirecta.com/connections/<id-conexion>?company=<id-empresa>"
       }
     ],
@@ -176,6 +178,8 @@ empresa:
   conectada también se limita por la concesión de cada empresa.
 - **Usa `permissions` cuando esté presente** para adaptar las acciones de tu
   aplicación antes de intentar una escritura.
+- **Usa `accountingModule` para elegir el informe** antes de pedirlo: sin el
+  módulo de Contabilidad, la empresa no tiene los informes contables.
 - **Para API Keys, no llames a `/profile`**: la API key ya conoce su
   empresa. Si tu integración alterna entre OAuth y API Key,
   detéctalo en el cliente y omite el paso.
