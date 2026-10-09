@@ -38,7 +38,7 @@ factura. El "tipo" emerge de la combinación de varios campos:
 
 | Subtipo | Cómo se identifica |
 |---|---|
-| **Completa** | `main.simplified !== true`. Normalmente tiene `main.contact` con datos fiscales. Con VeriFactu también puede ser una F2 para un contacto extracomunitario sin identificador fiscal. |
+| **Completa** | `main.simplified !== true`. Normalmente tiene `main.contact` con datos fiscales. Si TicketBAI no está activo, también puede dirigirse a un contacto extracomunitario sin identificador fiscal; con VeriFactu se registra como F2. |
 | **Simplificada** | `main.simplified === true`. Típicamente `main.contact` es `null` o el destinatario no tiene datos fiscales suficientes. |
 | **Externa** | `main.external === true` — generada fuera del programa. **No emite a TicketBAI ni VeriFactu**, aunque sí contabiliza. |
 | **Sustitutiva** | `main.substitution === true` con `main.substitutedInvoices` rellenado. Se crea con el endpoint dedicado [`POST /invoices/substitution`](#crear-factura-sustitutiva). Corresponde a F3 en VeriFactu. Ver [guía de Sustitutivas](../guides/invoices-sustitutivas.md). |
