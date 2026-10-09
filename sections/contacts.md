@@ -397,11 +397,11 @@ indicas `fiscalIdCountry`, se asume el mismo país que la dirección fiscal del
 contacto.
 
 Para contactos extracomunitarios sin identificador fiscal, deja el campo vacío
-e informa el nombre y el domicilio completos. Si VeriFactu está activo, sus
-facturas se emiten por defecto como facturas completas F2 sin identificación
-del destinatario (art. 6.1.d del RD 1619/2012), no como simplificadas. Para
-contactos intracomunitarios, usa el campo `vatEU` (formato con prefijo de país:
-`ESB12345674`).
+e informa el nombre y el domicilio completos. Si TicketBAI no está activo, sus
+facturas se emiten por defecto como facturas completas sin identificación del
+destinatario (art. 6.1.d del RD 1619/2012), no como simplificadas. Con VeriFactu
+se registran como F2. Para contactos intracomunitarios, usa el campo `vatEU`
+(formato con prefijo de país: `ESB12345674`).
 
 ## Versiones
 

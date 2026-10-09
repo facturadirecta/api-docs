@@ -77,7 +77,7 @@ calcula el servidor.
 | `DescripcionOperacion` | string (≤ 500 chars) | Descripción libre de la operación. Útil cuando las líneas no la describen suficientemente. |
 | `FacturaSimplificadaArt7273` | `"S"` o `"N"` | `"S"` si es una factura simplificada cualificada (con identificación del destinatario, Art. 7.2/7.3 del RD 1619/2012). |
 | `FechaOperacion` | string `DD-MM-AAAA` | Fecha de operación (devengo) cuando es distinta de la fecha de la factura. Si no la envías, no se comunica ninguna. Ver [Fecha de expedición y fecha de operación](#fecha-de-expedición-y-fecha-de-operación). |
-| `defaultOperacionExenta` | enum `E1`-`E6` | Valor por defecto de `OperacionExenta` cuando una línea exenta no lo indica explícitamente. |
+| `defaultOperacionExenta` | enum `E1`-`E8` | Valor por defecto de `OperacionExenta` cuando una línea exenta no lo indica explícitamente. `E7` y `E8` solo existen para IGIC. |
 
 ### Fecha de expedición y fecha de operación
 
@@ -141,9 +141,9 @@ Cada elemento de `lines` puede llevar un sub-objeto `verifactu`:
 
 | Campo | Tipo | Significado |
 |---|---|---|
-| `ClaveRegimen` | string | Clave del régimen aplicable según AEAT (`01`-`19`, dependiendo del tipo de operación). |
+| `ClaveRegimen` | string | Clave del régimen aplicable según AEAT (`01`-`21`). Las claves admitidas y su significado dependen del impuesto: lista L8A para IVA, L8B más `20` y `21` para IGIC, y `01`, `08`, `11`, `18`, `19` y `20` para IPSI. |
 | `CalificacionOperacion` | enum (ver tabla) | Sólo para operaciones **sujetas** o no sujetas. Mutuamente excluyente con `OperacionExenta`. |
-| `OperacionExenta` | enum `E1`-`E6` | Sólo para operaciones **exentas**. Mutuamente excluyente con `CalificacionOperacion`. |
+| `OperacionExenta` | enum `E1`-`E8` | Sólo para operaciones **exentas**. Mutuamente excluyente con `CalificacionOperacion`. `E7` y `E8` solo existen para IGIC. |
 
 Basta con enviar el campo que quieras fijar. Lo que la línea no indica
 se deduce de su impuesto, igual que cuando ninguna línea lleva datos de
@@ -154,10 +154,16 @@ operaciones intracomunitarias, y `ClaveRegimen` `02` con
 de tracto sucesivo basta con `{ "ClaveRegimen": "15" }`: el detalle
 sale como `15` / `S1` con el tipo y la cuota de la línea.
 
+El significado de una misma clave puede variar según el impuesto. La clave `18`
+corresponde al recargo de equivalencia en IVA, al régimen especial del pequeño
+empresario o profesional en IGIC y a operaciones concretas de la ordenanza del
+IPSI. FacturaDirecta valida la clave contra el impuesto de la empresa y no
+exige un recargo de equivalencia por el mero hecho de usar `18`.
+
 Si una línea indica `OperacionExenta`, no se le deduce ninguna
-`CalificacionOperacion`, y viceversa. Para una línea sin impuestos o
-con IVA 0 %, la causa de exención sale de `OperacionExenta` en la línea
-o, si no lo indicas, de `defaultOperacionExenta`.
+`CalificacionOperacion`, y viceversa. Para una línea sin impuestos, con IVA 0 %
+o con un impuesto exento, la causa de exención sale de `OperacionExenta` en la
+línea o, si no lo indicas, de `defaultOperacionExenta`.
 
 ## Códigos oficiales
 
@@ -211,16 +217,25 @@ Aplica solo en líneas **sujetas** o **no sujetas** (no exentas).
 
 ### `OperacionExenta`
 
-Aplica solo en líneas **exentas**.
+Aplica solo en líneas **exentas**. El significado de cada código depende
+del impuesto de la empresa (IVA en la península y Baleares, IGIC en
+Canarias).
 
-| Código | Significado oficial |
-|---|---|
-| `E1` | Exenta por Art. 20. |
-| `E2` | Exenta por Art. 21. |
-| `E3` | Exenta por Art. 22. |
-| `E4` | Exenta por Art. 24. |
-| `E5` | Exenta por Art. 25. |
-| `E6` | Exenta otros. |
+| Código | IVA (Ley 37/1992) | IGIC |
+|---|---|---|
+| `E1` | Exenta por Art. 20. | Exenta por el capítulo I del Decreto Legislativo 1/2025. |
+| `E2` | Exenta por Art. 21. | Exenta por Art. 11 de la Ley 20/1991. |
+| `E3` | Exenta por Art. 22. | Exenta por Art. 12 de la Ley 20/1991. |
+| `E4` | Exenta por Art. 23 y 24. | Exenta por Art. 13 de la Ley 20/1991. |
+| `E5` | Exenta por Art. 25. | Exenta por Art. 25 de la Ley 19/1994. |
+| `E6` | Exenta otros. | Exenta por Art. 47 de la Ley 19/1994. |
+| `E7` | No aplica. | Exenta por Art. 90 del Decreto Legislativo 1/2025 (régimen especial del pequeño empresario o profesional). |
+| `E8` | No aplica. | Exenta otros. |
+
+Para IPSI (Ceuta y Melilla) la AEAT admite `E1`-`E6` y rechaza `E7` y
+`E8`. Su significado, según el anexo del documento de validaciones de la
+AEAT: `E1` Art. 7 de la Ley 8/1991; `E2`, `E3` y `E5` Art. 8; `E4`
+Arts. 9 y 10; `E6` otros supuestos de la Ley 8/1991.
 
 > Los códigos `E1`-`E6` de VeriFactu corresponden a artículos
 > distintos de los `E1`-`E6` de TicketBAI. **No los mezcles** si
