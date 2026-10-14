@@ -338,6 +338,9 @@ la orden. No es un PATCH: lo que no envíes se pierde.
 - Conserva los `id` de las líneas que no quieras recrear.
 - Cada guardado vuelve a propagar los estados a los pedidos vinculados, que se
   guardan también y emiten su propio `client_order.updated`.
+- Si la actualización cambia datos visibles de la orden, FacturaDirecta
+  descarta el PDF anterior. La siguiente llamada a `/pdf` o `/send` genera un
+  PDF con el contenido actualizado.
 
 **Parámetros globales aceptados:** `accept-version`.
 
