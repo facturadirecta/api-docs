@@ -124,6 +124,7 @@ paginados.
 
 **Parámetros de consulta específicos:**
 
+- **`search`** — búsqueda aproximada en el título, la referencia y las descripciones de venta y de compra: todas las palabras, sin distinguir acentos ni mayúsculas (ver [Búsqueda](./search.md)).
 - **`title`** — búsqueda por título (calculado a partir del nombre).
 - **`sku`** — búsqueda por referencia.
 - **`externalId`** — búsqueda por ID externo.

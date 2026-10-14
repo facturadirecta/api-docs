@@ -182,6 +182,7 @@ de la empresa, paginadas.
     como un espacio.
   - Solo la fecha (`YYYY-MM-DD`). Cuenta el día entero en la zona horaria
     de la empresa (por defecto, `Europe/Madrid`).
+- **`search`** — búsqueda aproximada en el texto de la factura recurrente (título, líneas, notas) y en el nombre de su cliente: todas las palabras, sin distinguir acentos ni mayúsculas (ver [Búsqueda](./search.md)).
 - **`series`** — serie de numeración de la factura plantilla.
 - **`enabled`** — `true`/`false` para filtrar activas/inactivas.
 - **`freq`** — frecuencia (`daily`/`weekly`/`monthly`/`yearly`).

@@ -36,8 +36,10 @@ valores y la copia de cada momento están en las
   compras*) reciben un `403`: la API no filtra la actividad por usuario.
 - Una API key accede si tiene el scope. Al crearla, solo puede concederle
   `activity:read` quien tiene el permiso de actividad completo.
-- Por ahora, este permiso no se puede conceder a las aplicaciones
-  conectadas (servidor MCP y CLI).
+- Una aplicación conectada (servidor MCP y CLI) necesita además el permiso
+  **Registro de actividad** en la conexión, en la empresa consultada. Solo
+  puede concederlo quien tiene el permiso de actividad completo, y da acceso
+  a la actividad de toda la empresa.
 
 ## Estructura de un registro
 

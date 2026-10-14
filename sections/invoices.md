@@ -189,6 +189,7 @@ paginadas.
 **Parámetros de consulta específicos** (los más comunes; lista
 completa en el Swagger UI):
 
+- **`search`** — búsqueda aproximada en el texto de la factura (título, líneas, notas) y en el nombre de su cliente: todas las palabras, sin distinguir acentos ni mayúsculas. Es la búsqueda rápida del listado de la aplicación; la [búsqueda global](./search.md) la lanza sobre todos los tipos a la vez.
 - **`minDate`**, **`maxDate`** — rango por fecha de la factura.
 - **`series`** — filtrar por serie de numeración.
 - **`contact`** — filtrar por ID de cliente.

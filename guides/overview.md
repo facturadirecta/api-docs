@@ -114,6 +114,7 @@ La API ofrece acceso, entre otros, a estos recursos:
 | Recurso | Para qué sirve |
 |---|---|
 | [Perfil](../sections/profile.md) | Información del usuario autenticado y empresas accesibles. |
+| [Búsqueda](../sections/search.md) | Encontrar contactos, documentos y productos a partir de un texto, en todos los tipos a la vez. |
 | [Contactos](../sections/contacts.md) | Clientes, proveedores, empleados y otros contactos. |
 | [Productos](../sections/products.md) | Catálogo de productos y servicios. |
 | [Facturas de venta](../sections/invoices.md) | Crear, consultar, actualizar, enviar, anular o descargar facturas. |
