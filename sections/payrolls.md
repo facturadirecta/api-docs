@@ -132,6 +132,7 @@ paginadas.
 
 **Parámetros de consulta específicos:**
 
+- **`search`** — búsqueda aproximada en el texto de la nómina (título, líneas, notas) y en el nombre del empleado: todas las palabras, sin distinguir acentos ni mayúsculas (ver [Búsqueda](./search.md)).
 - **`minDate`**, **`maxDate`** — rango por fecha de la nómina
   (`YYYY-MM-DD`).
 - **`contact`** — ID del empleado.

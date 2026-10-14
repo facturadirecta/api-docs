@@ -219,6 +219,7 @@ empresa, paginados.
 
 **Parámetros de consulta principales:**
 
+- `search` — búsqueda aproximada en el texto del documento (título, líneas, notas) y en el nombre de su proveedor: todas las palabras, sin distinguir acentos ni mayúsculas (ver [Búsqueda](./search.md)).
 - `minDate`, `maxDate` — rango por fecha del documento (`YYYY-MM-DD`).
 - `contact` — ID de contacto.
 - `hasContact` — `true`/`false` para filtrar con o sin contacto (los

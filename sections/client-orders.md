@@ -189,6 +189,7 @@ paginados.
 
 - **`state`** — estado del pedido: `pending`, `ready`, `delivered` o
   `canceled`. Repite el parámetro para incluir varios estados.
+- **`search`** — búsqueda aproximada en el texto del pedido (título, líneas, notas) y en el nombre de su cliente: todas las palabras, sin distinguir acentos ni mayúsculas (ver [Búsqueda](./search.md)).
 - **`minDate`** / **`maxDate`** — fecha del pedido (`YYYY-MM-DD`), inclusive.
 - **`series`** — serie sin aplicar el formato de año (`##` o `####`).
 - **`formattedSeries`** — serie ya formateada.

@@ -139,6 +139,7 @@ paginados.
 
 **Parámetros de consulta principales:**
 
+- `search` — búsqueda aproximada en el texto del albarán (título, líneas, notas) y en el nombre de su cliente: todas las palabras, sin distinguir acentos ni mayúsculas (ver [Búsqueda](./search.md)).
 - `minDate`, `maxDate` — rango de fechas del documento (`YYYY-MM-DD`).
 - `series`, `formattedSeries` — serie de numeración.
 - `minNumber`, `maxNumber` — rango de número de documento.

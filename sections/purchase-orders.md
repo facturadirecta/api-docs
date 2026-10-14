@@ -175,6 +175,7 @@ paginadas.
 
 - **`state`** — estado de la orden: `pending`, `received` o `canceled`. Repite
   el parámetro para incluir varios estados.
+- **`search`** — búsqueda aproximada en el texto de la orden (título, líneas, notas) y en el nombre de su proveedor: todas las palabras, sin distinguir acentos ni mayúsculas (ver [Búsqueda](./search.md)).
 - **`minDate`** / **`maxDate`** — fecha de la orden (`YYYY-MM-DD`), inclusive.
 - **`series`** — serie sin aplicar el formato de año (`##` o `####`).
 - **`formattedSeries`** — serie ya formateada.
