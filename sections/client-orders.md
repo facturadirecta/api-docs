@@ -355,6 +355,9 @@ pedido. No es un PATCH: lo que no envíes se pierde.
 - No puedes eliminar, cambiar de producto, cambiar de cantidad ni cambiar de
   proveedor una línea vinculada a una orden de compra. Tampoco puedes crear
   el vínculo desde aquí: se crea desde la orden.
+- Si la actualización cambia datos visibles del pedido, FacturaDirecta
+  descarta el PDF anterior. La siguiente llamada a `/pdf` o `/send` genera un
+  PDF con el contenido actualizado.
 
 **Parámetros globales aceptados:** `accept-version`.
 
