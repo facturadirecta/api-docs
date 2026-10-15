@@ -161,14 +161,67 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -H "Content-Type: application/j
 ## Conciliar creando nuevo asiento
 
 `POST /{companyId}/statements/{id}/reconciliation` concilia el
-statement **creando un asiento contable nuevo** definido por las líneas
-que envías. Útil cuando el cobro o pago aún no está registrado y
-quieres reflejarlo en la contabilidad como parte de la conciliación.
+statement **creando un asiento contable nuevo** en la misma operación.
+Útil cuando el cobro o pago aún no está registrado y quieres reflejarlo
+en la contabilidad como parte de la conciliación. El asiento se crea con
+la fecha del statement y queda vinculado a él.
+
+Hay dos formas de indicar el asiento, excluyentes entre sí.
+
+### Con el documento que cobra o paga (`document`)
+
+Envía el ID de la factura de venta, factura de compra o nómina que el
+movimiento cobra o paga y la API construye el asiento, igual que el
+pago que registra `POST /bills/{id}/payments`:
+
+- el apunte del banco lleva el importe del movimiento en la moneda del
+  banco y su contravalor en la moneda de la empresa (los del statement);
+- el apunte del documento salda el documento (o el importe que indiques
+  en `amount`);
+- si ambos importes no coinciden en moneda de la empresa, la diferencia
+  va a la cuenta de diferencias positivas o negativas de cambio de la
+  configuración contable.
+
+Es la forma recomendada, y la más sencilla cuando el banco, el
+documento o ambos están en una moneda distinta de la de la empresa:
+no hace falta calcular ningún importe.
 
 **Parámetros del body:**
 
-- **`lines`** (obligatorio) — array de líneas del asiento contable.
-  Cada línea tiene:
+- **`document`** (obligatorio en este modo) — ID del documento
+  (`inv_`, `bil_` o `par_`). Debe ser definitivo (no borrador) y tener
+  saldo pendiente.
+- `amount` (opcional) — importe aplicado al documento, en la moneda del
+  documento, para un cobro o pago parcial. Solo se admite cuando el
+  documento y el banco están en monedas distintas; por defecto se salda
+  el pendiente del documento.
+- `title` (opcional) — título del asiento. Por defecto, el concepto del
+  statement.
+
+**Reglas:**
+
+- El sentido del movimiento debe corresponder al saldo del documento:
+  un ingreso cobra una factura de venta (o devuelve el pago de una
+  compra o nómina con saldo a favor); un cargo paga una compra o nómina
+  (o devuelve el cobro de una factura de venta abonada).
+- Si el documento y el banco están en la **misma moneda**, el importe
+  aplicado al documento es el del movimiento: si no coincide con el
+  pendiente, el documento queda con saldo (cobro parcial o exceso).
+- Si están en **monedas distintas**, se salda el pendiente del
+  documento salvo que indiques `amount`. El contravalor del movimiento
+  en moneda de la empresa es el que FacturaDirecta calculó al importar
+  el statement (`companyCurrencyAmount`).
+
+### Con los apuntes del asiento (`lines`)
+
+Para cualquier otro caso (comisiones, transferencias entre cuentas,
+movimientos que saldan varios documentos), envía las líneas contables
+completas del asiento.
+
+**Parámetros del body:**
+
+- **`lines`** (obligatorio en este modo) — array de líneas del asiento
+  contable. Cada línea tiene:
   - `account` (obligatorio) — cuenta contable.
   - `document` (opcional) — ID del documento al que se imputa (factura,
     gasto, banco propio).
@@ -178,9 +231,13 @@ quieres reflejarlo en la contabilidad como parte de la conciliación.
     del movimiento (puede coincidir con `debit`/`credit` si la moneda
     es la misma).
   - `currency` — código ISO 4217.
+- `title` (opcional) — título del asiento. Por defecto, el concepto del
+  statement.
 
-Las líneas deben **cuadrar contablemente**: total de debits = total
-de credits.
+Las líneas deben **cuadrar contablemente** (total de debits = total de
+credits) e incluir un apunte en la cuenta del banco con `document`
+igual al ID del banco, en el sentido del movimiento (debe en un
+ingreso, haber en un cargo).
 
 **Notas:**
 
@@ -191,8 +248,17 @@ de credits.
 
 ###### Ejemplo de request JSON
 
-Conciliar un ingreso (cobro de factura de venta), heredado del ejemplo
-`reconcileReceive` del openapi:
+Conciliar un cargo con la factura de compra que paga (la API construye
+el asiento; vale igual con un banco en dólares y una factura en euros):
+
+```json
+{
+  "document": "bil_4a9c2e58-3b1f-4d6a-8e2c-7f1a9b3d5c4e"
+}
+```
+
+Conciliar un ingreso enviando los apuntes (cobro de factura de venta),
+heredado del ejemplo `reconcileReceive` del openapi:
 
 ```json
 {
@@ -219,8 +285,8 @@ Conciliar un ingreso (cobro de factura de venta), heredado del ejemplo
 }
 ```
 
-Conciliar un cargo (pago de factura de compra), heredado del ejemplo
-`reconcileSend`:
+Conciliar un cargo enviando los apuntes (pago de factura de compra),
+heredado del ejemplo `reconcileSend`:
 
 ```json
 {
@@ -283,10 +349,14 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -X DELETE \
   hecho con `POST /bills/{id}/payments`), usa
   [conciliar con asiento existente](#conciliar-con-asiento-existente).
   El asiento ya existe; solo hay que enlazarlo.
-- **Para conciliar movimientos sin asiento previo** (transferencias
-  varias, comisiones, devoluciones), usa
+- **Para conciliar el cobro o pago de un documento que aún no está
+  registrado**, usa
   [conciliar creando nuevo asiento](#conciliar-creando-nuevo-asiento)
-  enviando las líneas contables del asiento a crear.
+  con `document`: la API construye el asiento, también cuando el banco
+  o el documento están en otra moneda.
+- **Para conciliar movimientos sin documento** (transferencias varias,
+  comisiones, devoluciones), usa la misma operación enviando las
+  líneas contables del asiento a crear (`lines`).
 - **Para localizar el movimiento de un asiento conciliado**, usa
   `matchedDocument=<id-asiento>`. El filtro solo devuelve una relación
   vigente. Si borras el asiento, el movimiento vuelve a estar pendiente,
@@ -303,6 +373,9 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" -X DELETE \
   `2026-02-30`. Ver [Fechas que no existen](../guides/errors.md#fechas-que-no-existen-400).
 - `400 ValidationError` — líneas que no cuadran (debits ≠ credits) en
   `reconcileWithNewTransaction`.
+- `400 ValidationError` — en `reconcileWithNewTransaction` con
+  `document`, el documento es un borrador, no tiene saldo pendiente o
+  el sentido del movimiento (ingreso o cargo) no corresponde a su saldo.
 - `400 ValidationError` — `transactionId` apunta a un asiento con
   importe incompatible con el statement.
 - `404 Not Found` — `transactionId` no existe en la empresa.

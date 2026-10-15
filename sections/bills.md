@@ -345,8 +345,11 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 
 ## Actualizar factura de compra
 
-`PUT /{companyId}/bills/{id}` sustituye **el contenido completo** de la
-factura de compra. No es un PATCH: lo que no envíes, se borra.
+`PUT /{companyId}/bills/{id}` sustituye el contenido de la factura de compra.
+Las líneas se reemplazan por las que envíes y los campos opcionales que no envíes se
+eliminan. Los campos obligatorios que no envíes conservan su valor, igual que `meta`, que
+no cambia. Lo que FacturaDirecta rellena al crear (`account`, `dueDate`, `exchangeRate`,
+`fiscalPosition`…) se rellena igual al actualizar si no lo envías.
 
 **Restricciones:**
 
@@ -433,6 +436,13 @@ con la de la factura de compra. Si es una tercera moneda, la API devuelve `400`
 porque la petición no incluye el importe real cargado en esa cuenta. Cuando la
 cuenta usa la moneda de la empresa, `companyCurrencyAmount` permite registrar el
 importe exacto que después se compara con el extracto al conciliar.
+
+Para registrar el cobro o pago a partir de un movimiento del extracto
+bancario (también desde una cuenta en una tercera moneda), concilia el
+movimiento con `document` en
+[conciliar creando nuevo asiento](./statements.md#conciliar-creando-nuevo-asiento):
+la API construye el asiento con el importe real del movimiento y la
+diferencia de cambio.
 
 **Respuesta:** la factura completa actualizada (con los pagos registrados
 visibles en `related.payments` cuando se consulta).

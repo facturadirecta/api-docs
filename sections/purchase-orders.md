@@ -319,8 +319,11 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 
 ## Actualizar orden de compra
 
-`PUT /{companyId}/purchaseOrders/{id}` sustituye **el contenido completo** de
-la orden. No es un PATCH: lo que no envíes se pierde.
+`PUT /{companyId}/purchaseOrders/{id}` sustituye el contenido de la orden.
+Las líneas se reemplazan por las que envíes y los campos opcionales que no envíes se
+eliminan. Los campos obligatorios que no envíes conservan su valor, igual que `docNumber`
+y `meta`, que no cambian. Lo que FacturaDirecta rellena al crear (`account`, `dueDate`,
+`exchangeRate`, `fiscalPosition`, `theme`…) se rellena igual al actualizar si no lo envías.
 
 **Parámetros del body:**
 
