@@ -330,8 +330,11 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 
 ## Actualizar factura recurrente
 
-`PUT /{companyId}/recurring/invoices/{id}` sustituye **el contenido
-completo** de la recurrente. No es un PATCH.
+`PUT /{companyId}/recurring/invoices/{id}` sustituye el contenido de la
+recurrente. Dentro de `action.template` se aplica la misma regla que al
+actualizar una factura: las líneas se reemplazan por las que envíes, los campos
+opcionales que no envíes se eliminan y los obligatorios que no envíes conservan
+su valor, igual que la serie (`docNumber`) y `meta`.
 
 Casos típicos:
 

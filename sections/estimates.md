@@ -316,8 +316,11 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 
 ## Actualizar presupuesto
 
-`PUT /{companyId}/estimates/{id}` sustituye **el contenido completo** del
-presupuesto. No es un PATCH: lo que no envíes, se borra.
+`PUT /{companyId}/estimates/{id}` sustituye el contenido del presupuesto.
+Las líneas se reemplazan por las que envíes y los campos opcionales que no envíes se
+eliminan. Los campos obligatorios que no envíes conservan su valor, igual que `docNumber`
+y `meta`, que no cambian. Lo que FacturaDirecta rellena al crear (`account`, `dueDate`,
+`exchangeRate`, `fiscalPosition`, `theme`…) se rellena igual al actualizar si no lo envías.
 
 Para cambiar el estado del documento, envía el contacto y las líneas
 inalterados junto con el nuevo `baseState` (y, si aplica, `acceptedDate` /

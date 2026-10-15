@@ -341,7 +341,10 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 ## Actualizar factura
 
 `PUT /{companyId}/invoices/{id}` reemplaza el `content` de la
-factura.
+factura. Las líneas se reemplazan por las que envíes y los campos opcionales que no envíes se
+eliminan. Los campos obligatorios que no envíes conservan su valor, igual que `docNumber`
+y `meta`, que no cambian. Lo que FacturaDirecta rellena al crear (`account`, `dueDate`,
+`exchangeRate`, `fiscalPosition`, `theme`…) se rellena igual al actualizar si no lo envías.
 
 **Reglas relevantes:**
 
@@ -441,6 +444,13 @@ cobros contra la factura.
 La moneda de la cuenta bancaria debe coincidir con la moneda de la empresa o
 con la de la factura. Si es una tercera moneda, la API devuelve `400` porque la
 petición no indica el importe real recibido en esa cuenta.
+
+Para registrar el cobro o pago a partir de un movimiento del extracto
+bancario (también desde una cuenta en una tercera moneda), concilia el
+movimiento con `document` en
+[conciliar creando nuevo asiento](./statements.md#conciliar-creando-nuevo-asiento):
+la API construye el asiento con el importe real del movimiento y la
+diferencia de cambio.
 
 En una factura en moneda extranjera cobrada en una cuenta que usa la moneda de
 la empresa, envía `amount` en la moneda de la factura y
