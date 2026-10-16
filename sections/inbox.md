@@ -56,22 +56,69 @@ externas. Para la API pública, todos los `inbox.id` son `tas_*`.
   ilegible, imagen sin texto, etc.). `scan.completedAt` y `scan.mimeType`
   están rellenos pero `scan.extraction` puede ser nulo o muy parcial.
 
-## Orígenes (`source`)
+## Cómo llegan documentos a la bandeja
 
-Un item puede llegar a la bandeja por cuatro vías:
+Un item puede llegar a la bandeja por cuatro vías. Todas generan items
+con el mismo schema y se procesan con la misma lógica de escaneo y
+propuesta; el campo `source` dice por cuál entró cada uno.
 
-- **`upload`** — subido vía API pública (`POST /inbox` con un upload
-  previo). Es el único origen que esta API permite generar
-  directamente.
-- **`inbox`** — recibido por email vía la dirección de Mailgun de la
-  empresa.
-- **`googleDrive`** — sincronizado automáticamente desde una carpeta
-  de Google Drive vinculada.
-- **`scanner`** — subido manualmente desde la pantalla de Tareas en
-  la interfaz.
+### API (`source: upload`)
 
-Todos los orígenes generan items con el mismo schema y se procesan
-con la misma lógica de escaneo y propuesta.
+Sube el binario con [`POST /uploads`](./uploads.md) y crea el item con
+`POST /inbox` referenciando el upload. Es la única vía que esta API permite
+generar directamente, y la que debe usar una integración o un agente que
+tenga el fichero en la mano. El item se crea con `status: pending` y el
+escaneo se encola al momento.
+
+### Buzón por correo (`source: inbox`)
+
+Cada empresa puede activar una **dirección de correo exclusiva** (del tipo
+`nombre-a1b2c3d4e5@inbox.facturadirecta.com`). Cualquier correo que llegue
+a ella crea un item por cada adjunto (facturas de compra, tickets o nóminas
+en PDF, imagen o Facturae) y además guarda el cuerpo del mensaje como un
+PDF adicional, marcado con `contentSubtype: inboxEmailBody`. Es la vía
+pensada para que el usuario reenvíe lo que recibe de sus proveedores.
+
+Lo que una integración o un agente debe saber:
+
+- **Dónde está la dirección.** En
+  [`GET /settings/company`](./settings.md#ficha-de-la-empresa),
+  `content.inbox.email.address`. Solo se devuelve si el buzón está activo
+  (`active: true`); el buzón se activa desde Ajustes › Integraciones, no por
+  API, y requiere el módulo `inbox` (`content.modules.inbox`).
+- **No se verifica el remitente.** Trata la dirección como confidencial:
+  dásela al usuario de la empresa, no la publiques en sitios de terceros.
+- **Escaneo automático o manual.** `content.inbox.email.autoScan` dice si
+  lo recibido se escanea al llegar (planes con escaneos ilimitados). Si es
+  `false`, el item queda en la bandeja con `status: pending` hasta que un
+  usuario lo escanee desde la interfaz; la API no puede forzar ese escaneo.
+- Los items llegan con `source: inbox` y se pueden filtrar así en
+  `GET /inbox`.
+
+### Google Drive (`source: googleDrive`)
+
+El usuario puede enlazar desde Ajustes › Integraciones una **carpeta de su
+Google Drive** (con permiso de solo lectura). FacturaDirecta la revisa
+periódicamente y crea un item por cada fichero nuevo que aparece en ella,
+con el mismo tratamiento que un adjunto de correo. Requiere el módulo
+`googleDrive` (`content.modules.googleDrive`).
+
+Lo que una integración o un agente debe saber:
+
+- **Qué carpeta es.** En `GET /settings/company`,
+  `content.inbox.googleDrive`: `linked` dice si hay carpeta enlazada,
+  `folderId` es su identificador en Drive y `folderUrl` la URL para
+  abrirla o indicársela al usuario. El nombre de la carpeta no se guarda.
+- **Si está parada.** `error` distinto de `null` es el mensaje que ve el
+  usuario cuando la sincronización se ha detenido por un error permanente
+  (credenciales caducadas, carpeta borrada). La única solución es que el
+  usuario vuelva a enlazar la carpeta desde la interfaz.
+- Los items llegan con `source: googleDrive`.
+
+### Pantalla de Tareas (`source: scanner`)
+
+Subida manual desde la pantalla de Tareas de la interfaz. No interviene la
+API.
 
 ## Adjuntos del item
 

@@ -40,8 +40,10 @@ por los flujos de importación bancaria de la interfaz.
   entre cuentas propias, comisiones que no se contabilizan, etc.).
 
 El campo `ignore` complementa: cuando un statement está marcado como
-ignorado, `state` pasa a `ignored` y el statement queda fuera de los
-listados por defecto.
+ignorado, `state` pasa a `ignored` y el statement deja de contar como
+pendiente (por ejemplo en `related.statements.pending` de los
+[bancos](./banks.md)). El listado lo sigue devolviendo: filtra con
+`state=pending` si solo quieres los que faltan por conciliar.
 
 ## Estructura
 
@@ -55,6 +57,8 @@ listados por defecto.
 | `amount` | number | Importe. **Positivo para ingresos, negativo para cargos**. |
 | `currency` | string | Moneda del movimiento (ISO 4217). |
 | `companyCurrencyAmount` | number | Importe convertido a la moneda de la empresa. |
+| `balance` | number | Saldo disponible de la cuenta tras el movimiento, según la entidad. Positivo es dinero en el banco. `null` si el movimiento no lo trae (importado sin saldo, o banco de Stripe). |
+| `bookedBalance` | number | Saldo contable de la cuenta tras el movimiento, según la entidad, cuando difiere del disponible. `null` si la entidad no lo informa. |
 | `state` | enum | `pending`/`reconciled`/`ignored`. |
 | `bank` | string | ID del banco propio del statement (`ban_*`). |
 | `ignore` | boolean | Si está marcado como ignorado. |
