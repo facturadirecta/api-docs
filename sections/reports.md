@@ -344,6 +344,11 @@ segundos.
 | `allTheseTags` | texto, repetible | | Solo los apuntes de documentos con todas estas etiquetas. |
 | `limit`, `offset` | ver [Paginación](../guides/pagination.md) | 25, 0 | La paginación se aplica a las filas ya agrupadas. |
 
+> Para el saldo contable de un banco no hace falta este informe:
+> `GET /{companyId}/banks/{id}?related=balance` lo da con el mismo
+> criterio (y con `balanceDate`, a una fecha), en todos los planes y con
+> el scope `banks:read`. Ver [Bancos](./banks.md).
+
 `thirdPartyDetail` necesita `thirdParty` porque el detalle por tercero de
 una cuenta entera, como la de clientes, puede tardar decenas de segundos
 en empresas con miles de clientes.
