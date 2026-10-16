@@ -86,7 +86,7 @@ Los campos de `main` más importantes para crear una factura:
 | `dueDate` | Sí | Fecha de vencimiento. Si hay `installments`, se ajusta a la fecha más tardía del calendario. |
 | `installments` | No | Calendario de vencimientos múltiples; cada elemento contiene `date`, `amount` y `currency`. |
 | `currency` | Sí | ISO 4217. |
-| `exchangeRate` | Sí | Tipo de cambio a la moneda de la empresa. 1 si coincide. |
+| `exchangeRate` | No | Tipo de cambio a la moneda de la empresa. Si no lo envías, se toma el de la fecha de la factura (`date`). En la moneda de la empresa es siempre 1. |
 | `docNumber` | Sí | `{ series: "...", number?: N }`. Si omites `number`, se asigna automáticamente. |
 | `fiscalPosition` | Sí | Régimen tributario aplicable. Determina los impuestos disponibles. |
 | `lines` | Sí | Array de líneas (ver más abajo). |
@@ -259,7 +259,6 @@ campos calculados se generan en el servidor).
       "date": "2026-05-13",
       "dueDate": "2026-06-12",
       "currency": "EUR",
-      "exchangeRate": 1,
       "docNumber": { "series": "F-##-" },
       "fiscalPosition": "general",
       "account": "700000",
@@ -344,7 +343,9 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 factura. Las líneas se reemplazan por las que envíes y los campos opcionales que no envíes se
 eliminan. Los campos obligatorios que no envíes conservan su valor, igual que `docNumber`
 y `meta`, que no cambian. Lo que FacturaDirecta rellena al crear (`account`, `dueDate`,
-`exchangeRate`, `fiscalPosition`, `theme`…) se rellena igual al actualizar si no lo envías.
+`fiscalPosition`, `theme`…) se rellena igual al actualizar si no lo envías. Si no envías
+`exchangeRate`, se conserva el anterior mientras no cambien ni la moneda ni la fecha; si
+cambia alguna de las dos, se toma el tipo de cambio de la nueva fecha.
 
 **Reglas relevantes:**
 
@@ -625,8 +626,7 @@ Sirven para ver qué se cambió y recuperar datos: ver
   `2026-02-30`. Ver [Fechas que no existen](../guides/errors.md#fechas-que-no-existen-400).
 - `400 ValidationError` — combinaciones incoherentes:
   - `main.contact = null` con `main.simplified = false`.
-  - `main.exchangeRate <= 0` o ausente cuando `currency ≠
-    settings.currency`.
+  - `main.exchangeRate <= 0`.
   - `main.docNumber.series` no presente en
     `settings.numbering.invoice`.
   - `line.tax` con un `TaxId` que no está en el catálogo de

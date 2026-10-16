@@ -181,7 +181,7 @@ guía menciona pero no desarrolla, porque cada uno merece su propia guía:
 - **`referenceNumber`** — número de factura asignado por el proveedor.
   No confundir con `docNumber` (numeración interna).
 - **`transactionDate`** — fecha de la transacción cuando difiere de la
-  fecha del documento.
+  fecha del documento. En moneda extranjera, es la fecha del tipo de cambio.
 - **`depreciable`** y **`depreciationSettings`** — amortización contable
   para bienes inventariables.
 - **`installments`** — calendario de pagos a plazos. Ver
@@ -282,6 +282,10 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 - Por defecto el modo es `calcTotal` (los totales se calculan). Para
   importar un documento con totales fijos del proveedor, usa
   `mode: "totalProvided"`.
+- En una moneda distinta de la de la empresa, si no envías `exchangeRate`
+  se toma el tipo de cambio de la fecha de la factura (`transactionDate`, o
+  `date` si no la envías). Si lo envías, se respeta. En la moneda de la
+  empresa es siempre 1.
 
 ###### Ejemplo de request JSON
 
@@ -348,8 +352,11 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 `PUT /{companyId}/bills/{id}` sustituye el contenido de la factura de compra.
 Las líneas se reemplazan por las que envíes y los campos opcionales que no envíes se
 eliminan. Los campos obligatorios que no envíes conservan su valor, igual que `meta`, que
-no cambia. Lo que FacturaDirecta rellena al crear (`account`, `dueDate`, `exchangeRate`,
-`fiscalPosition`…) se rellena igual al actualizar si no lo envías.
+no cambia. Lo que FacturaDirecta rellena al crear (`account`, `dueDate`, `fiscalPosition`…)
+se rellena igual al actualizar si no lo envías. Si no envías `exchangeRate`, se conserva el
+anterior mientras no cambien ni la moneda ni la fecha de la factura (`transactionDate`, o
+`date` si no la envías); si cambia alguna de las dos, se toma el tipo de cambio de la nueva
+fecha.
 
 **Restricciones:**
 

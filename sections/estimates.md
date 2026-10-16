@@ -320,7 +320,9 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 Las líneas se reemplazan por las que envíes y los campos opcionales que no envíes se
 eliminan. Los campos obligatorios que no envíes conservan su valor, igual que `docNumber`
 y `meta`, que no cambian. Lo que FacturaDirecta rellena al crear (`account`, `dueDate`,
-`exchangeRate`, `fiscalPosition`, `theme`…) se rellena igual al actualizar si no lo envías.
+`fiscalPosition`, `theme`…) se rellena igual al actualizar si no lo envías. Si no envías
+`exchangeRate`, se conserva el anterior mientras no cambien ni la moneda ni la fecha; si
+cambia alguna de las dos, se toma el tipo de cambio de la nueva fecha.
 
 Para cambiar el estado del documento, envía el contacto y las líneas
 inalterados junto con el nuevo `baseState` (y, si aplica, `acceptedDate` /
