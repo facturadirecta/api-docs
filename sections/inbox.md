@@ -305,6 +305,9 @@ haya cambiado).
 
 - **`content`** — el prototipo de bill. Su `uuid` se omite
   intencionadamente; lo asigna `POST /bills` o lo eliges tú al crear.
+  Si la factura está en una moneda distinta de la de la empresa,
+  `content.main.exchangeRate` trae el tipo de cambio de la fecha de la
+  factura (`transactionDate`), el mismo que tomaría la web.
 - **`matchedContact`** — contacto único encontrado por la API a partir
   del NIF/CIF/nombre extraídos. `null` si no se encontró ninguno o si
   hay varios candidatos.
@@ -317,7 +320,8 @@ haya cambiado).
 **Flujo recomendado tras la propuesta:**
 
 1. Revisa el `content` y ajústalo si quieres (cambiar líneas, impuestos,
-   añadir notas).
+   añadir notas). Si cambias la moneda o la fecha de la factura, quita
+   `exchangeRate` para que `POST /bills` tome el de la nueva fecha.
 2. Si `matchedContact` es null:
    - O bien usa `candidateContacts` para elegir uno.
    - O bien crea uno desde `newContactProposal` con `POST /contacts`.

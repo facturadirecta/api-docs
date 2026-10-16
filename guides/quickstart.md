@@ -122,7 +122,6 @@ Crea un fichero `invoice.json`:
       "date": "2026-05-13",
       "dueDate": "2026-06-12",
       "currency": "EUR",
-      "exchangeRate": 1,
       "docNumber": { "series": "F-##-" },
       "fiscalPosition": "general",
       "account": "700000",
