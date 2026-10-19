@@ -29,6 +29,12 @@ necesitan el **módulo de Contabilidad**, como en la web.
 > web (por ejemplo, excluyen el asiento de regularización), y una suma
 > propia puede no coincidir con lo que ve el usuario.
 
+> Para rankings, totales y comparativas a medida (los cinco mejores
+> clientes, el gasto por proveedor, las provincias que más facturan frente
+> al año pasado) usa la [consulta analítica](./query.md): agrupa facturas,
+> compras, contactos o apuntes por la dimensión que elijas, con las mismas
+> cifras que los listados.
+
 ## Estructura del resumen de resultados
 
 La respuesta tiene `meta` y `rows`:

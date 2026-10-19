@@ -1,11 +1,16 @@
 ---
-title: Impuestos
+title: Catálogo de impuestos
 audience:
   - developers
 status: draft
 ---
 
-# Impuestos
+# Catálogo de impuestos
+
+Esta guía trata los **tipos impositivos** que se aplican a las líneas de los
+documentos (IVA, IRPF, IGIC…). Los **modelos de impuestos** que FacturaDirecta
+genera a partir de ellos (303, 347, 390…) son otro recurso:
+[Declaraciones de impuestos](../sections/tax-declarations.md).
 
 Los impuestos en FacturaDirecta no se envían como tasas numéricas inline:
 se referencian por **identificador** desde un catálogo configurado en la

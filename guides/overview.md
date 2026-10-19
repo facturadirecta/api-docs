@@ -129,6 +129,8 @@ La API ofrece acceso, entre otros, a estos recursos:
 | [Extractos bancarios](../sections/statements.md) | Extractos y conciliación. |
 | [Métodos de pago](../sections/payment-methods.md) | Métodos de cobro y pago. |
 | [Diario contable](https://help.facturadirecta.com/es/articles/15084462-diario-contable) | Asientos y movimientos contables. |
+| [Declaraciones de impuestos](../sections/tax-declarations.md) | Modelos de impuestos generados (303, 347, 390…): casillas, PDF y fichero de presentación. Solo lectura. |
+| [Consulta analítica](../sections/query.md) | Totales, rankings y comparativas de facturas, compras, contactos y diario en una sola llamada, para informes propios y agentes de IA. Solo lectura. |
 | [Configuración](../sections/settings.md) | Series, impuestos, plantillas y configuración fiscal. |
 | [Bandeja de entrada](../sections/inbox.md) | Procesamiento de documentos recibidos. |
 | [Uploads](../sections/uploads.md) | Subida de archivos. |

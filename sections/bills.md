@@ -239,6 +239,9 @@ empresa, paginados.
   `creationDate` y `modificationDate`. Repite el parámetro para combinar
   criterios y antepone `-` para orden descendente.
 - `related` — recursos a expandir.
+- `totals` — `true` añade a la respuesta las sumas de todos los
+  documentos que cumplen los filtros, no solo de la página. Ver
+  [Totales del conjunto filtrado](#totales-del-conjunto-filtrado).
 
 Ver [Paginación](../guides/pagination.md) para los parámetros comunes.
 
@@ -248,6 +251,40 @@ Ver [Paginación](../guides/pagination.md) para los parámetros comunes.
 curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
   "https://app.facturadirecta.com/api/$COMPANY_ID/bills?minDate=2026-01-01&state=pending&limit=50"
 ```
+
+### Totales del conjunto filtrado
+
+Con `totals=true`, la respuesta añade `totals`: el recuento y las sumas
+de todos los documentos que cumplen los filtros, con una fila por
+moneda. Es la forma de responder «¿cuánto me queda por pagar?» sin
+recorrer las páginas.
+
+```shell
+curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
+  "https://app.facturadirecta.com/api/$COMPANY_ID/bills?state=pending&limit=1&totals=true"
+```
+
+```json
+{
+  "pagination": { "offset": 0, "limit": 1, "total": 2 },
+  "items": [ { "...": "..." } ],
+  "totals": [
+    { "currency": "EUR", "count": 2, "total": 726, "totalBeforeTaxes": 600, "taxes": 126, "pending": 726, "companyCurrencyPending": 726 }
+  ]
+}
+```
+
+| Campo | Significado |
+|---|---|
+| `currency` | Moneda de los documentos de la fila. |
+| `count` | Documentos que cumplen los filtros. |
+| `total`, `totalBeforeTaxes`, `taxes` | Suma del total, de la base imponible y de los impuestos (`total` menos `totalBeforeTaxes`), en la moneda de la fila. |
+| `pending` | Importe pendiente de pago, en positivo, en la moneda de la fila. Negativo si se ha pagado de más. |
+| `companyCurrencyPending` | El pendiente en la moneda de la empresa. |
+
+Para agrupar esas sumas por proveedor, cuenta de gasto o mes, o para
+compararlas con otro periodo, usa la
+[consulta analítica](./query.md).
 
 ## Crear factura de compra
 
