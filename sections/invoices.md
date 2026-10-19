@@ -208,6 +208,9 @@ completa en el Swagger UI):
   Repite el parámetro para combinar criterios y antepone `-` para orden
   descendente (por ejemplo, `sortBy=-date&sortBy=number`).
 - **Tags**: `allTheseTags` y `anyOfTheseTags` filtran por etiquetas concretas; `hasTags=true` devuelve solo facturas con al menos una etiqueta y `hasTags=false`, solo facturas sin etiquetas.
+- **`totals`** — `true` añade a la respuesta las sumas de todas las
+  facturas que cumplen los filtros, no solo de la página. Ver
+  [Totales del conjunto filtrado](#totales-del-conjunto-filtrado).
 
 **Parámetros globales aceptados:**
 
@@ -222,6 +225,40 @@ Acepta además los parámetros estándar `offset`, `limit`,
 curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
   "https://app.facturadirecta.com/api/$COMPANY_ID/invoices?minDate=2026-01-01&state=pending&limit=50"
 ```
+
+### Totales del conjunto filtrado
+
+Con `totals=true`, la respuesta añade `totals`: el recuento y las sumas
+de todas las facturas que cumplen los filtros, con una fila por moneda.
+Es la forma de responder «¿cuánto suman las facturas vencidas?» sin
+recorrer las páginas.
+
+```shell
+curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
+  "https://app.facturadirecta.com/api/$COMPANY_ID/invoices?state=overdue&limit=1&totals=true"
+```
+
+```json
+{
+  "pagination": { "offset": 0, "limit": 1, "total": 3 },
+  "items": [ { "...": "..." } ],
+  "totals": [
+    { "currency": "EUR", "count": 3, "total": 1815, "totalBeforeTaxes": 1500, "taxes": 315, "pending": 1815, "companyCurrencyPending": 1815 }
+  ]
+}
+```
+
+| Campo | Significado |
+|---|---|
+| `currency` | Moneda de las facturas de la fila. |
+| `count` | Facturas que cumplen los filtros. |
+| `total`, `totalBeforeTaxes`, `taxes` | Suma del total, de la base imponible y de los impuestos (`total` menos `totalBeforeTaxes`), en la moneda de la fila. |
+| `pending` | Importe pendiente de cobro, en positivo, en la moneda de la fila. Negativo si se ha cobrado de más. |
+| `companyCurrencyPending` | El pendiente en la moneda de la empresa. |
+
+Para agrupar esas sumas por cliente, provincia, estado o mes, o para
+compararlas con otro periodo, usa la
+[consulta analítica](./query.md).
 
 ## Crear factura
 

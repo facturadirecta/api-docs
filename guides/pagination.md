@@ -60,6 +60,12 @@ devuelve hasta 50 contactos a partir del 101º (índice 100).
 Para recorrer el resultado completo, incrementa `offset` en pasos de
 `limit` hasta que `offset + items.length >= total`.
 
+Para sumar en vez de recorrer: los listados de
+[facturas](../sections/invoices.md#totales-del-conjunto-filtrado) y de
+[facturas de compra](../sections/bills.md#totales-del-conjunto-filtrado) admiten
+`totals=true`, y la [consulta analítica](../sections/query.md) agrupa y compara
+sin paginar.
+
 ## Patrón B — Cursor paginado
 
 Aplica a:

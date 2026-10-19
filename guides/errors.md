@@ -44,7 +44,7 @@ Puede incluir además:
 | `403 Forbidden` | Credencial válida pero sin los scopes necesarios, o sin acceso a la empresa indicada en el path. |
 | `404 Not Found` | El recurso no existe o no pertenece a la empresa del path. |
 | `409 Conflict` | La operación choca con el estado actual: identificador duplicado, borrado de un recurso con dependencias, etc. También lo devuelve una petición con `Idempotency-Key` cuando la original sigue en curso. Ver [Idempotencia](./idempotency.md). |
-| `422 Unprocessable Entity` | La `Idempotency-Key` enviada ya se usó con otra petición distinta. Ver [Idempotencia](./idempotency.md). También lo devuelve una consulta de la [actividad](../sections/activity.md) que tarda demasiado (`activity_query_timeout`): acótala con `minDate` y `maxDate`. Y un [informe](../sections/reports.md) que tarda demasiado (`report_query_timeout`): acota el periodo, el nivel de detalle o las columnas. |
+| `422 Unprocessable Entity` | La `Idempotency-Key` enviada ya se usó con otra petición distinta. Ver [Idempotencia](./idempotency.md). También lo devuelve una consulta de la [actividad](../sections/activity.md) que tarda demasiado (`activity_query_timeout`): acótala con `minDate` y `maxDate`. Y un [informe](../sections/reports.md) o una [consulta analítica](../sections/query.md) que tardan demasiado (`report_query_timeout`): acota el periodo, el nivel de detalle, las dimensiones o los filtros. |
 | `429 Too Many Requests` | Demasiadas escrituras simultáneas del mismo tipo en la empresa. Reintenta con backoff. Ver [Límite de peticiones](./authentication.md#límite-de-peticiones). |
 | `500 Internal Server Error` | Error inesperado del servidor. No es un error del cliente; conviene reintentar tras un retraso. |
 
@@ -189,10 +189,10 @@ capacidad del plan contratado, la respuesta incluye el código estable
 ```json
 {
   "statusCode": 403,
-  "message": "La empresa está en modo solo lectura por exceder el límite de clientes contratados (10). Por favor, amplia tu suscripción o reduce el número de clientes de tu empresa.",
+  "message": "La empresa está en modo solo lectura por exceder el límite de clientes contratados (10). Por favor, amplía tu suscripción o reduce el número de clientes de tu empresa.",
   "errors": [
     {
-      "message": "La empresa está en modo solo lectura por exceder el límite de clientes contratados (10). Por favor, amplia tu suscripción o reduce el número de clientes de tu empresa.",
+      "message": "La empresa está en modo solo lectura por exceder el límite de clientes contratados (10). Por favor, amplía tu suscripción o reduce el número de clientes de tu empresa.",
       "code": "plan_limit_exceeded"
     }
   ]
