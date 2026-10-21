@@ -77,6 +77,7 @@ dados de alta en esas fechas, sin el tope de 5 años. `compare` y
 | Medida | Tipo | Significado |
 |---|---|---|
 | `count` | número | Documentos del conjunto filtrado. |
+| `contacts` | número | Contactos distintos de los documentos del grupo. Con la dimensión `fiscalId`, más de uno indica contactos duplicados con el mismo identificador fiscal. |
 | `totalBeforeTaxes` | importe | Suma de la base imponible de cada documento, en su moneda. Es la cifra que el listado muestra como base. |
 | `taxes` | importe | Suma de la diferencia entre el total y la base imponible: IVA, recargos y retenciones con su signo. |
 | `total` | importe | Suma del total de cada documento, impuestos incluidos. |
@@ -119,6 +120,7 @@ Todos los importes van en la moneda de la empresa.
 |---|---|---|
 | `contact` | entidad | Cliente o proveedor del documento. |
 | `contact.region` | entidad | Provincia de la dirección actual del contacto (la del contacto hoy, no la del documento). `id` es el código de provincia y `name` su nombre, para España. |
+| `fiscalId` | entidad | Identificador fiscal de la contraparte: NIF, CIF o NIE en España, NIF-IVA intracomunitario (VAT number) en la UE o el identificador fiscal de su país. `id` es el identificador normalizado (ver [Identificador fiscal](#identificador-fiscal)) y `name` el nombre de la contraparte en el documento más reciente del grupo. |
 | `country` | código | País del documento (ISO 3166-1 alpha-2). |
 | `series` | código | Serie de numeración. |
 | `currency` | código | Moneda del documento. |
@@ -134,6 +136,7 @@ Todos los importes van en la moneda de la empresa.
 |---|---|---|
 | `address.region` | entidad | Provincia de la dirección del contacto, con `id` (código) y `name` (nombre, para España). |
 | `address.country` | código | País de la dirección del contacto. |
+| `fiscalId` | entidad | Identificador fiscal del contacto, normalizado como en las facturas. Con `count`, un grupo de más de uno son contactos duplicados. `name` es el nombre del contacto dado de alta más recientemente. |
 | `isClient`, `isProvider`, `isEmployee` | booleano | El contacto tiene esa faceta. |
 | `createdMonth` | periodo | Mes natural de alta del contacto (`2026-03`). |
 
@@ -153,6 +156,32 @@ La dimensión `contact` del diario es la que responde «ventas de las
 cuentas 7 por cliente» incluyendo los asientos manuales, algo que
 `invoices` no ve. Un apunte de ventas sin contacto queda en `unassigned`.
 
+### Identificador fiscal
+
+`fiscalId` agrupa por el identificador fiscal y no por el contacto: dos
+contactos duplicados con el mismo NIF suman en una sola fila. En las
+facturas es el identificador que el documento copió de su contacto al
+emitirse; los documentos más antiguos, que no lo guardan, toman el del
+contacto hoy, como el listado.
+
+Para agrupar, el identificador se normaliza según su país:
+
+| País del identificador | Clave | Ejemplo |
+|---|---|---|
+| España | En mayúsculas, sin espacios ni signos, sin el prefijo `ES` y con el DNI completado con ceros a la izquierda. | `ESB-12345674` y `b12345674` son `B12345674`; `1234567L` es `01234567L`. |
+| Resto de la UE | En mayúsculas, sin espacios ni signos y en la forma del NIF-IVA intracomunitario: con el prefijo de su país, lo lleve o no (`EL` en Grecia). | `12 345 678 901` de Francia es `FR12345678901`. |
+| Resto del mundo | En mayúsculas y sin espacios ni signos. | `12-3456789` es `123456789`. |
+
+El país es el del identificador del contacto o, si no lo tiene, el de su
+dirección. Los documentos sin identificador forman el grupo `null`, que
+en un negocio con muchos tickets puede ser el más grande.
+
+El filtro `fiscalId` busca la clave tal como la da la dimensión. Admite
+separadores y minúsculas, y un NIF español con el prefijo `ES` o un DNI
+sin sus ceros. Un identificador de otro país de la UE tiene que llevar su
+prefijo (`FR12345678901`): sin él, las mismas cifras podrían ser de otro
+país.
+
 ## Filtros
 
 Cada filtro tiene un campo, un operador y un valor (`value`) o una lista
@@ -170,6 +199,7 @@ de valores (`values`):
 |---|---|---|---|
 | `invoices`, `bills` | `contact` | `eq`, `in` | Identificador del contacto (`con_…`). |
 | | `contact.region` | `eq`, `in` | Código de provincia de la dirección del contacto. |
+| | `fiscalId` | `eq`, `in` | Identificador fiscal de la contraparte, sea cual sea el contacto. Ver [Identificador fiscal](#identificador-fiscal). |
 | | `country` | `eq`, `in` | Código ISO del país del documento. |
 | | `series` | `eq`, `in` | Serie de numeración. |
 | | `currency` | `eq`, `in` | Moneda del documento. |
@@ -181,6 +211,7 @@ de valores (`values`):
 | | `draft` | `eq` | `true` incluye los borradores junto a los definitivos. |
 | `bills` | `account` | `eq`, `in`, `startsWith` | Cuenta contable de gasto del documento. |
 | `contacts` | `address.region`, `address.country` | `eq`, `in` | Provincia y país de la dirección. |
+| | `fiscalId` | `eq`, `in` | Identificador fiscal del contacto. |
 | | `isClient`, `isProvider`, `isEmployee` | `eq` | Faceta del contacto. |
 | | `tag` | `eq`, `in` | Etiquetas que el contacto debe tener, todas ellas. |
 | `journal` | `account` | `eq`, `in`, `startsWith` | Cuenta contable o prefijo. |
@@ -207,7 +238,7 @@ de valores (`values`):
 
 En cada fila, el valor de una dimensión depende de su tipo:
 
-- **Entidad** (`contact`, `paymentMethod`, `thirdParty`, `account`, las
+- **Entidad** (`contact`, `fiscalId`, `paymentMethod`, `thirdParty`, `account`, las
   provincias): `{ "id", "name" }`, más `type` en `thirdParty` y `webUrl`
   cuando el elemento tiene ficha en la aplicación (ver
   [Abrir un resultado en FacturaDirecta](../guides/overview.md#abrir-un-resultado-en-facturadirecta)).
@@ -289,6 +320,41 @@ curl "https://app.facturadirecta.com/api/$COMPANY_ID/query" \
 La respuesta real tiene cinco filas; aquí se muestran dos. `totals` suma
 las 61 facturas del año y `other` las 38 de los 23 clientes que quedan
 fuera de las cinco primeras filas.
+
+### Ejemplo: los mejores clientes por identificador fiscal
+
+Si el mismo cliente está dado de alta dos veces, `contact` lo reparte en
+dos filas. `fiscalId` lo reúne, y `contacts` dice cuántos contactos hay
+detrás de cada fila.
+
+```bash
+curl "https://app.facturadirecta.com/api/$COMPANY_ID/query" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "from": "invoices",
+    "measures": ["totalBeforeTaxes", "contacts"],
+    "dimensions": ["fiscalId"],
+    "limit": 5
+  }'
+```
+
+```json
+{
+  "rows": [
+    { "fiscalId": { "id": "B12345674", "name": "Cliente Uno SL" }, "totalBeforeTaxes": 21300, "contacts": 2 },
+    { "fiscalId": { "id": "FR12345678901", "name": "Client Deux SARL" }, "totalBeforeTaxes": 9800, "contacts": 1 }
+  ],
+  "totals": { "totalBeforeTaxes": 48200, "contacts": 37 }
+}
+```
+
+La primera fila reúne dos contactos con el NIF `B12345674`. Para ver
+cuáles son, repite la consulta con `"dimensions": ["fiscalId", "contact"]`
+y el filtro `{ "field": "fiscalId", "op": "eq", "value": "B12345674" }`.
+Para buscar todos los contactos duplicados sin mirar facturas, consulta
+`contacts` con la medida `count` y la dimensión `fiscalId`: los grupos de
+más de uno salen primero.
 
 ### Ejemplo: facturas vencidas y cuánto suman
 
@@ -473,8 +539,9 @@ no en los días, que valen `null`.
   todas sus facturas.
 - `state` y `agingBucket` se calculan a la fecha de hoy en la zona
   horaria de la empresa, como el listado.
-- Las medidas que no se suman (`average` y las de días) se calculan en
-  `totals` sobre todos los documentos, no como media de las filas.
+- Las medidas que no se suman (`average`, `contacts` y las de días) se
+  calculan en `totals` sobre todos los documentos, no como media o suma
+  de las filas.
 
 ## Permisos
 
@@ -487,10 +554,11 @@ ve las facetas (clientes, proveedores, empleados) que su permiso le da.
 - `400 Bad Request`: una fuente, medida, dimensión o filtro fuera del
   vocabulario. El mensaje propone el nombre más parecido:
   «La medida 'totalbefore' no existe en 'invoices': ¿quieres decir
-  'totalBeforeTaxes'?». También `compare` y `breakdown` a la vez, más de
-  2 dimensiones, 10 medidas o 10 filtros, un periodo de más de 5 años o
-  de más de 24 tramos, una fecha que no existe, un operador que el filtro
-  no admite o `limit` fuera de 1 a 500.
+  'totalBeforeTaxes'?». Algunos sinónimos también tienen sugerencia:
+  `taxId`, `nif` o `vat` proponen `fiscalId`. También `compare` y
+  `breakdown` a la vez, más de 2 dimensiones, 10 medidas o 10 filtros,
+  un periodo de más de 5 años o de más de 24 tramos, una fecha que no
+  existe, un operador que el filtro no admite o `limit` fuera de 1 a 500.
 - `403 Forbidden` (`token_scope_missing`): la credencial no tiene el
   scope de la fuente.
 - `422 Unprocessable Entity` (`report_query_timeout`): la consulta ha
