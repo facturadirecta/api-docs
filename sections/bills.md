@@ -314,6 +314,9 @@ compararlas con otro periodo, usa la
 
 - Si `contact` apunta a un ID existente con faceta de proveedor
   (`accounts.provider` configurada), sus datos fiscales se toman de él.
+- Si envías `contact` y no `country`, la factura toma el país de la
+  dirección fiscal del contacto, y también su código postal si no envías
+  `zipcode`. Si envías `country`, se respeta y `zipcode` no se completa.
 - Para registrar un ticket de caja sin proveedor identificado, omite
   `contact` y envía `subtype: "ticket"`.
 - Por defecto el modo es `calcTotal` (los totales se calculan). Para
@@ -389,8 +392,9 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 `PUT /{companyId}/bills/{id}` sustituye el contenido de la factura de compra.
 Las líneas se reemplazan por las que envíes y los campos opcionales que no envíes se
 eliminan. Los campos obligatorios que no envíes conservan su valor, igual que `meta`, que
-no cambia. Lo que FacturaDirecta rellena al crear (`account`, `dueDate`, `fiscalPosition`…)
-se rellena igual al actualizar si no lo envías. Si no envías `exchangeRate`, se conserva el
+no cambia. Lo que FacturaDirecta rellena al crear (`account`, `dueDate`, `fiscalPosition`,
+`country`…) se rellena igual al actualizar si no lo envías: si cambias de `contact` sin enviar
+`country`, la factura toma el país del nuevo contacto. Si no envías `exchangeRate`, se conserva el
 anterior mientras no cambien ni la moneda ni la fecha de la factura (`transactionDate`, o
 `date` si no la envías); si cambia alguna de las dos, se toma el tipo de cambio de la nueva
 fecha.
