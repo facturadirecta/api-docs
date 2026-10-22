@@ -275,10 +275,17 @@ campos calculados se generan en el servidor).
   serie controla además la sustitución de `##`/`####` por el año
   (ver [settings](./settings.md#lista-de-series-de-numeración)).
 - Si **omites `draft`**, se aplica el valor por defecto de la
-  empresa (configuración).
-- Si la empresa tiene TicketBAI o VeriFactu activos y la factura
-  encaja en su ámbito (no es `external`), el envío al organismo
-  fiscal se prepara en el momento del guardado. Ver
+  empresa (`sales.newInvoiceMode`, ver
+  [settings](./settings.md)), que puede ser `final`: la factura
+  nace definitiva, es decir, emitida. Envía `draft` siempre de forma
+  explícita (`true` para un borrador).
+- Guardar la factura como definitiva (`draft: false`) la **emite**:
+  se le asigna número y, si la empresa tiene TicketBAI o VeriFactu
+  activos y la factura encaja en su ámbito (no es `external`), se
+  genera el registro fiscal y se envía al organismo en el momento
+  del guardado. Una factura emitida no vuelve a ser provisional y,
+  con esos sistemas, no se puede modificar ni borrar: solo anular,
+  rectificar o, con VeriFactu, subsanar. Ver
   [TicketBAI](../guides/ticketbai.md) y
   [VeriFactu](../guides/verifactu.md).
 - `main.simplified` es **obligatorio** en el schema; envíalo
@@ -426,6 +433,19 @@ cambia alguna de las dos, se toma el tipo de cambio de la nueva fecha.
   de anulación al organismo (`meta.ticketbai.voided` /
   `meta.verifactu.registroAnulacion`).
 - Se emite el webhook **`invoice.voided`**.
+
+**Anular no es corregir.** Anular es declarar que la factura no
+tenía que emitirse: conserva su número y queda visible como anulada,
+sin dejar huecos en la numeración. Si la factura tenía que existir
+pero contiene errores, lo que corresponde es una
+[subsanación](../guides/verifactu.md#subsanaciones) (VeriFactu) o
+una factura rectificativa.
+
+**Restaurar una factura anulada.** Sin TicketBAI ni VeriFactu, un
+`PUT` con `main.voided = false` la restaura (la actividad lo
+registra como `unvoided`). Si la factura tiene información de
+VeriFactu, TicketBAI o Batuz, la restauración devuelve HTTP 400: el
+registro de anulación ya se ha comunicado y no se puede revertir.
 
 Una factura **anulada no es lo mismo que una factura borrada**: la
 anulada queda en el sistema con estado `voided`; la borrada se
