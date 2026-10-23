@@ -38,13 +38,22 @@ contabilidad es solo `journal`.
 
 | Fuente | Qué contiene | Scope | Medida por defecto |
 |---|---|---|---|
-| `invoices` | [Facturas de venta](./invoices.md) definitivas y no borradas, con los importes del documento. Un apunte manual de ventas no está aquí: está en `journal`. | `invoices:read` | `totalBeforeTaxes` |
-| `bills` | [Facturas de compra y tickets](./bills.md) definitivos y no borrados, con los importes del documento. Las nóminas y las amortizaciones no están aquí: están en `journal`. | `bills:read` | `totalBeforeTaxes` |
+| `invoices` | [Facturas de venta](./invoices.md) definitivas, no anuladas y no borradas, con los importes del documento. Un apunte manual de ventas no está aquí: está en `journal`. | `invoices:read` | `totalBeforeTaxes` |
+| `bills` | [Facturas de compra y tickets](./bills.md) definitivos, no anulados y no borrados, con los importes del documento. Las nóminas y las amortizaciones no están aquí: están en `journal`. | `bills:read` | `totalBeforeTaxes` |
 | `contacts` | [Contactos](./contacts.md) no borrados que la credencial puede ver: clientes, proveedores y empleados según sus permisos. | `contacts:read` | `count` |
 | `journal` | Apuntes del [diario](./journal.md) de todos los documentos y asientos, sin los asientos de mantenimiento (apertura, regularización y cierre). Es la única fuente contable. | `accounting:read` | `net` |
 
-Los borradores no entran salvo que lo pidas con el filtro `draft`. Los
-documentos borrados no entran nunca.
+Los borradores no entran salvo que lo pidas con el filtro `draft`, y los
+documentos anulados, salvo que los pidas con el filtro `state`
+(`voided` en `value` o entre los `values`). Los documentos borrados no
+entran nunca.
+
+En `invoices`, las facturas simplificadas (las de un destinatario sin
+identificador fiscal) entran como las demás. Las sustitutivas de
+simplificadas (F3) no entran nunca: repiten las ventas de las
+simplificadas que sustituyen y no tienen asiento, así que contarlas
+sumaría dos veces la misma venta. Los documentos con total cero entran
+y cuentan en `count`.
 
 ## Petición
 
@@ -203,7 +212,7 @@ de valores (`values`):
 | | `country` | `eq`, `in` | Código ISO del país del documento. |
 | | `series` | `eq`, `in` | Serie de numeración. |
 | | `currency` | `eq`, `in` | Moneda del documento. |
-| | `state` | `eq`, `in` | `pending`, `overdue`, `paid`, `overpaid` o `voided`. |
+| | `state` | `eq`, `in` | `pending`, `overdue`, `paid`, `overpaid` o `voided`. Sin este filtro, los anulados no entran. |
 | | `paymentMethod` | `eq`, `in` | Identificador del método de pago. |
 | | `total`, `totalBeforeTaxes` | `gte`, `lte`, `between` | Importes del documento. |
 | | `dueDate` | `gte`, `lte`, `between` | Fecha de vencimiento (`YYYY-MM-DD`). |
@@ -528,8 +537,13 @@ no en los días, que valen `null`.
 
 - Una consulta sin dimensiones sobre `invoices` da el mismo recuento y
   las mismas sumas que el [listado de facturas](./invoices.md) con los
-  mismos filtros y `totals=true`. Lo mismo entre `bills` y el
-  [listado de facturas de compra](./bills.md).
+  mismos filtros, `state` con todos los estados menos `draft` y `voided`,
+  y `totals=true`, salvo por las sustitutivas (F3), que el listado sí
+  incluye. Lo mismo entre `bills` y el
+  [listado de facturas de compra](./bills.md), que no tiene sustitutivas.
+- Una factura anulada tiene los importes a cero: pedirla con `state`
+  solo cambia `count` y las medidas que dependen de él (`average`,
+  `contacts`).
 - `journal` con la dimensión `category` da las mismas cifras que el
   [resumen de resultados](./reports.md#obtener-el-resumen-de-resultados):
   los apuntes de los grupos 6 y 7 del periodo, sin el asiento de
