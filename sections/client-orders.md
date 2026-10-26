@@ -237,6 +237,10 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 
 **Notas:**
 
+- `language` (opcional): idioma en que se imprime y se envía el documento, como
+  código ISO 639-1 (`es`, `ca`, `en`...). Si se omite, el del contacto al
+  asignarlo y, si no tiene, el idioma base de la plantilla. Solo tiene efecto
+  si la plantilla tiene ese idioma.
 - Si no envías `content.uuid`, la API asigna uno con prefijo `cor_`. Si lo
   envías y ya existe, responde `409 Conflict`.
 - El `state` del pedido se calcula desde las líneas: lo que envíes en

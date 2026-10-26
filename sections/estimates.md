@@ -246,6 +246,10 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 
 **Notas:**
 
+- `language` (opcional): idioma en que se imprime y se envía el documento, como
+  código ISO 639-1 (`es`, `ca`, `en`...). Si se omite, el del contacto al
+  asignarlo y, si no tiene, el idioma base de la plantilla. Solo tiene efecto
+  si la plantilla tiene ese idioma.
 - Si `contact` apunta a un ID existente, sus datos fiscales y de envío se
   toman de ese contacto.
 - `series` y `docNumber` se asignan automáticamente si no los envías, según la

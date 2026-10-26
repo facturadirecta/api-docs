@@ -17,6 +17,14 @@ gastos, ...) en su campo `paymentMethod` y determinan qué se imprime
 en la plantilla y cómo se procesa el cobro/pago en operaciones de
 banca.
 
+Un documento solo puede llevar un método de pago **de la empresa** (sin
+`contact`) o **de su propio contacto**, y en la dirección del documento:
+`receive` (o sin `direction`) en facturas, presupuestos, albaranes y
+pedidos; `send` (o sin `direction`) en gastos, órdenes de compra y
+nóminas. La misma regla vale para los métodos por defecto de un contacto
+(`receivePaymentMethod` y `sendPaymentMethod`). Si no se cumple, el alta
+o la actualización responde 400 con un error de validación.
+
 > En los ejemplos de esta página:
 >
 > - Los **UUIDs** (`pam_…`, `ban_…`, `con_…`) son ilustrativos. Cada
