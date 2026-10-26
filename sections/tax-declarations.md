@@ -175,14 +175,14 @@ guardado. Los valores actuales, del más reciente al más antiguo:
 | Modelo | `formVersion` |
 |---|---|
 | 303 | `303_e26v101` (desde 2026), `303_e25v102` (2025), `303_e24v201` (desde el 4T de 2024), `303_e24v201_3T` (3T de 2024), `303_e23`, `303_e22`, `303_e21v200` (desde el 3T de 2021), `303_e21v103`, `303_e19v10_10`, `303_e18v10_20`, `303_e18v10_10`, `303_e17v20_04`, `303_e15v32` |
-| 390 | `390_2025`, `390_2024`, `390_2023`, `390_2022`, `390_2021`, `390_2018`, `390_2017` |
+| 390 | `390_2026`, `390_2025`, `390_2024`, `390_2023`, `390_2022`, `390_2021`, `390_2018`, `390_2017` |
 | 190 | `190_2025`, `190_2024`, `190_2023`, `190_2022`, `190` |
 | 347 | `347_e25` (desde 2025), `347` |
 | 202 | `202_e25` (desde 2025), `202_e23` (desde 2023), `202_e17v48` |
 | 130 | `130_e15v12` (desde el 2T de 2024), `130_e15v11` |
 | 111, 115, 180, 349 | `111`, `115`, `180`, `349` |
 
-<!-- review: tabla derivada de TAX_DEFINITION_VERSIONS en packages/model/src/model/taxes/definitions/index.ts; verificado 2026-10-18 -->
+<!-- review: tabla derivada de TAX_DEFINITION_VERSIONS en packages/model/src/model/taxes/definitions/index.ts; verificado 2026-10-26 -->
 
 ## Operaciones
 
