@@ -101,6 +101,7 @@ comportamiento propio:
 | Campo | Significado |
 |---|---|
 | `contact` | El **proveedor**. Los impuestos y las cuentas contables se resuelven con el catálogo de compras. |
+| `language` | Idioma en que se imprime y se envía la orden, como código ISO 639-1 (`es`, `ca`, `en`...). Si no lo indicas, el del proveedor y, si no tiene, el idioma base de la plantilla. Solo tiene efecto si la plantilla tiene ese idioma. |
 | `state` | Estado de la orden. Calculado; se ignora al escribir. |
 | `dueDate` | Fecha de recepción prevista de la mercancía. |
 | `warehouse` | Almacén del documento a efectos de stock. Si no lo indicas se usa el almacén por defecto de la empresa. |

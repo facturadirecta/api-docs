@@ -168,6 +168,11 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 
 - Si omites `accounts`, el contacto se crea como cliente con las cuentas por defecto de la empresa.
 - `fiscalId` se valida cuando `fiscalIdCountry` es `ES` (o `country` es `ES` si no se indica `fiscalIdCountry`).
+- `language` (opcional) es el idioma en que se imprimen y se envían los
+  documentos del contacto, como código ISO 639-1 (`es`, `ca`, `en`...). Las
+  facturas, presupuestos y demás documentos nuevos lo toman al asignarles el
+  contacto. Sin valor, cada documento sale en el idioma base de su
+  plantilla.
 - La respuesta es el contacto creado completo, en el mismo formato que
   [Obtener un contacto](#obtener-un-contacto).
 

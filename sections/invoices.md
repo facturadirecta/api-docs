@@ -91,12 +91,13 @@ Los campos de `main` más importantes para crear una factura:
 | `fiscalPosition` | Sí | Régimen tributario aplicable. Determina los impuestos disponibles. |
 | `lines` | Sí | Array de líneas (ver más abajo). |
 | `theme` | No | ID de la plantilla de impresión. Si se omite, se usa la plantilla de la serie o la predeterminada de la empresa. Obtenible con [`GET /settings/themes`](./settings.md#lista-de-plantillas). |
+| `language` | No | Idioma en que se imprime y se envía la factura, como código ISO 639-1 (`es`, `ca`, `en`...). Si se omite, se toma el del contacto al asignarlo y, si el contacto no tiene, el idioma base de la plantilla. Solo tiene efecto si la plantilla tiene ese idioma; si no, se imprime en su idioma base. |
 | `account` | Sí | Cuenta contable de ingresos (típicamente 700*). |
 | `draft` | Sí | `true` → provisional; `false` → definitiva (contabiliza). |
 | `voided` | Sí | `true` solo para anular. |
 | `taxIncludedPrices` | No (default `false`) | Si los precios de las líneas incluyen impuestos. |
 | `external` | No | `true` para facturas creadas fuera del programa (no emite TicketBAI/VeriFactu). |
-| `paymentMethod` | No | ID de [método de cobro](./payment-methods.md). |
+| `paymentMethod` | No | ID de [método de cobro](./payment-methods.md): uno de la empresa (sin contacto) o uno del contacto de la factura, y de cobro (`receive` o sin dirección). |
 | `emails`, `emailsCc`, `emailsBcc` | No | Destinatarios por defecto para el envío por email (CSV en un solo string). |
 | `correctedInvoice` | No | ID de la factura rectificada cuando esta es rectificativa. Ver [Rectificativas](../guides/invoices-rectificativas.md). |
 | `verifactu` | No | Parámetros específicos VeriFactu (`TipoFactura`, `DescripcionOperacion`, etc.). Ver [VeriFactu](../guides/verifactu.md). |
