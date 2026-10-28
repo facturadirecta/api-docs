@@ -146,6 +146,9 @@ el `id` del registro de actividad es el identificador de la versión.
 | `usageCreditGrant`, `usageCreditPurchase`, `usageCreditChargeback`, `usageCreditAdjustment` | `amountCents`, `balanceAfterCents` |
 | `webhook` | `url`, `success`, `responseStatus` |
 | `webhook_endpoint_*`, `webhook_secret_rotated` | `endpointId`, `name`, `url`, `events`, `changedFields`, `failureCount` |
+| `report_subscription_created`, `report_subscription_updated`, `report_subscription_paused`, `report_subscription_resumed`, `report_subscription_deleted` | `subscriptionId`, `title`, `reportType`, `recipient`, `frequency`, `range`, `format`, `changedFields`, `source` (`subscription` o `savedQuery`), `reason` (`user`, `plan`, `permission`, `savedQueryDeleted` o `userGone`) |
+| `report_subscription_sent`, `report_subscription_failed` | `subscriptionId`, `title`, `reportType`, `recipient`, `frequency`, `range`, `format`, `test`, `period`, `sentFormat`, `pdfTooLarge`, `delivery` (`attached` o `link`), `error` |
+| `report_export` | `reportType`, `title`, `format` (`pdf`, `xlsx`, `csv` o `print`), `periodStart`, `periodEnd`, `requestedByEmail` |
 
 Las sincronizaciones bancarias del sistema anterior tienen sus propios
 tipos y devuelven los mismos campos que `bankSync` (más `error`) y
@@ -181,6 +184,13 @@ lista completa está en el openapi). Los más habituales:
   `automationInfo`, `automationReport`.
 - **Webhooks:** `webhook` (entrega), `webhook_endpoint_created` y el
   resto de cambios de endpoints.
+- **Informes:** `report_subscription_created`, `report_subscription_updated`,
+  `report_subscription_paused`, `report_subscription_resumed` y
+  `report_subscription_deleted` (el ciclo de vida de un envío programado, lo
+  haga un usuario o el sistema), `report_subscription_sent` y
+  `report_subscription_failed` (cada envío que sale por correo, también los de
+  prueba) y `report_export` (cada exportación de un informe a un fichero). No
+  incluyen la configuración ni los filtros del informe.
 
 Los registros antiguos pueden tener tipos que ya no se generan. Trata
 `type` como un valor abierto: si no lo conoces, usa `description`.
