@@ -33,13 +33,16 @@ datos actuales, y cada una tiene un tope de 30 segundos.
 ## Fuentes
 
 Cada fuente se llama como el recurso de la API cuyo listado devolvería
-esos documentos. No hay fuentes genéricas como «ventas» o «compras»: la
-contabilidad es solo `journal`.
+esos documentos; `invoiceLines` y `billLines` son las líneas de esos
+mismos documentos, con su producto. No hay fuentes genéricas como
+«ventas» o «compras»: la contabilidad es solo `journal`.
 
 | Fuente | Qué contiene | Scope | Medida por defecto |
 |---|---|---|---|
 | `invoices` | [Facturas de venta](./invoices.md) definitivas, no anuladas y no borradas, con los importes del documento. Un apunte manual de ventas no está aquí: está en `journal`. | `invoices:read` | `totalBeforeTaxes` |
+| `invoiceLines` | Líneas de las facturas de `invoices`, con su producto, su cantidad y su importe sin impuestos. Las líneas sin cantidad, como las de solo texto, no entran. Es la fuente de «¿qué producto vendo más?». | `invoices:read` | `totalBeforeTaxes` |
 | `bills` | [Facturas de compra y tickets](./bills.md) definitivos, no anulados y no borrados, con los importes del documento. Las nóminas y las amortizaciones no están aquí: están en `journal`. | `bills:read` | `totalBeforeTaxes` |
+| `billLines` | Líneas de las facturas de compra y tickets de `bills`, con su producto, su cantidad, su importe sin impuestos y su cuenta de gasto. Las líneas sin cantidad no entran. | `bills:read` | `totalBeforeTaxes` |
 | `contacts` | [Contactos](./contacts.md) no borrados que la credencial puede ver: clientes, proveedores y empleados según sus permisos. | `contacts:read` | `count` |
 | `journal` | Apuntes del [diario](./journal.md) de todos los documentos y asientos, sin los asientos de mantenimiento (apertura, regularización y cierre). Es la única fuente contable. | `accounting:read` | `net` |
 
@@ -49,7 +52,8 @@ documentos anulados, salvo que los pidas con el filtro `state`
 entran nunca.
 
 En `invoices`, las facturas simplificadas (las de un destinatario sin
-identificador fiscal) entran como las demás. Las sustitutivas de
+identificador fiscal) entran como las demás; el filtro `simplified` las
+separa. Las sustitutivas de
 simplificadas (F3) no entran nunca: repiten las ventas de las
 simplificadas que sustituyen y no tienen asiento, así que contarlas
 sumaría dos veces la misma venta. Los documentos con total cero entran
@@ -61,7 +65,7 @@ y cuentan en `count`.
 
 | Campo | Tipo | Significado |
 |---|---|---|
-| `from` | string | Fuente: `invoices`, `bills`, `contacts` o `journal`. Obligatorio. |
+| `from` | string | Fuente: `invoices`, `invoiceLines`, `bills`, `billLines`, `contacts` o `journal`. Obligatorio. |
 | `measures` | string[] | Hasta 10 medidas de la fuente. En las medidas de días, la agregación va como sufijo: `daysToPayment.median`. Sin indicar, la medida por defecto de la fuente. |
 | `dimensions` | string[] | Hasta 2 dimensiones por las que agrupar, en orden. Sin indicar, una sola fila con los totales. |
 | `period` | object | `start` y `end` (`YYYY-MM-DD`), las dos fechas incluidas. Por defecto, el año natural en curso. Como máximo, 5 años. En `contacts` es opcional y sin tope: sin `period` entran todos los contactos. |
@@ -70,7 +74,9 @@ y cuentan en `count`.
 | `filters` | object[] | Hasta 10 filtros `{ field, op, value }` o `{ field, op, values }`. Ver [Filtros](#filtros). |
 | `orderBy` | object[] | Hasta 4 criterios `{ field, direction }` sobre las medidas y dimensiones de la consulta. `direction` es `asc` o `desc` (por defecto). Sin indicar, la primera medida de mayor a menor. |
 | `limit` | integer | Filas como máximo, entre 1 y 500. Por defecto, 10. |
+| `limitPerGroup` | integer | Con dos dimensiones, como máximo estas filas de la segunda dentro de cada valor de la primera: las primeras según las medidas de `orderBy` (o la primera medida, de mayor a menor). «Los cinco productos más vendidos de cada cliente». No se combina con `compare`, `breakdown` ni `includeOther`. |
 | `includeOther` | boolean | Añade `other` con la suma de los grupos que quedan fuera de `limit`. No se aplica con `breakdown`. |
+| `amounts` | string | Moneda de los importes en `invoices`, `bills` y sus líneas: `document` (por defecto), cada importe en la de su documento, con la moneda como dimensión implícita si hay varias; `company`, el contravalor de cada documento en la moneda de la empresa (`meta.currency`), en un solo grupo aunque haya varias monedas. `pending` solo admite `document`; con multimoneda, `cost`, `margin` y `marginRate` solo admiten `company`. |
 
 El periodo acota por la fecha del documento en `invoices` y `bills` y por
 la fecha del apunte en `journal`. En `contacts` acota por la fecha de alta
@@ -89,16 +95,44 @@ dados de alta en esas fechas, sin el tope de 5 años. `compare` y
 | `contacts` | número | Contactos distintos de los documentos del grupo. Con la dimensión `fiscalId`, más de uno indica contactos duplicados con el mismo identificador fiscal. |
 | `totalBeforeTaxes` | importe | Suma de la base imponible de cada documento, en su moneda. Es la cifra que el listado muestra como base. |
 | `taxes` | importe | Suma de la diferencia entre el total y la base imponible: IVA, recargos y retenciones con su signo. |
+| `indirectTaxes` | importe | Suma de los impuestos sin las retenciones de IRPF: IVA, recargo de equivalencia, IGIC o IPSI. Es la columna «Impuestos» de los informes «Ventas por cliente» y «Compras por proveedor». |
+| `retentions` | importe | Suma de las retenciones de IRPF, en positivo. |
+| `gross` | importe | Base imponible más los impuestos sin descontar las retenciones (`totalBeforeTaxes` + `indirectTaxes`): el «Importe total» de los informes «Ventas por cliente» y «Compras por proveedor». |
 | `total` | importe | Suma del total de cada documento, impuestos incluidos. |
 | `pending` | importe | Importe pendiente de cobro (o de pago, en `bills`): el total menos lo cobrado. Negativo si se ha cobrado de más. |
 | `average` | importe | Base imponible media por documento: `totalBeforeTaxes` entre `count`. |
-| `daysToPayment` | días | Días entre la fecha del documento y la fecha del último cobro (o pago) que lo salda. Solo cuentan los documentos cobrados. |
-| `daysOverdue` | días | Días entre el vencimiento y el cobro, o hasta hoy si sigue pendiente; nunca negativos. Solo cuentan los documentos con vencimiento. |
+| `daysToPayment` | días | Días entre la fecha del documento y la fecha del último cobro (o pago) que lo salda. Solo cuentan los documentos cobrados. Cobros y pagos a fondo: en todos los planes de pago, no en el Gratis. |
+| `daysOverdue` | días | Días entre el vencimiento y el cobro, o hasta hoy si sigue pendiente; nunca negativos. Solo cuentan los documentos con vencimiento. Cobros y pagos a fondo: en todos los planes de pago, no en el Gratis. |
 
 Las medidas de días admiten la agregación como sufijo: `.avg` (por
 defecto), `.median`, `.p90`, `.min`, `.max` o `.count` (cuántos
 documentos entran en el cálculo). Puedes pedir varias a la vez:
 `daysToPayment` y `daysToPayment.median`.
+
+### Líneas de facturas de venta y de compra
+
+En `invoiceLines` y `billLines`:
+
+| Medida | Tipo | Significado |
+|---|---|---|
+| `count` | número | Líneas del conjunto filtrado. |
+| `documents` | número | Documentos distintos con alguna línea en el grupo. |
+| `contacts` | número | Contactos distintos de los documentos del grupo: por ejemplo, cuántos clientes compran un producto. |
+| `quantity` | número | Suma de las cantidades de las líneas, con hasta cuatro decimales. |
+| `totalBeforeTaxes` | importe | Suma del importe de las líneas sin impuestos, con el descuento de cada línea, en la moneda del documento. |
+| `averagePrice` | importe | `totalBeforeTaxes` entre `quantity`: el precio medio por unidad. |
+
+En `invoiceLines`, además, el margen de las ventas, incluido en todos los planes de pago
+(ver [Planes](#planes)). El coste sale del precio de compra que tiene hoy el
+producto, en la moneda de la empresa, así que estas medidas van siempre en esa
+moneda: con multimoneda, piden `amounts: "company"` para que las ventas también
+lo estén (si no, `400`).
+
+| Medida | Tipo | Significado |
+|---|---|---|
+| `cost` | importe | Cantidad por el precio de compra del producto (el de su faceta de compra, con su descuento). Las líneas sin producto, o con un producto sin precio de compra, no tienen coste: un grupo sin ninguna con coste da `null`. |
+| `margin` | importe | `totalBeforeTaxes` menos `cost`, solo de las líneas con coste. |
+| `marginRate` | ratio | `margin` entre la base imponible de las líneas con coste, como fracción (`0.25` es un 25 %). |
 
 ### Contactos
 
@@ -129,15 +163,27 @@ Todos los importes van en la moneda de la empresa.
 |---|---|---|
 | `contact` | entidad | Cliente o proveedor del documento. |
 | `contact.region` | entidad | Provincia de la dirección actual del contacto (la del contacto hoy, no la del documento). `id` es el código de provincia y `name` su nombre, para España. |
+| `contact.country` | código | País de la dirección actual del contacto (código ISO de dos letras), no el del documento. |
 | `fiscalId` | entidad | Identificador fiscal de la contraparte: NIF, CIF o NIE en España, NIF-IVA intracomunitario (VAT number) en la UE o el identificador fiscal de su país. `id` es el identificador normalizado (ver [Identificador fiscal](#identificador-fiscal)) y `name` el nombre de la contraparte en el documento más reciente del grupo. |
 | `country` | código | País del documento (ISO 3166-1 alpha-2). |
 | `series` | código | Serie de numeración. |
 | `currency` | código | Moneda del documento. |
 | `state` | valor | Estado del documento: `pending`, `overdue`, `paid`, `overpaid` o `voided`. |
 | `paymentMethod` | entidad | Método de cobro o de pago del documento. |
-| `agingBucket` | tramo | Antigüedad del pendiente: `notDue` (sin vencer), `1-30`, `31-60`, `61-90` y `over90` días de retraso; `settled` para los cobrados o pagados. |
-| `month`, `quarter`, `year` | periodo | Mes, trimestre o año natural de la fecha del documento (`2026-03`, `2026-Q1`, `2026`). |
+| `agingBucket` | tramo | Antigüedad del pendiente: `notDue` (sin vencer), `1-30`, `31-60`, `61-90` y `over90` días de retraso; `settled` para los cobrados o pagados. Cobros y pagos a fondo: en todos los planes de pago, no en el Gratis. |
+| `day`, `week`, `month`, `quarter`, `year` | periodo | Día, semana ISO (de lunes a domingo), mes, trimestre o año natural de la fecha del documento (`2026-03-31`, `2026-W14`, `2026-03`, `2026-Q1`, `2026`). |
 | `account` | código | Solo en `bills`: cuenta contable de gasto de la cabecera del documento. |
+
+### Líneas de facturas de venta y de compra
+
+En `invoiceLines` y `billLines`, además de `contact`, `contact.region`,
+`contact.country`, `fiscalId`, `country`, `series`, `currency` y las de
+tiempo, que son las del documento de la línea:
+
+| Dimensión | Valor | Significado |
+|---|---|---|
+| `product` | entidad | Producto o servicio de la línea, con `id`, `name` y `sku` (su referencia). Las líneas sin producto forman el grupo `null`. |
+| `account` | código | Cuenta contable de la línea: de ventas en `invoiceLines`, de gasto en `billLines`. |
 
 ### Contactos
 
@@ -159,7 +205,7 @@ Todos los importes van en la moneda de la empresa.
 | `contact` | entidad | Contacto del documento que generó el asiento (la factura, la compra, la nómina, el cobro o la cabecera de un asiento manual). Si el documento no tiene contacto y el asiento tiene una sola contrapartida de cliente, proveedor o acreedor (cuentas 43, 40 o 41), ese contacto. Si no, `unassigned`. |
 | `category` | valor | Origen del importe, el del [resumen de resultados](./reports.md): `invoices`, `currencyGains`, `otherIncome`, `bills`, `payrolls`, `depreciation`, `currencyLosses`, `otherExpenses`. Solo los apuntes de los grupos 6 y 7 tienen categoría. |
 | `documentType` | valor | Tipo del documento que generó el asiento: `invoice`, `bill`, `payroll`, `transaction` (cobros, pagos y asientos manuales) u `other`. |
-| `month`, `quarter`, `year` | periodo | Mes, trimestre o año natural de la fecha del apunte. |
+| `day`, `week`, `month`, `quarter`, `year` | periodo | Día, semana ISO, mes, trimestre o año natural de la fecha del apunte. |
 
 La dimensión `contact` del diario es la que responde «ventas de las
 cuentas 7 por cliente» incluyendo los asientos manuales, algo que
@@ -208,6 +254,7 @@ de valores (`values`):
 |---|---|---|---|
 | `invoices`, `bills` | `contact` | `eq`, `in` | Identificador del contacto (`con_…`). |
 | | `contact.region` | `eq`, `in` | Código de provincia de la dirección del contacto. |
+| | `contact.country` | `eq`, `in` | Código ISO del país de la dirección del contacto. |
 | | `fiscalId` | `eq`, `in` | Identificador fiscal de la contraparte, sea cual sea el contacto. Ver [Identificador fiscal](#identificador-fiscal). |
 | | `country` | `eq`, `in` | Código ISO del país del documento. |
 | | `series` | `eq`, `in` | Serie de numeración. |
@@ -218,7 +265,13 @@ de valores (`values`):
 | | `dueDate` | `gte`, `lte`, `between` | Fecha de vencimiento (`YYYY-MM-DD`). |
 | | `tag` | `eq`, `in` | Etiquetas que el documento debe tener, todas ellas. |
 | | `draft` | `eq` | `true` incluye los borradores junto a los definitivos. |
+| `invoices` | `simplified` | `eq` | `true` deja solo las facturas simplificadas; `false` las deja fuera. Sin este filtro entran las dos. |
 | `bills` | `account` | `eq`, `in`, `startsWith` | Cuenta contable de gasto del documento. |
+| `invoiceLines`, `billLines` | `product` | `eq`, `in` | Identificador del producto (`pro_…`). |
+| | `hasProduct` | `eq` | `true` deja solo las líneas con producto; `false`, solo las de texto libre. |
+| | `account` | `eq`, `in`, `startsWith` | Cuenta contable de la línea. |
+| | `contact`, `contact.region`, `contact.country`, `fiscalId`, `country`, `series`, `currency`, `tag`, `draft` | | Los del documento de la línea, como en `invoices` y `bills`. |
+| `invoiceLines` | `simplified` | `eq` | Las líneas de facturas simplificadas, solas (`true`) o fuera (`false`). |
 | `contacts` | `address.region`, `address.country` | `eq`, `in` | Provincia y país de la dirección. |
 | | `fiscalId` | `eq`, `in` | Identificador fiscal del contacto. |
 | | `isClient`, `isProvider`, `isEmployee` | `eq` | Faceta del contacto. |
@@ -237,23 +290,25 @@ de valores (`values`):
 | `meta.period` | object | El periodo consultado, `start` y `end`. Ausente en `contacts` sin `period`. |
 | `meta.compare` | object | Con `compare`: `kind`, `start` y `end` del periodo de referencia. |
 | `meta.breakdown` | string | Con `breakdown`: la unidad de los tramos. |
-| `meta.currency` | string | Moneda de los importes cuando `currency` no es una dimensión de la respuesta. |
+| `meta.currency` | string | Moneda de los importes cuando `currency` no es una dimensión de la respuesta o cuando van en la de la empresa (`amounts: "company"`). |
 | `meta.limit`, `meta.generatedAt` | | El límite aplicado y el momento del cálculo. |
 | `columns` | object[] | Qué es cada clave de las filas, en orden: `id`, `kind` (`dimension` o `measure`), `title`, `description`, `type` y, en las medidas, `measure` y `period`. |
 | `rows` | object[] | Los grupos, ordenados y limitados. Una clave por columna. |
-| `totals` | object | El valor de cada medida sobre el conjunto filtrado completo, no solo sobre las filas devueltas. |
-| `other` | object | Con `includeOther`, si hay más grupos que `limit`: `groups` (cuántos quedan fuera) y la suma de cada medida que se puede sumar; `null` en las que no (`average`, las de días). |
+| `totals` | object | El valor de cada medida sobre el conjunto filtrado completo, no solo sobre las filas devueltas. Con `compare`, también el del periodo de referencia, la diferencia y la variación (`<medida>_reference`, `_difference` y `_variance`). |
+| `other` | object | Con `includeOther`, si hay más grupos que `limit`: `groups` (cuántos quedan fuera) y la suma de cada medida que se puede sumar; `null` en las que no (`average`, las de días). Con `compare`, también `<medida>_reference`, `_difference` y `_variance`; la referencia del resto es el total de referencia menos el de las filas, así que la tabla cuadra con `totals`. |
 | `truncated` | boolean | Había más grupos que `limit`. |
 
 En cada fila, el valor de una dimensión depende de su tipo:
 
-- **Entidad** (`contact`, `fiscalId`, `paymentMethod`, `thirdParty`, `account`, las
-  provincias): `{ "id", "name" }`, más `type` en `thirdParty` y `webUrl`
+- **Entidad** (`contact`, `product`, `fiscalId`, `paymentMethod`, `thirdParty`, `account`, las
+  provincias): `{ "id", "name" }`, más `type` en `thirdParty`, `fiscalId` y
+  `country` (los del contacto hoy) en `contact`, `sku` en `product`, y `webUrl`
   cuando el elemento tiene ficha en la aplicación (ver
   [Abrir un resultado en FacturaDirecta](../guides/overview.md#abrir-un-resultado-en-facturadirecta)).
   `name` es `null` si el elemento ya no existe.
-- **Periodo** (`month`, `quarter`, `year`, `createdMonth` y la dimensión
-  `period` del desglose): `{ "id", "start", "end" }`.
+- **Periodo**: las dimensiones de tiempo (`day`, `week`, `month`, `quarter`,
+  `year`, `createdMonth`) valen un texto (`2026-W14`, `2026-03`); la dimensión
+  `period` del desglose, `{ "id", "start", "end" }`.
 - El resto: un texto, un número o un booleano. Una dimensión sin valor
   (un documento sin país, por ejemplo) vale `null` y forma su propio
   grupo.
@@ -269,9 +324,12 @@ un 20 %, o `null` si la referencia es cero). Con `breakdown`, la columna
 `period` identifica el tramo de cada fila.
 
 En empresas con multimoneda, `currency` es una dimensión implícita de
-`invoices` y `bills`: aparece en las filas aunque no la pidas y los
-importes de monedas distintas nunca se mezclan. Los importes de
-`journal` van siempre en la moneda de la empresa.
+`invoices`, `bills` y sus líneas cuando la consulta pide importes:
+aparece en las filas aunque no la pidas y los importes de monedas
+distintas nunca se mezclan. Una consulta sin importes (documentos,
+cantidades, días) no se separa por moneda. Con `amounts: "company"` los
+importes van en la moneda de la empresa y tampoco se separan. Los
+importes de `journal` van siempre en la moneda de la empresa.
 
 ## Operaciones
 
@@ -533,6 +591,39 @@ curl "https://app.facturadirecta.com/api/$COMPANY_ID/query" \
 El segundo cliente tiene dos facturas sin cobrar: cuenta en `count`, pero
 no en los días, que valen `null`.
 
+### Ejemplo: los productos que más vendes a cada cliente
+
+Las tres primeras líneas de producto de cada cliente, por unidades, sin
+las líneas de texto libre:
+
+```bash
+curl "https://app.facturadirecta.com/api/$COMPANY_ID/query" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "from": "invoiceLines",
+    "measures": ["quantity", "totalBeforeTaxes"],
+    "dimensions": ["contact", "product"],
+    "filters": [{ "field": "hasProduct", "op": "eq", "value": true }],
+    "orderBy": [{ "field": "contact", "direction": "asc" }, { "field": "quantity", "direction": "desc" }],
+    "limitPerGroup": 3,
+    "limit": 100
+  }'
+```
+
+```json
+{
+  "rows": [
+    { "contact": { "id": "<id-contacto>", "name": "Cliente Uno", "webUrl": "…" }, "product": { "id": "<id-producto>", "name": "Tornillo M4", "sku": "TOR-M4", "webUrl": "…" }, "quantity": 1200, "totalBeforeTaxes": 240 },
+    { "contact": { "id": "<id-contacto>", "name": "Cliente Uno", "webUrl": "…" }, "product": { "id": "<id-producto-2>", "name": "Tuerca M4", "sku": "TUE-M4", "webUrl": "…" }, "quantity": 800, "totalBeforeTaxes": 96 }
+  ],
+  "totals": { "quantity": 5310, "totalBeforeTaxes": 1874.5 }
+}
+```
+
+`totals` es el de todas las líneas del filtro, no solo el de las filas
+que deja `limitPerGroup`.
+
 ## Qué cifras salen
 
 - Una consulta sin dimensiones sobre `invoices` da el mismo recuento y
@@ -541,6 +632,10 @@ no en los días, que valen `null`.
   y `totals=true`, salvo por las sustitutivas (F3), que el listado sí
   incluye. Lo mismo entre `bills` y el
   [listado de facturas de compra](./bills.md), que no tiene sustitutivas.
+- `invoiceLines` agrupado por `product` da las mismas cantidades e
+  importes que el informe «Ventas por producto» de la aplicación, y
+  `billLines`, que «Compras por producto», salvo que este cuenta también
+  las líneas de las compras anuladas.
 - Una factura anulada tiene los importes a cero: pedirla con `state`
   solo cambia `count` y las medidas que dependen de él (`average`,
   `contacts`).
@@ -559,9 +654,29 @@ no en los días, que valen `null`.
 
 ## Permisos
 
-Cada fuente necesita su scope: `invoices:read`, `bills:read`,
+Cada fuente necesita su scope: `invoices:read` (también para
+`invoiceLines`), `bills:read` (también para `billLines`),
 `contacts:read` o `accounting:read`. En `contacts`, la credencial solo
 ve las facetas (clientes, proveedores, empleados) que su permiso le da.
+
+## Planes
+
+Todos los planes consultan sus datos. Dos grupos de nombres están incluidos
+en todos los planes de pago y no en el Gratis, igual en la aplicación, en la
+API y en el MCP:
+
+- **Cobros y pagos a fondo**: la dimensión `agingBucket` y las medidas
+  `daysToPayment` y `daysOverdue`, en `invoices` y `bills`. Sin ellos la
+  consulta responde `403` con `code: plan_limit_exceeded` y
+  `hint.features: ["collectionsAnalytics"]`.
+- **Margen**: las medidas `cost`, `margin` y `marginRate` de `invoiceLines`.
+  Sin él, `403` con `hint.features: ["marginAnalytics"]`.
+
+Los nombres siguen en el vocabulario y en las descripciones de `describe`,
+así que una aplicación puede anunciar lo que la empresa podría consultar si
+ampliara su plan. Un administrador de la empresa lo amplía en FacturaDirecta;
+volver a conectar la aplicación no lo soluciona. La contabilidad (`journal`)
+no depende del plan en la API: la decide el scope `accounting:read`.
 
 ## Errores comunes
 
@@ -572,9 +687,13 @@ ve las facetas (clientes, proveedores, empleados) que su permiso le da.
   `taxId`, `nif` o `vat` proponen `fiscalId`. También `compare` y
   `breakdown` a la vez, más de 2 dimensiones, 10 medidas o 10 filtros,
   un periodo de más de 5 años o de más de 24 tramos, una fecha que no
-  existe, un operador que el filtro no admite o `limit` fuera de 1 a 500.
+  existe, un operador que el filtro no admite, `limit` fuera de 1 a 500 o
+  `limitPerGroup` sin dos dimensiones.
 - `403 Forbidden` (`token_scope_missing`): la credencial no tiene el
   scope de la fuente.
+- `403 Forbidden` (`plan_limit_exceeded`): la consulta pide cifras de
+  cobros a fondo o de margen que el plan de la empresa no incluye;
+  `hint.features` dice cuál falta (ver [Planes](#planes)).
 - `422 Unprocessable Entity` (`report_query_timeout`): la consulta ha
   tardado más de 30 segundos. Acota el periodo, las dimensiones o los
   filtros.
