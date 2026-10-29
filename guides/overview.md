@@ -75,7 +75,7 @@ Ventajas:
 - Cada clave pertenece a la empresa donde se creó.
 - No depende de una sesión de usuario.
 
-Consulta [API keys](./api-keys.md) para la referencia técnica y
+Consulta [API keys](../sections/api-keys.md) para la referencia técnica y
 [API keys en Ajustes](https://help.facturadirecta.com/es/articles/15157077-api-keys)
 para crear la clave desde la interfaz.
 
