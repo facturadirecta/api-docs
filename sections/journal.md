@@ -202,7 +202,7 @@ general.
 Esta página cubre los matices funcionales y los casos típicos. Para
 el contrato completo del item (incluyendo el schema `Accounting`
 devuelto por `related=idAccounting`), consulta el
-[Swagger UI](https://www.facturadirecta.com/api) o el
+[explorador de la API](https://www.facturadirecta.com/desarrolladores/api/explorador/) o el
 [openapi crudo](https://app.facturadirecta.com/openapi.json).
 
 ## Endpoints

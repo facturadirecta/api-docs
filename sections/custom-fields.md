@@ -126,5 +126,5 @@ de campos activos, por lo que puede devolver `403`.
 - **`customFields:write`** — Gestión de campos personalizados.
 
 Para la referencia exhaustiva de campos del body y respuesta, consulta el
-[Swagger UI](https://www.facturadirecta.com/api) o el
+[explorador de la API](https://www.facturadirecta.com/desarrolladores/api/explorador/) o el
 [openapi crudo](https://app.facturadirecta.com/openapi.json).

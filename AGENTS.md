@@ -18,6 +18,11 @@ repositorio**. Se sirve viva en:
 Esa URL es la fuente autoritativa. El Markdown de este repo es la capa
 editorial que explica cómo usar la API.
 
+La web publica este mismo contenido en
+https://www.facturadirecta.com/desarrolladores/api/, con un explorador interactivo de la API en
+https://www.facturadirecta.com/desarrolladores/api/explorador/ y un índice para agentes en
+https://www.facturadirecta.com/desarrolladores/llms.txt.
+
 ## Estructura
 
 - `sections/<resource>.md` — un fichero por recurso de la API.

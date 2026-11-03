@@ -251,7 +251,7 @@ Esta página cubre los matices funcionales de `company`, `series` y
 Para impuestos, la referencia funcional está en la
 [guía de Impuestos](../guides/taxes.md). Para el contrato completo
 campo a campo, consulta el
-[Swagger UI](https://www.facturadirecta.com/api) o el
+[explorador de la API](https://www.facturadirecta.com/desarrolladores/api/explorador/) o el
 [openapi crudo](https://app.facturadirecta.com/openapi.json).
 
 ## Endpoints

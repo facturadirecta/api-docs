@@ -188,7 +188,7 @@ URL para el usuario, no como una URL a la que enviar `$ACCESS_TOKEN`.
 paginadas.
 
 **Parámetros de consulta específicos** (los más comunes; lista
-completa en el Swagger UI):
+completa en el [explorador de la API](https://www.facturadirecta.com/desarrolladores/api/explorador/)):
 
 - **`search`** — búsqueda aproximada en el texto de la factura (título, líneas, notas) y en el nombre de su cliente: todas las palabras, sin distinguir acentos ni mayúsculas. Es la búsqueda rápida del listado de la aplicación; la [búsqueda global](./search.md) la lanza sobre todos los tipos a la vez.
 - **`minDate`**, **`maxDate`** — rango por fecha de la factura.
@@ -709,7 +709,7 @@ recurso. Para el contrato completo del schema (todos los campos del
 `Invoice`, los `$ref` a `documentCounterpart`, `invoiceMainFacturae`,
 `invoiceMainVerifactu`, `invoiceMetaTicketbai`,
 `invoiceMetaVerifactu`, etc.), consulta el
-[Swagger UI](https://www.facturadirecta.com/api) o el
+[explorador de la API](https://www.facturadirecta.com/desarrolladores/api/explorador/) o el
 [openapi crudo](https://app.facturadirecta.com/openapi.json).
 
 Los detalles regulatorios y los flujos especiales viven en las

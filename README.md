@@ -17,6 +17,15 @@ Esa URL es la fuente de verdad del contrato de la API. Las páginas Markdown
 de este repositorio son una capa editorial encima de esa especificación:
 explicaciones, ejemplos, guías y matices de comportamiento.
 
+## Documentación en la web
+
+Estas mismas páginas se publican en la sección de desarrolladores de la web
+de FacturaDirecta, que añade un explorador interactivo de la API:
+
+- Guías y referencia: https://www.facturadirecta.com/desarrolladores/api/
+- Explorador de la API: https://www.facturadirecta.com/desarrolladores/api/explorador/
+- Índice para agentes (`llms.txt`): https://www.facturadirecta.com/desarrolladores/llms.txt
+
 ## Recursos
 
 - [Actividad](./sections/activity.md)

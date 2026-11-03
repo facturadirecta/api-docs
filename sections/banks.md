@@ -386,7 +386,7 @@ general.
 
 Esta página cubre los matices funcionales. Para el contrato completo
 del schema (incluyendo los `oneOf` por `subtype`), consulta el
-[Swagger UI](https://www.facturadirecta.com/api) o el
+[explorador de la API](https://www.facturadirecta.com/desarrolladores/api/explorador/) o el
 [openapi crudo](https://app.facturadirecta.com/openapi.json).
 
 ## Endpoints
