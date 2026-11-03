@@ -205,6 +205,6 @@ respuesta lleva las cabeceras `X-RateLimit-Limit`, `X-RateLimit-Remaining` y
 - Revisa [Paginación y filtros estándar](./pagination.md).
 - Revisa [Idempotencia y reintentos seguros](./idempotency.md) antes de
   automatizar altas, cobros o una migración.
-- Explora la [referencia OpenAPI](https://www.facturadirecta.com/api).
+- Explora la referencia completa en el [explorador de la API](https://www.facturadirecta.com/desarrolladores/api/explorador/).
 - Configura [webhooks](https://help.facturadirecta.com/es/articles/13905261-webhooks) si tu integración necesita recibir cambios
   en tiempo real.

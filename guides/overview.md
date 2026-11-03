@@ -46,7 +46,7 @@ https://app.facturadirecta.com/api
 
 Recursos técnicos:
 
-- **Swagger UI / referencia navegable**: `https://www.facturadirecta.com/api`
+- **Explorador de la API (referencia navegable del OpenAPI)**: [https://www.facturadirecta.com/desarrolladores/api/explorador/](https://www.facturadirecta.com/desarrolladores/api/explorador/)
 - **OpenAPI crudo**: `https://app.facturadirecta.com/openapi.json`
 
 Puedes importar el OpenAPI en herramientas como Postman o Insomnia, o generar

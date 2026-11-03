@@ -202,7 +202,7 @@ flujo OAuth.
 
 Esta página cubre el único endpoint del recurso y todos sus campos.
 Para el contrato JSON literal, consulta el
-[Swagger UI](https://www.facturadirecta.com/api) o el
+[explorador de la API](https://www.facturadirecta.com/desarrolladores/api/explorador/) o el
 [openapi crudo](https://app.facturadirecta.com/openapi.json).
 
 ## Endpoints

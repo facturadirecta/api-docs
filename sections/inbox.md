@@ -516,7 +516,7 @@ general.
 
 Esta página cubre los matices funcionales y los casos típicos. Para la
 referencia exhaustiva de todos los campos del body y la respuesta,
-consulta el [Swagger UI](https://www.facturadirecta.com/api) o el
+consulta el [explorador de la API](https://www.facturadirecta.com/desarrolladores/api/explorador/) o el
 [openapi crudo](https://app.facturadirecta.com/openapi.json).
 
 ## Endpoints

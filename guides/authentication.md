@@ -25,7 +25,7 @@ A partir de ahí, los paths que se documentan en cada recurso (por ejemplo
 
 Recursos auxiliares:
 
-- **Referencia OpenAPI navegable (Swagger UI):** `https://www.facturadirecta.com/api`
+- **Explorador de la API (referencia OpenAPI navegable):** [https://www.facturadirecta.com/desarrolladores/api/explorador/](https://www.facturadirecta.com/desarrolladores/api/explorador/)
 - **Especificación OpenAPI cruda (`openapi.json`):** `https://app.facturadirecta.com/openapi.json`
 
 ## OAuth2
