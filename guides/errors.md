@@ -189,10 +189,10 @@ capacidad del plan contratado, la respuesta incluye el código estable
 ```json
 {
   "statusCode": 403,
-  "message": "La empresa está en modo solo lectura por exceder el límite de clientes contratados (10). Por favor, amplía tu suscripción o reduce el número de clientes de tu empresa.",
+  "message": "Has llegado al límite de clientes disponibles en el plan gratuito (10). Por favor, amplía tu suscripción o reduce el número de clientes de tu empresa.",
   "errors": [
     {
-      "message": "La empresa está en modo solo lectura por exceder el límite de clientes contratados (10). Por favor, amplía tu suscripción o reduce el número de clientes de tu empresa.",
+      "message": "Has llegado al límite de clientes disponibles en el plan gratuito (10). Por favor, amplía tu suscripción o reduce el número de clientes de tu empresa.",
       "code": "plan_limit_exceeded"
     }
   ]
