@@ -48,10 +48,20 @@ consultan con sus propios recursos.
   factura de *Acme Soluciones SL* con una línea «Consultoría trimestral».
 - El **número del documento** se compara normalizado: sin ceros a la
   izquierda y con guiones y barras equivalentes a espacios. `F-2026-12`,
-  `F 2026 12` y `F-2026-0012` encuentran la misma factura. En las facturas de
-  compra y tickets se compara la referencia del proveedor.
+  `F 2026 12` y `F-2026-0012` encuentran la misma factura. Solo se compara si
+  el texto lleva alguna cifra: sin cifras solo podría coincidir con la serie.
+  En las facturas de compra y tickets se compara la referencia del proveedor,
+  aunque el texto no lleve cifras.
 - Dentro de cada tipo, las coincidencias de número van primero; el resto, de
   más reciente a más antiguo.
+
+## Tope de tiempo
+
+La búsqueda recorre los documentos de cada tipo de más reciente a más antiguo
+hasta reunir los resultados. En una empresa con cientos de miles de documentos,
+un texto que no aparece en los recientes puede tardar demasiado: pasado su tope
+de tiempo, la respuesta es `422` con el código `search_query_timeout`. Para
+evitarlo, acota la búsqueda con `types` o con un texto más concreto.
 
 ## Permisos
 
