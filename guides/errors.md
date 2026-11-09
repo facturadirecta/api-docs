@@ -161,7 +161,7 @@ El `403` por permisos indica el scope en `requiredScope` y el motivo en
 | --- | --- | --- |
 | `token_scope_missing` | El token o la API key no incluye el scope. | Volver a autorizar pidiendo el scope, o usar una API key que lo tenga. |
 | `user_role_insufficient` | El usuario no pertenece a la empresa o su rol no lo permite. El nivel de rol «solo lo asignado» no da acceso por la API. | Pedir el permiso a un administrador de la empresa: volver a autorizar no lo arregla. |
-| `plan_api_not_available` | El plan de la empresa no incluye el acceso por la API. | Cambiar de plan. |
+| `plan_api_not_available` | El plan de la empresa no incluye el acceso por la API. Es el caso de la versión reducida de FacturaDirecta incluida en la suscripción de Abaq. | Cambiar a un plan de pago. |
 | `connection_permission_insufficient` | La aplicación conectada no tiene el permiso necesario en esa empresa. | Abrir `manageUrl`, ampliar el permiso y repetir la llamada. |
 | `company_not_in_connection` | La empresa no está autorizada para esa aplicación conectada. | Abrir `manageUrl`, añadir la empresa y repetir la llamada. |
 | `connection_required` | El cliente MCP o CLI exige una conexión, pero la petición no la presenta. | Volver a conectar la aplicación o iniciar sesión de nuevo en el CLI. |

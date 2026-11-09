@@ -140,8 +140,20 @@ tabla, con qué categoría existe en cada catálogo:
 | `agriculture` | — | ✓ | Compensación a explotaciones en régimen especial agrario. |
 
 Como el conjunto de valores puede ampliarse ante cambios normativos, **no
-asumas un closed set**: trata `category` como un enum extensible y degrada
-gracefully con valores desconocidos.
+asumas un conjunto cerrado**: trata `category` como un enum extensible y
+mantén un comportamiento compatible ante valores desconocidos.
+
+### Compensación agraria y retención de IRPF
+
+En una línea de compra que combina un impuesto con `category: "agriculture"`
+y una retención del grupo `IRPF`, la base de la retención incluye la base de
+la línea y la compensación agraria. Por ejemplo, una base de `100` con una
+compensación del `12%` produce una base de retención de `112`.
+
+En modo `calcTotal`, FacturaDirecta aplica este cálculo al generar
+`main.taxes`; conviene dejar el agregado vacío y leerlo de la respuesta. Las
+líneas sin compensación agraria mantienen como base de retención la base de la
+línea.
 
 ### Impuestos autorepercutidos
 
