@@ -170,8 +170,8 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
 **Parámetros del body:**
 
 - `content.type` — siempre `"deliveryNote"`.
-- `content.main` — campos del documento. `contact` y `lines` son las
-  partes esenciales.
+- `content.main` — campos del documento. `lines` es la parte esencial;
+  `contact` es opcional.
 - `tags` (opcional).
 
 **Notas:**
@@ -180,7 +180,11 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
   código ISO 639-1 (`es`, `ca`, `en`...). Si se omite, el del contacto al
   asignarlo y, si no tiene, el idioma base de la plantilla. Solo tiene efecto
   si la plantilla tiene ese idioma.
-- Si `contact` apunta a un ID existente, sus datos se toman del contacto.
+- Si omites `contact` o envías `null`, el albarán se crea sin contacto ni
+  datos de destinatario y usa la configuración predeterminada de la
+  empresa. Si envías un ID, debe corresponder a un contacto existente con
+  faceta de cliente y sus datos se copian al albarán. Un albarán con IRPF
+  sí requiere contacto.
 - `series` y `docNumber` se asignan automáticamente si no los envías,
   según la numeración configurada para albaranes.
 - La respuesta es el albarán creado completo, en el mismo formato que
@@ -244,10 +248,10 @@ y `meta`, que no cambian. Lo que FacturaDirecta rellena al crear (`account`, `du
 `exchangeRate`, se conserva el anterior mientras no cambien ni la moneda ni la fecha; si
 cambia alguna de las dos, se toma el tipo de cambio de la nueva fecha.
 
-Para cambiar el estado del documento, envía el contacto y las líneas
-inalterados junto con el nuevo `baseState` (y, si aplica,
-`deliveredDate`/`deliveredTo`, `deliveryReceipt` o
-`rejectedDate`/`rejectedBy`).
+Para cambiar el estado del documento, envía las líneas inalteradas y el
+valor actual de `contact` —incluido `null` si no tiene— junto con el nuevo
+`baseState` (y, si aplica, `deliveredDate`/`deliveredTo`,
+`deliveryReceipt` o `rejectedDate`/`rejectedBy`).
 
 **Restricciones:**
 
@@ -402,8 +406,9 @@ Sirven para ver qué se cambió y recuperar datos: ver
 
 - `400` — `minDate` o `maxDate` es una fecha que no existe, como
   `2026-02-30`. Ver [Fechas que no existen](../guides/errors.md#fechas-que-no-existen-400).
-- `400 ValidationError` — falta `contact` o `lines` con `quantity` /
-  `unitPrice` inválidos.
+- `400 ValidationError` — `contact` referencia un contacto inexistente o
+  sin faceta de cliente, el albarán lleva IRPF sin contacto, o `lines`
+  contiene valores `quantity` / `unitPrice` inválidos.
 - `400 ValidationError` — `baseState` con valor no admitido (debe ser
   `pending`, `delivered`, `closed` o `rejected`).
 - `409 Conflict` — borrado o modificación incompatible con una factura

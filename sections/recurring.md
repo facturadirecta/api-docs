@@ -133,8 +133,10 @@ Otros campos del trigger:
 ```
 
 `template.main` es una estructura equivalente a la de una factura de
-venta normal (ver [Facturas de venta](./invoices.md)). Puede incluir
-`customFields`, un mapa de valores indexado por el ID estable `cfi_<uuid v4>`
+venta normal (ver [Facturas de venta](./invoices.md)). `contact` es
+opcional: si lo omites o envías `null`, cada ejecución genera una factura
+simplificada sin contacto. Las plantillas con IRPF sí requieren un contacto.
+También puede incluir `customFields`, un mapa de valores indexado por el ID estable `cfi_<uuid v4>`
 de cada [campo personalizado](./custom-fields.md). Las definiciones borradas
 siguen siendo válidas; un ID desconocido o con formato incorrecto produce
 `400 Bad Request`.
@@ -242,6 +244,9 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
   esa primera factura hasta que llegue la siguiente ocurrencia mensual.
 - Si `enabled: false`, la recurrente se guarda pero las ejecuciones
   programadas se omiten hasta que se reactive.
+- `content.main.action.template.main.contact` es opcional. Sin contacto,
+  las ejecuciones crean facturas simplificadas y aplican la configuración
+  predeterminada de la empresa.
 - Los planes 2026 limitan el número de recurrentes **activas a la vez**
   (Gratis 2, Bronce 20, Plata 200, Oro y Diamante sin límite; cuentan
   todas las automatizaciones activas, no solo las facturas). Con el cupo lleno, crear
