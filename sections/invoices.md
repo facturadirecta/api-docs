@@ -39,7 +39,7 @@ factura. El "tipo" emerge de la combinación de varios campos:
 | Subtipo | Cómo se identifica |
 |---|---|
 | **Completa** | `main.simplified !== true`. Normalmente tiene `main.contact` con datos fiscales. Si TicketBAI no está activo, también puede dirigirse a un contacto extracomunitario sin identificador fiscal; con VeriFactu se registra como F2. |
-| **Simplificada** | `main.simplified === true`. Típicamente `main.contact` es `null` o el destinatario no tiene datos fiscales suficientes. |
+| **Simplificada** | `main.simplified === true`. Típicamente `main.contact` se omite, es `null` o el destinatario no tiene datos fiscales suficientes. |
 | **Externa** | `main.external === true` — generada fuera del programa. **No emite a TicketBAI ni VeriFactu**, aunque sí contabiliza. |
 | **Sustitutiva** | `main.substitution === true` con `main.substitutedInvoices` rellenado. Se crea con el endpoint dedicado [`POST /invoices/substitution`](#crear-factura-sustitutiva). Corresponde a F3 en VeriFactu. Ver [guía de Sustitutivas](../guides/invoices-sustitutivas.md). |
 | **Rectificativa** | Asociada a una factura previa vía `main.correctedInvoice` y/o emitida en una serie de rectificativas (`invoiceType: complete_correction` o `simplified_correction` en [settings](./settings.md)). Ver [guía de Rectificativas](../guides/invoices-rectificativas.md). |
@@ -81,7 +81,7 @@ Los campos de `main` más importantes para crear una factura:
 
 | Campo | Requerido | Significado |
 |---|---|---|
-| `contact` | Sí salvo simplificada | ID del cliente (`con_*`). En simplificadas: `null`. |
+| `contact` | No | ID del cliente (`con_*`). Si lo omites o envías `null`, la factura se crea sin contacto y se clasifica como simplificada. Si lo indicas, debe existir y tener faceta de cliente. |
 | `date` | Sí | Fecha de emisión (`YYYY-MM-DD`). |
 | `dueDate` | Sí | Fecha de vencimiento. Si hay `installments`, se ajusta a la fecha más tardía del calendario. |
 | `installments` | No | Calendario de vencimientos múltiples; cada elemento contiene `date`, `amount` y `currency`. |
@@ -289,12 +289,18 @@ campos calculados se generan en el servidor).
   rectificar o, con VeriFactu, subsanar. Ver
   [TicketBAI](../guides/ticketbai.md) y
   [VeriFactu](../guides/verifactu.md).
-- `main.simplified` es **obligatorio** en el schema; envíalo
-  explícitamente. Si `main.contact` es `null`, debe ser `true`.
+- `main.contact` es opcional. Si lo omites o envías `null`, la factura se
+  crea sin contacto y FacturaDirecta calcula `main.simplified: true`. Si
+  envías un ID, debe corresponder a un contacto existente con faceta de
+  cliente.
+- `main.simplified` no es obligatorio al escribir: FacturaDirecta lo
+  calcula a partir del contacto y de sus datos fiscales. Las facturas
+  sustitutivas y las facturas con IRPF sí requieren contacto; Facturae y
+  FACe también necesitan un cliente identificado.
 
 **Parámetros globales aceptados:** `accept-version`.
 
-###### Ejemplo de request JSON (factura completa, regalo a un cliente)
+###### Ejemplo de request JSON (factura completa con cliente)
 
 ```json
 {
@@ -683,7 +689,9 @@ Sirven para ver qué se cambió y recuperar datos: ver
 - `400` — `minDate` o `maxDate` es una fecha que no existe, como
   `2026-02-30`. Ver [Fechas que no existen](../guides/errors.md#fechas-que-no-existen-400).
 - `400 ValidationError` — combinaciones incoherentes:
-  - `main.contact = null` con `main.simplified = false`.
+  - `main.contact` referencia un contacto inexistente o sin faceta de
+    cliente.
+  - una factura sustitutiva o con IRPF no tiene contacto.
   - `main.exchangeRate <= 0`.
   - `main.docNumber.series` no presente en
     `settings.numbering.invoice`.

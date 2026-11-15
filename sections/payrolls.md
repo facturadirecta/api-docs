@@ -191,9 +191,10 @@ sus pagos en una sola llamada (patrón "atómico").
 
 **Notas:**
 
-- `content.main.contact` debe apuntar a un contacto con faceta
-  **`employee`** configurada (`accounts.employee` asignada). Si no,
-  la API devuelve `400 ValidationError`.
+- A diferencia de los demás documentos, una nómina siempre requiere
+  `content.main.contact`. Debe apuntar a un contacto existente con faceta
+  **`employee`** configurada (`accounts.employee` asignada). Si falta o no
+  cumple esa condición, la API devuelve `400 ValidationError`.
 - `lines` debe tener mínimo 1. Una nómina realista tiene típicamente
   4 líneas: `debit` (salario), `ss_employee`, `irpf_employee`,
   `ss_company` (ver ejemplo).
@@ -491,7 +492,8 @@ Sirven para ver qué se cambió y recuperar datos: ver
 
 - `400` — `minDate` o `maxDate` es una fecha que no existe, como
   `2026-02-30`. Ver [Fechas que no existen](../guides/errors.md#fechas-que-no-existen-400).
-- `400 ValidationError` — `contact` sin faceta `employee` configurada.
+- `400 ValidationError` — falta `contact`, el contacto no existe o no
+  tiene la faceta `employee` configurada.
 - `400 ValidationError` — `lines` vacío (debe tener al menos 1).
 - `400 ValidationError` — `modelo190.clavePercepcion` con valor
   fuera del catálogo (A-Z).

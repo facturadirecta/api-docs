@@ -114,6 +114,7 @@ comportamiento propio:
 
 | Campo | Significado |
 |---|---|
+| `contact` | Cliente del pedido. Es opcional: si lo omites o envías `null`, el pedido se crea sin contacto ni datos de destinatario. Si envías un ID, debe existir y tener faceta de cliente. |
 | `state` | Estado del pedido. Calculado; se ignora al escribir. |
 | `owner` | Usuario responsable del pedido. Limita la visibilidad cuando se trabaja con roles personalizados. |
 | `warehouse` | Almacén del documento a efectos de stock. Si no lo indicas se usa el almacén por defecto de la empresa. |
@@ -245,6 +246,8 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
   envías y ya existe, responde `409 Conflict`.
 - El `state` del pedido se calcula desde las líneas: lo que envíes en
   `main.state` se descarta.
+- `main.contact` es opcional. Sin él, el pedido usa la configuración
+  predeterminada de la empresa. Un pedido con IRPF sí requiere contacto.
 - Toda referencia a otro documento (`main.contact`, `lines[].document`,
   `lines[].provider`, `main.paymentMethod`, `main.theme`) debe existir. Si no,
   la respuesta es `400` indicando los IDs no encontrados.

@@ -293,8 +293,9 @@ compararlas con otro periodo, usa la
 **Parámetros del body:**
 
 - `content.type` — siempre `"bill"`.
-- `content.main` — campos del documento (al menos `contact` o
-  `subtype: "ticket"` y las `lines` con `text`, `quantity`, `unitPrice`).
+- `content.main` — campos del documento. Debe incluir `contact`, que
+  admite un ID o `null`, y las `lines` con `text`, `quantity` y
+  `unitPrice`.
 - `tags` (opcional).
 - `fromInbox` (opcional) — vincula la factura a un item de la
   [bandeja de entrada](./inbox.md). Estructura:
@@ -312,13 +313,17 @@ compararlas con otro periodo, usa la
 
 **Notas:**
 
+- `contact` debe estar presente en el body, pero admite `null`. Con
+  `contact: null`, tanto una factura de compra como un ticket se guardan
+  sin contacto y usan la configuración predeterminada de compras de la
+  empresa. Un documento con IRPF sí requiere contacto.
 - Si `contact` apunta a un ID existente con faceta de proveedor
   (`accounts.provider` configurada), sus datos fiscales se toman de él.
 - Si envías `contact` y no `country`, la factura toma el país de la
   dirección fiscal del contacto, y también su código postal si no envías
   `zipcode`. Si envías `country`, se respeta y `zipcode` no se completa.
-- Para registrar un ticket de caja sin proveedor identificado, omite
-  `contact` y envía `subtype: "ticket"`.
+- Para registrar un ticket de caja sin proveedor identificado, envía
+  `contact: null` y `subtype: "ticket"`.
 - Por defecto el modo es `calcTotal` (los totales se calculan). Para
   importar un documento con totales fijos del proveedor, usa
   `mode: "totalProvided"`.
@@ -577,8 +582,8 @@ Sirven para ver qué se cambió y recuperar datos: ver
 
 - `400` — `minDate` o `maxDate` es una fecha que no existe, como
   `2026-02-30`. Ver [Fechas que no existen](../guides/errors.md#fechas-que-no-existen-400).
-- `400 ValidationError` — falta `subtype: "ticket"` o `contact` cuando
-  el documento no es un ticket.
+- `400 ValidationError` — falta el campo `contact` en el body, referencia
+  un contacto inexistente, o el documento lleva IRPF con `contact: null`.
 - `400 ValidationError` — `lines` con `quantity` o `unitPrice` inválidos.
 - `400 ValidationError` — `mode: "totalProvided"` sin enviar `total`.
 - `409 Conflict` — borrado de una factura con pagos asociados.

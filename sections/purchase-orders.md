@@ -100,7 +100,7 @@ comportamiento propio:
 
 | Campo | Significado |
 |---|---|
-| `contact` | El **proveedor**. Los impuestos y las cuentas contables se resuelven con el catálogo de compras. |
+| `contact` | Contacto que actúa como proveedor. Es opcional: sin él, la orden usa la configuración predeterminada de compras de la empresa. Si envías un ID, el contacto debe existir. |
 | `language` | Idioma en que se imprime y se envía la orden, como código ISO 639-1 (`es`, `ca`, `en`...). Si no lo indicas, el del proveedor y, si no tiene, el idioma base de la plantilla. Solo tiene efecto si la plantilla tiene ese idioma. |
 | `state` | Estado de la orden. Calculado; se ignora al escribir. |
 | `dueDate` | Fecha de recepción prevista de la mercancía. |
@@ -229,6 +229,9 @@ curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
   envías y ya existe, responde `409 Conflict`.
 - El `state` de la orden se calcula desde las líneas: lo que envíes en
   `main.state` se descarta.
+- `main.contact` es opcional. Si lo omites o envías `null`, la orden se
+  crea sin contacto y usa la configuración predeterminada de compras. Un
+  documento con IRPF sí requiere contacto.
 - Para abastecer líneas de pedido, indica `clientOrder` y `clientOrderLine` en
   cada línea. Al guardar, esas líneas de pedido pasan a `ordered`.
 
