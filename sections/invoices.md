@@ -598,6 +598,11 @@ vuelve a llamar al endpoint para obtener una nueva si caduca.
 
 **Respuesta:** `{ url, filename }` con la URL del XML.
 
+Con un método de cobro por transferencia, el XML incluye el BIC/SWIFT del
+banco de la empresa cuando está informado. Con una domiciliación, incluye el
+BIC/SWIFT del mandato SEPA del cliente. La ausencia del BIC no impide generar
+el fichero.
+
 **Restricciones:**
 
 - La factura debe ser elegible (cliente con `taxCode`, dirección

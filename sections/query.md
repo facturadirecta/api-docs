@@ -69,7 +69,7 @@ y cuentan en `count`.
 | `measures` | string[] | Hasta 10 medidas de la fuente. En las medidas de días, la agregación va como sufijo: `daysToPayment.median`. Sin indicar, la medida por defecto de la fuente. |
 | `dimensions` | string[] | Hasta 2 dimensiones por las que agrupar, en orden. Sin indicar, una sola fila con los totales. |
 | `period` | object | `start` y `end` (`YYYY-MM-DD`), las dos fechas incluidas. Por defecto, el año natural en curso. Como máximo, 5 años. En `contacts` es opcional y sin tope: sin `period` entran todos los contactos. |
-| `compare` | string | `previousPeriod` (el periodo anterior de la misma duración) o `previousYear` (el mismo periodo del año anterior). Añade a cada medida las columnas de referencia, diferencia y variación. |
+| `compare` | string | `previousPeriod` (el periodo anterior de la misma duración) o `previousYear` (el mismo periodo del año anterior). Añade a cada medida las columnas de referencia, diferencia y variación; cada dimensión temporal añade además el intervalo equivalente del periodo de referencia. |
 | `breakdown` | string | `month`, `quarter` o `year`: divide el periodo en tramos naturales y añade la dimensión `period`. Como máximo, 24 tramos. No se combina con `compare`. |
 | `filters` | object[] | Hasta 10 filtros `{ field, op, value }` o `{ field, op, values }`. Ver [Filtros](#filtros). |
 | `orderBy` | object[] | Hasta 4 criterios `{ field, direction }` sobre las medidas y dimensiones de la consulta. `direction` es `asc` o `desc` (por defecto). Sin indicar, la primera medida de mayor a menor. |
@@ -292,7 +292,7 @@ de valores (`values`):
 | `meta.breakdown` | string | Con `breakdown`: la unidad de los tramos. |
 | `meta.currency` | string | Moneda de los importes cuando `currency` no es una dimensión de la respuesta o cuando van en la de la empresa (`amounts: "company"`). |
 | `meta.limit`, `meta.generatedAt` | | El límite aplicado y el momento del cálculo. |
-| `columns` | object[] | Qué es cada clave de las filas, en orden: `id`, `kind` (`dimension` o `measure`), `title`, `description`, `type` y, en las medidas, `measure` y `period`. |
+| `columns` | object[] | Qué es cada clave de las filas, en orden: `id`, `kind` (`dimension` o `measure`), `title`, `description`, `type` y, en las medidas, `measure` y `period`. Con `compare`, incluye también las columnas comparativas de las medidas y `<dimensión>_reference` para cada dimensión temporal. |
 | `rows` | object[] | Los grupos, ordenados y limitados. Una clave por columna. |
 | `totals` | object | El valor de cada medida sobre el conjunto filtrado completo, no solo sobre las filas devueltas. Con `compare`, también el del periodo de referencia, la diferencia y la variación (`<medida>_reference`, `_difference` y `_variance`). |
 | `other` | object | Con `includeOther`, si hay más grupos que `limit`: `groups` (cuántos quedan fuera) y la suma de cada medida que se puede sumar; `null` en las que no (`average`, las de días). Con `compare`, también `<medida>_reference`, `_difference` y `_variance`; la referencia del resto es el total de referencia menos el de las filas, así que la tabla cuadra con `totals`. |
@@ -308,7 +308,8 @@ En cada fila, el valor de una dimensión depende de su tipo:
   `name` es `null` si el elemento ya no existe.
 - **Periodo**: las dimensiones de tiempo (`day`, `week`, `month`, `quarter`,
   `year`, `createdMonth`) valen un texto (`2026-W14`, `2026-03`); la dimensión
-  `period` del desglose, `{ "id", "start", "end" }`.
+  `period` del desglose y, con `compare`, cada `<dimensión>_reference` valen
+  `{ "id", "start", "end" }`.
 - El resto: un texto, un número o un booleano. Una dimensión sin valor
   (un documento sin país, por ejemplo) vale `null` y forma su propio
   grupo.
@@ -320,8 +321,12 @@ y los días a una décima.
 Con `compare`, cada medida añade tres columnas: `<medida>_reference` (el
 valor en el periodo de referencia), `<medida>_difference` (periodo menos
 referencia) y `<medida>_variance` (la variación como fracción, `0.2` es
-un 20 %, o `null` si la referencia es cero). Con `breakdown`, la columna
-`period` identifica el tramo de cada fila.
+un 20 %, o `null` si la referencia es cero). Si agrupas por una dimensión
+temporal, las filas se emparejan con el tramo equivalente y esa dimensión añade
+`<dimensión>_reference`, con el intervalo exacto comparado en `id`, `start` y
+`end`; la dimensión original conserva la clave del periodo actual. Esto también
+se aplica cuando el periodo empieza o termina a mitad de un tramo. Con
+`breakdown`, la columna `period` identifica el tramo de cada fila.
 
 En empresas con multimoneda, `currency` es una dimensión implícita de
 `invoices`, `bills` y sus líneas cuando la consulta pide importes:
