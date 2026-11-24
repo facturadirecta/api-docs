@@ -172,7 +172,9 @@ Todos los importes van en la moneda de la empresa.
 | `paymentMethod` | entidad | Método de cobro o de pago del documento. |
 | `agingBucket` | tramo | Antigüedad del pendiente: `notDue` (sin vencer), `1-30`, `31-60`, `61-90` y `over90` días de retraso; `settled` para los cobrados o pagados. Cobros y pagos a fondo: en todos los planes de pago, no en el Gratis. |
 | `day`, `week`, `month`, `quarter`, `year` | periodo | Día, semana ISO (de lunes a domingo), mes, trimestre o año natural de la fecha del documento (`2026-03-31`, `2026-W14`, `2026-03`, `2026-Q1`, `2026`). |
-| `account` | código | Solo en `bills`: cuenta contable de gasto de la cabecera del documento. |
+| `account` | código | Solo en `bills`: cuenta contable del proveedor en la cabecera del documento (normalmente 400 o 410). |
+
+La cuenta de gasto no está en la cabecera de la compra: para agrupar o filtrar por ella usa `billLines.account`, que es la cuenta contable de cada línea.
 
 ### Líneas de facturas de venta y de compra
 
@@ -250,6 +252,10 @@ de valores (`values`):
 | `between` | `values` | Dos valores, los dos incluidos. Importes y fechas. |
 | `startsWith` | `value` | Empieza por. Cuentas contables: `7`, `629`. |
 
+Los filtros se combinan con `AND`. Repetir un campo sigue estando permitido por compatibilidad, aunque normalmente basta con una fila `in`; en `tag`, los documentos o contactos deben tener **todas** las etiquetas elegidas. `between` necesita los dos extremos y `in` admite como máximo 100 valores.
+
+Los filtros `total` y `totalBeforeTaxes` siempre comparan el importe en la moneda original del documento, incluso con `amounts: "company"`. En una empresa multimoneda, filtra antes por una única `currency` para que el límite represente una sola moneda.
+
 | Fuente | Filtro | Operadores | Significado |
 |---|---|---|---|
 | `invoices`, `bills` | `contact` | `eq`, `in` | Identificador del contacto (`con_…`). |
@@ -266,7 +272,7 @@ de valores (`values`):
 | | `tag` | `eq`, `in` | Etiquetas que el documento debe tener, todas ellas. |
 | | `draft` | `eq` | `true` incluye los borradores junto a los definitivos. |
 | `invoices` | `simplified` | `eq` | `true` deja solo las facturas simplificadas; `false` las deja fuera. Sin este filtro entran las dos. |
-| `bills` | `account` | `eq`, `in`, `startsWith` | Cuenta contable de gasto del documento. |
+| `bills` | `account` | `eq`, `in`, `startsWith` | Cuenta contable del proveedor en la cabecera del documento. Para la cuenta de gasto, usa `billLines.account`. |
 | `invoiceLines`, `billLines` | `product` | `eq`, `in` | Identificador del producto (`pro_…`). |
 | | `hasProduct` | `eq` | `true` deja solo las líneas con producto; `false`, solo las de texto libre. |
 | | `account` | `eq`, `in`, `startsWith` | Cuenta contable de la línea. |
