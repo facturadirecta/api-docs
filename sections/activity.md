@@ -191,6 +191,13 @@ lista completa está en el openapi). Los más habituales:
   `report_subscription_failed` (cada envío que sale por correo, también los de
   prueba) y `report_export` (cada exportación de un informe a un fichero). No
   incluyen la configuración ni los filtros del informe.
+- **Programa Partner:** `partnerCollectionPastDue`,
+  `partnerCollectionSuspended`, `partnerCollectionRestored`,
+  `partnerCollectionTerminated` y `partnerCollectionClosed` registran el ciclo
+  del impago. El último indica que la cuenta partner se ha cerrado y su deuda
+  pendiente se ha marcado como incobrable. `partnerCollectionReset`,
+  `partnerOpenInvoicesPaid` y `partnerDelegatedCompanyReleased` registran la
+  recuperación y sus efectos posteriores.
 
 Los registros antiguos pueden tener tipos que ya no se generan. Trata
 `type` como un valor abierto: si no lo conoces, usa `description`.
