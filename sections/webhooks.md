@@ -157,9 +157,16 @@ Algoritmo, equivalente al de Stripe:
 4. Rechaza la petición si la diferencia entre `Webhook-Timestamp` y la
    hora actual supera **5 minutos** (anti-replay).
 
-El `secret` es el `signing_secret` devuelto al crear el endpoint
-(formato `whsec_<hex>`) o tras `rotateSecret`. **Solo se muestra una vez**
-en la creación/rotación. Guárdalo en un lugar seguro al recibirlo.
+El `secret` es el `signing_secret` devuelto al crear el endpoint o tras
+`rotateSecret`, entero, con el prefijo (formato `whsec_<hex>`). **Solo se
+muestra una vez** en la creación/rotación. Guárdalo en un lugar seguro al
+recibirlo.
+
+De forma transitoria, `Webhook-Signature` lleva una segunda `v1`, calculada
+con el secret sin el prefijo `whsec_`
+(`t=<timestamp>,v1=<firma>,v1=<firma sin prefijo>`). La primera es la que
+se verifica con el `signing_secret`; si tu verificador recorre todas las
+`v1`, como el de Stripe, basta con que coincida una.
 
 ## Política de reintentos
 
